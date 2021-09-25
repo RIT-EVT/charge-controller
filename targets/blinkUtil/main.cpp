@@ -8,12 +8,12 @@
  */
 #include <EVT/io/GPIO.hpp>
 #include <EVT/io/manager.hpp>
-#include <BOARD_NAME/dev/LED.hpp>
+#include <charge_controller/dev/LED.hpp>
 #include <EVT/io/pin.hpp>
 #include <EVT/utils/time.hpp>
 
 namespace IO = EVT::core::IO;
-namespace DEV = BOARD_NAME::DEV;
+namespace DEV = charge_controller::DEV;
 namespace time = EVT::core::time;
 
 int main() {

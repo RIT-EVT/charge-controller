@@ -1,9 +1,9 @@
-#ifndef _BOARD_NAME_LED_
-#define _BOARD_NAME_LED_
+#ifndef _charge_controller_LED_
+#define _charge_controller_LED_
 
 #include <EVT/io/GPIO.hpp>
 
-namespace BOARD_NAME::DEV
+namespace charge_controller::DEV
 {
 
 class LED
@@ -46,6 +46,6 @@ private:
     ActiveState activeState;
 };
 
-}  //namespace BOARD_NAME::DEV
+}  //namespace charge_controller::DEV
 
 #endif

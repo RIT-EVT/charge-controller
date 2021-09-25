@@ -1,7 +1,7 @@
 API
 ###
 
-This documentation outlines the library for BOARD_NAME.
+This documentation outlines the library for charge-controller.
 
 DEV
 ***
@@ -12,5 +12,5 @@ is not strictly a rule. An LED is a simplistic example of a device.
 LED
 ===
 
-.. doxygenclass:: BOARD_NAME::DEV::LED
+.. doxygenclass:: charge-controller::DEV::LED
    :members:

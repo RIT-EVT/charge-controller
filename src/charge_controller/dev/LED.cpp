@@ -1,6 +1,6 @@
-#include <BOARD_NAME/dev/LED.hpp>
+#include <charge_controller/dev/LED.hpp>
 
-namespace BOARD_NAME::DEV {
+namespace charge_controller::DEV {
 
 LED::LED(EVT::core::IO::GPIO& gpio, LED::ActiveState activeState)
     : gpio(gpio) {
@@ -30,4 +30,4 @@ void LED::setState(EVT::core::IO::GPIO::State state) {
     }
 }
 
-}  // namespace BOARD_NAME::DEV
+}  // namespace charge_controller::DEV

@@ -32,7 +32,7 @@ add_library(${PROJECT_NAME} STATIC)
 
 # Add sources
 target_sources(${PROJECT_NAME} PRIVATE
-        src/BOARD_NAME/dev/LED.cpp
+        src/charge_controller/dev/LED.cpp
         )
 
 ###############################################################################
