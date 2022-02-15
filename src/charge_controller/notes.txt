@@ -1,0 +1,10 @@
+PA1: RelayInputCtl - Relay control
+PA2: LED    - HeartBeat LED
+PA4: LCD A0 -
+
+
+PA10: UART_RX -
+PA11: UART_TX -
+
+PC4: CAN_RX
+PC5: CAN_TX
