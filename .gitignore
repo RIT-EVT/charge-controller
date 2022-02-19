@@ -10,5 +10,8 @@ venv/
 # IDE Files
 .idea/
 
+# VS Code Files
+.vscode/
+
 # macOS files
 .DS_Store
