@@ -1,9 +1,5 @@
-//
-// Created by matth on 10/2/2021.
-//
-
-#ifndef EXAMPLE_BMSMANAGER_H
-#define EXAMPLE_BMSMANAGER_H
+#ifndef EXAMPLE_BMSMANAGER_HPP
+#define EXAMPLE_BMSMANAGER_HPP
 
 #include <EVT/io/CAN.hpp>
 
@@ -16,9 +12,10 @@ public:
     BMSManager(IO::CAN& can, uint8_t address);
     int getBattVoltage();
     int getBattTemperature();
+    int getStateOfCharge();
     bool isConnected();
     bool faultDetected();
 };
 
 
-#endif //EXAMPLE_BMSMANAGER_H
+#endif //EXAMPLE_BMSMANAGER_HPP
