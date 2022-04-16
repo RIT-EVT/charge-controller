@@ -6,16 +6,16 @@
 namespace IO = EVT::core::IO;
 class BMSManager {
 private:
-    IO::CAN* can = nullptr;
-    uint8_t address;
+  IO::CAN *can = nullptr;
+  uint8_t address;
+
 public:
-    BMSManager(IO::CAN& can, uint8_t address);
-    int getBattVoltage();
-    int getBattTemperature();
-    int getStateOfCharge();
-    bool isConnected();
-    bool faultDetected();
+  BMSManager(IO::CAN &can, uint8_t address);
+  int getBattVoltage();
+  int getBattTemperature();
+  int getStateOfCharge();
+  bool isConnected();
+  bool faultDetected();
 };
 
-
-#endif //EXAMPLE_BMSMANAGER_HPP
+#endif // EXAMPLE_BMSMANAGER_HPP
