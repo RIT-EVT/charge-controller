@@ -14,15 +14,16 @@
 #include <charge_controller/dev/LCDDisplay.hpp>
 #include <charge_controller/Logger.h>
 
-
 namespace IO = EVT::core::IO;
 namespace DEV = EVT::core::DEV;
 namespace time = EVT::core::time;
 
+#define HEARTBEAT_INTERVAL     500
+
 // IO pins
 constexpr IO::Pin RELAY_CTL_PIN = IO::Pin::PB_0;
 constexpr IO::Pin LED_PIN = IO::Pin::PA_10;
-constexpr IO::Pin STANDBY_BUTTON_PIN = IO::Pin::PA_2;
+constexpr IO::Pin STANDBY_BUTTON_PIN = IO::Pin::PB_6;
 constexpr IO::Pin START_BUTTON_PIN = IO::Pin::PA_7;
 constexpr IO::Pin BATTERY_1_OK = IO::Pin::PA_9;
 constexpr IO::Pin BATTERY_2_OK = IO::Pin::PA_8;
@@ -30,13 +31,17 @@ constexpr IO::Pin BATTERY_2_OK = IO::Pin::PA_8;
 // LCD pins
 constexpr IO::Pin LCD_A0_PIN = IO::Pin::PA_6;
 constexpr IO::Pin LCD_RST_PIN = IO::Pin::PA_1;
-constexpr IO::Pin SPI_CS_PIN = IO::Pin::PA_3;
+constexpr IO::Pin SPI_CS_PIN = IO::Pin::PB_4;
 constexpr IO::Pin SPI_MOSI_PIN = IO::Pin::PB_5;
 constexpr IO::Pin SPI_CLK_PIN = IO::Pin::PA_5;
 
 // UART pins
-constexpr IO::Pin UART_RX_PIN = IO::Pin::PB_7;
-constexpr IO::Pin UART_TX_PIN = IO::Pin::PB_6;
+//constexpr IO::Pin UART_RX_PIN = IO::Pin::PB_7;
+//constexpr IO::Pin UART_TX_PIN = IO::Pin::PB_6;
+
+// UART pins
+constexpr IO::Pin UART_RX_PIN = IO::Pin::UART_RX;
+constexpr IO::Pin UART_TX_PIN = IO::Pin::UART_TX;
 
 // CAN pins
 constexpr IO::Pin CAN_RX_PIN = IO::Pin::PA_11;
@@ -62,6 +67,7 @@ void canInterrupt(IO::CANMessage &message, void *priv) {
 
     EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage> *queue = params->queue;
     BMSManager* bms = params->bmsManager;
+    bms->updateBMSData(message);
     if (queue != nullptr)
         queue->append(message);
 }
@@ -127,8 +133,11 @@ int main() {
 
     IO::SPI &spi = IO::getSPI<SPI_CLK_PIN, SPI_MOSI_PIN>(devices, 1);
 
+    LOG.setUART(&uart);
+    LOG.setLogLevel(Logger::LogLevel::DEBUG);
+
     // charge controller module instantiation
-    BMSManager bms(can, BMS_CAN_ADDRESS);
+    BMSManager bms(can, batt1OK, batt2OK);
     LCDDisplay display(spi, LCDRegisterSEL, LCDReset);
     ChargeController chargeController(bms, display, relayControl);
 
@@ -139,47 +148,13 @@ int main() {
     can.addIRQHandler(canInterrupt, reinterpret_cast<void*>(&canParams));
     DEV::Timerf302x8 timer(TIM2, 100);
 
-//    // Reserved memory for CANopen stack usage
-//    uint8_t sdoBuffer[1][CO_SDO_BUF_BYTE];
-//    CO_TMR_MEM appTmrMem[4];
-//
-//    CO_IF_DRV canStackDriver;
-//    CO_IF_CAN_DRV canDriver;
-//    CO_IF_TIMER_DRV timerDriver;
-//    CO_IF_NVM_DRV nvmDriver;
-//    IO::getCANopenCANDriver(&can, &canOpenQueue, &canDriver);
-//    IO::getCANopenTimerDriver(&timer, &timerDriver);
-//    IO::getCANopenNVMDriver(&nvmDriver);
-//
-//    canStackDriver.Can = &canDriver;
-//    canStackDriver.Timer = &timerDriver;
-//    canStackDriver.Nvm = &nvmDriver;
-//
-//    CO_NODE_SPEC canSpec = {
-//        .NodeId = 0x01,
-//        .Baudrate = IO::CAN::DEFAULT_BAUD,
-//        .Dict = testCanNode.getObjectDictionary(),
-//        .DictLen = testCanNode.getNumElements(),
-//        .EmcyCode = NULL,
-//        .TmrMem = appTmrMem,
-//        .TmrNum = 16,
-//        .TmrFreq = 100,
-//        .Drv = &canStackDriver,
-//        .SdoBuf = reinterpret_cast<uint8_t*>(&sdoBuffer[0]),
-//    };
-//
-//    CO_NODE canNode;
-//    time::wait(500);
-//
-//    can.connect();
-//
-//    CONodeInit(&canNode, &canSpec);
-//    CONodeStart(&canNode);
-//    CONmtSetMode(&canNode.Nmt, CO_OPERATIONAL);
+    LOG.log(Logger::INFO, "Initialized");
 
     display.init();
     chargeController.init();
 
+    LOG.log(Logger::INFO, "Started");
+    uint32_t lastHeartBeat = time::millis();
     while (true) {
         chargeController.loop();
         if (standbyButton.read())
@@ -188,6 +163,17 @@ int main() {
         if (startButton.read())
             chargeController.startCharging();
 
+        if(time::millis()-lastHeartBeat > HEARTBEAT_INTERVAL){
+            switch (statusLED.readPin()) {
+            case IO::GPIO::State::LOW:
+                statusLED.writePin(IO::GPIO::State::HIGH);
+                break;
+            case IO::GPIO::State::HIGH:
+                statusLED.writePin(IO::GPIO::State::LOW);
+                break;
+            }
+            lastHeartBeat = time::millis();
+        }
         time::wait(50);
     }
 }
