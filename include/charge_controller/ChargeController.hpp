@@ -6,8 +6,9 @@
 #include <charge_controller/dev/BMSManager.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
 
-#define MAX_VOLTAGE 12
+#define MAX_VOLTAGE 12000 //in millivolts
 #define MAX_TEMPERATURE 90.0
+#define MIN_TEMPERATURE 5.0
 
 class ChargeController {
 public:

@@ -46,6 +46,7 @@ private:
     IO::GPIO& bmsOK1;
     IO::GPIO& bmsOK2;
     uint32_t millivolts = 0;
+    uint32_t temperature = 5;
     BMSState state = BMSState::START;
 };
 
