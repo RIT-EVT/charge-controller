@@ -1,6 +1,7 @@
 #include <charge_controller/Logger.h>
 #include <cstdarg>
 #include <cstdio>
+#include <cstring>
 
 Logger LOG;
 
@@ -21,16 +22,16 @@ void Logger::log(LogLevel level, const char *format, ...) {
 
     switch (level) {
         case LogLevel::DEBUG:
-            uart->printf("DEBUG::");
+            uart->puts("DEBUG::");
             break;
         case LogLevel::INFO:
-            uart->printf("INFO::");
+            uart->puts("INFO::");
             break;
         case LogLevel::WARNING:
-            uart->printf("WARNING::");
+            uart->puts("WARNING::");
             break;
         case LogLevel::ERROR:
-            uart->printf("ERROR::");
+            uart->puts("ERROR::");
             break;
     }
 
@@ -38,8 +39,12 @@ void Logger::log(LogLevel level, const char *format, ...) {
     va_start(args, format);
 
     char string[200];
-    vsprintf(string, format, args);
-    uart->printf("%s\r\n", string);
+    if(vsprintf(string, format, args)>0) {
+        uint8_t *data = reinterpret_cast<uint8_t *>(&string);
+        uart->writeBytes(data, strlen(string));
+        uart->puts("\r\n");
+    }
+//    uart->printf("%s\r\n", string);
 
     va_end(args);
 }
