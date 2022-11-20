@@ -6,9 +6,32 @@
 #include <charge_controller/dev/BMSManager.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
 
-#define MAX_VOLTAGE 12000 //in millivolts
+//#define MAX_VOLTAGE 12000
+//#define MAX_PACK_VOLTAGE    12000 //in millivolts
+//#define MIN_PACK_VOLTAGE    5000 //in millivolts
+//#define MAX_CELL_VOLTAGE    4200 //in millivolts
+//#define MIN_CELL_VOLTAGE    3000 //in millivolts
+//#define MAX_TEMPERATURE 90.0
+//#define MIN_TEMPERATURE 5.0
+
+//Temp
+#define MAX_PACK_VOLTAGE    12000 //in millivolts
+#define MIN_PACK_VOLTAGE    -1 //in millivolts
+#define MAX_CELL_VOLTAGE    4200 //in millivolts
+#define MIN_CELL_VOLTAGE    -1 //in millivolts
 #define MAX_TEMPERATURE 90.0
-#define MIN_TEMPERATURE 5.0
+#define MIN_TEMPERATURE -1
+
+#define CHECK_IN_RANGE(V,H,L)  ((L) < (V) && (V) < (H))
+
+#define BAD_PACK_VOLTAGE 0x1
+#define BAD_MAX_CELL_VOLTAGE 0x2
+#define BAD_MIN_CELL_VOLTAGE 0x4
+#define BAD_MAX_TEMP 0x8
+#define BAD_MIN_TEMP 0x10
+#define BAD_FAULT_STATE 0x20
+
+
 
 class ChargeController {
 public:
@@ -19,10 +42,10 @@ public:
     STANDBY,
     FAULT
   };
-  ChargeController(BMSManager bms, LCDDisplay display, IO::GPIO &relay);
+  ChargeController(BMSManager &bms, LCDDisplay &display, IO::GPIO &relay);
   void init();
   void loop();
-  bool checkBMS();
+  uint8_t checkBMS();
   bool isCharging() { return state == ControllerStates::CHARGING; };
   bool hasFault() { return state == ControllerStates::FAULT; };
 
@@ -36,8 +59,8 @@ private:
   void standbyState();
   void faultState();
 
-  BMSManager bms;
-  LCDDisplay display;
+  BMSManager &bms;
+  LCDDisplay &display;
   IO::GPIO &relay;
 
   ControllerStates state = ControllerStates::NO_BATTERY;
