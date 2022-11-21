@@ -4,6 +4,165 @@
 #include <stdint.h>
 #include <EVT/io/CAN.hpp>
 #include <EVT/io/GPIO.hpp>
+#include <Canopen/co_obj.h>
+
+#include <charge_controller/Logger.h>
+#include <Canopen/co_pdo.h>
+
+//RPDO0-1 settings
+// 0: RPDO number in index and total number of sub indexes.
+// 1: The COB-ID to receive PDOs from.
+// 2: transmission trigger
+#define GEN_PACK_RPDO_CONFIG(NUM, ID)                                        \
+    {                                                                       \
+        .Key = CO_KEY(0x1400+2*NUM, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),        \
+        .Type = nullptr,                                                    \
+        .Data = (uintptr_t) 3,                                              \
+    },                                                                      \
+    {                                                                       \
+        .Key = CO_KEY(0x1400+2*NUM, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),       \
+        .Type = nullptr,                                                    \
+        .Data = (uintptr_t) CO_COBID_TPDO_DEFAULT(0) + ID,                  \
+    },                                                                      \
+    {                                                                       \
+        .Key = CO_KEY(0x1400+2*NUM, 2, CO_UNSIGNED8 | CO_OBJ_D__R_),        \
+        .Type = nullptr,                                                    \
+        .Data = (uintptr_t) 0xFE,                                           \
+    },                                                                      \
+    {                                                                       \
+        .Key = CO_KEY(0x1401+2*NUM, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),        \
+        .Type = nullptr,                                                    \
+        .Data = (uintptr_t) 3,                                              \
+    },                                                                      \
+    {                                                                       \
+        .Key = CO_KEY(0x1401+2*NUM, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),       \
+        .Type = nullptr,                                                    \
+        .Data = (uintptr_t) CO_COBID_TPDO_DEFAULT(0) + ID + 1,              \
+    },                                                                      \
+    {                                                                       \
+        .Key = CO_KEY(0x1401+2*NUM, 2, CO_UNSIGNED8 | CO_OBJ_D__R_),        \
+        .Type = nullptr,                                                    \
+        .Data = (uintptr_t) 0xFE,                                           \
+    },
+
+
+// RPDO0-1 mapping, determines the PDO messages to send when TPDO1 is triggered
+// 0: The number of PDO messages associated with the TPDO
+// 1: Link to the first PDO message
+// n: Link to the nth PDO message
+#define GEN_PACK_RPDO_MAP(NUM)                                               \
+    {                                                                       \
+        .Key = CO_KEY(0x1600+2*NUM, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),        \
+        .Type = nullptr,                                                    \
+        .Data = (uintptr_t) 5,                                              \
+    },                                                                      \
+    { /* Battery Voltage  */                                                \
+        .Key = CO_KEY(0x1600+2*NUM, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),       \
+        .Type = nullptr,                                                    \
+        .Data = CO_LINK(0x2100+NUM, 1, 16),                                 \
+    },                                                                      \
+    { /* Min Cell Voltage  */                                               \
+        .Key = CO_KEY(0x1600+2*NUM, 2, CO_UNSIGNED32 | CO_OBJ_D__R_),       \
+        .Type = nullptr,                                                    \
+        .Data = CO_LINK(0x2100+NUM, 2, 16),                                 \
+    },                                                                      \
+    { /* Min Cell Voltage ID  */                                            \
+        .Key = CO_KEY(0x1600+2*NUM, 3, CO_UNSIGNED32 | CO_OBJ_D__R_),       \
+        .Type = nullptr,                                                    \
+        .Data = CO_LINK(0x2100+NUM, 3, 8),                                  \
+    },                                                                      \
+    { /* Max Cell Voltage  */                                               \
+        .Key = CO_KEY(0x1600+2*NUM, 4, CO_UNSIGNED32 | CO_OBJ_D__R_),       \
+        .Type = nullptr,                                                    \
+        .Data = CO_LINK(0x2100+NUM, 4, 16),                                 \
+    },                                                                      \
+    { /* Max Cell Voltage ID  */                                            \
+        .Key = CO_KEY(0x1600+2*NUM, 5, CO_UNSIGNED32 | CO_OBJ_D__R_),       \
+        .Type = nullptr,                                                    \
+        .Data = CO_LINK(0x2100+NUM, 5, 8),                                  \
+    },                                                                      \
+    {                                                                       \
+        .Key = CO_KEY(0x1601+2*NUM, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),        \
+        .Type = nullptr,                                                    \
+        .Data = (uintptr_t) 7,                                              \
+    },                                                                      \
+    { /* Current - Unused  */                                               \
+        .Key = CO_KEY(0x1601+2*NUM, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),       \
+        .Type = nullptr,                                                    \
+        .Data = CO_LINK(0x5000, 0, 8),                                      \
+    },                                                                      \
+    { /* Pack Min Temp  */                                                  \
+        .Key = CO_KEY(0x1601+2*NUM, 2, CO_UNSIGNED32 | CO_OBJ_D__R_),       \
+        .Type = nullptr,                                                    \
+        .Data = CO_LINK(0x2100+NUM, 7, 8),                                  \
+    },                                                                      \
+    { /* Pack Max Temp  */                                                  \
+        .Key = CO_KEY(0x1601+2*NUM, 3, CO_UNSIGNED32 | CO_OBJ_D__R_),       \
+        .Type = nullptr,                                                    \
+        .Data = CO_LINK(0x2100+NUM, 8, 8),                                  \
+    },                                                                      \
+    { /* SOC - Unused  */                                                   \
+        .Key = CO_KEY(0x1601+2*NUM, 4, CO_UNSIGNED32 | CO_OBJ_D__R_),       \
+        .Type = nullptr,                                                    \
+        .Data = CO_LINK(0x5000, 0, 8),                                      \
+    },                                                                      \
+    { /* State  */                                                          \
+        .Key = CO_KEY(0x1601+2*NUM, 5, CO_UNSIGNED32 | CO_OBJ_D__R_),       \
+        .Type = nullptr,                                                    \
+        .Data = CO_LINK(0x2100+NUM, 10, 8),                                 \
+    },                                                                      \
+    { /*RecapActualAllowed - Unused  */                                     \
+        .Key = CO_KEY(0x1601+2*NUM, 6, CO_UNSIGNED32 | CO_OBJ_D__R_),       \
+        .Type = nullptr,                                                    \
+        .Data = CO_LINK(0x5000, 0, 8),                                      \
+    },                                                                      \
+    { /*DischargeActualAllowed - Unused  */                                 \
+        .Key = CO_KEY(0x1601+2*NUM, 7, CO_UNSIGNED32 | CO_OBJ_D__R_),       \
+        .Type = nullptr,                                                    \
+        .Data = CO_LINK(0x5000, 0, 8),                                      \
+    },
+
+#define GEN_PACK_DATA(NUM, VAR)                                             \
+    {                                                                       \
+        .Key = CO_KEY(0x2100+NUM, 1, CO_UNSIGNED16 | CO_OBJ___PR_),         \
+        .Type = nullptr,                                                    \
+        .Data = (uintptr_t) &VAR.batteryVoltage,                            \
+    },                                                                      \
+    {                                                                       \
+        .Key = CO_KEY(0x2100+NUM, 2, CO_UNSIGNED16 | CO_OBJ___PR_),         \
+        .Type = nullptr,                                                    \
+        .Data = (uintptr_t) &VAR.minCellVoltage,                            \
+    },                                                                      \
+    {                                                                       \
+        .Key = CO_KEY(0x2100+NUM, 3, CO_UNSIGNED8 | CO_OBJ___PR_),          \
+        .Type = nullptr,                                                    \
+        .Data = (uintptr_t) &VAR.minCellVoltageID,                          \
+    },                                                                      \
+    {                                                                       \
+        .Key = CO_KEY(0x2100+NUM, 4, CO_UNSIGNED16 | CO_OBJ___PR_),         \
+        .Type = nullptr,                                                    \
+        .Data = (uintptr_t) &VAR.maxCellVoltage,                            \
+    },                                                                      \
+    {                                                                       \
+        .Key = CO_KEY(0x2100+NUM, 5, CO_UNSIGNED8 | CO_OBJ___PR_),          \
+        .Type = nullptr,                                                    \
+        .Data = (uintptr_t) &VAR.maxCellVoltageID,                          \
+    },                                                                      \
+    {                                                                       \
+        .Key = CO_KEY(0x2100+NUM, 7, CO_SIGNED8 | CO_OBJ___PR_),            \
+        .Type = nullptr,                                                    \
+        .Data = (uintptr_t) &VAR.batteryPackMinTemp,                        \
+    },                                                                      \
+    {                                                                       \
+        .Key = CO_KEY(0x2100+NUM, 8, CO_SIGNED8 | CO_OBJ___PR_),            \
+        .Type = nullptr,                                                    \
+        .Data = (uintptr_t) &VAR.batteryPackMaxTemp,                        \
+    },                                                                      \
+    {                                                                       \
+        .Key = CO_KEY(0x2100+NUM, 10, CO_UNSIGNED8 | CO_OBJ___PR_),         \
+        .Type = nullptr,                                                    \
+        .Data = (uintptr_t) &VAR.status,                                    \
+    },
 
 namespace IO = EVT::core::IO;
 
@@ -194,170 +353,179 @@ private:
             .Data = (uintptr_t) 0x580 + NODE_ID,
         },
 
-        //RPDO0 settings
-        // 0: RPDO number in index and total number of sub indexes.
-        // 1: The COB-ID to receive PDOs from.
-        // 2: transmission trigger
-        {
-            .Key = CO_KEY(0x1400, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 3,
-        },
-        {
-            .Key = CO_KEY(0x1400, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) CO_COBID_TPDO_DEFAULT(0) + packs[0].node_ID,
-        },
-        {
-            .Key = CO_KEY(0x1400, 2, CO_UNSIGNED8 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 0xFE,
-        },
+//        //RPDO0 settings
+//        // 0: RPDO number in index and total number of sub indexes.
+//        // 1: The COB-ID to receive PDOs from.
+//        // 2: transmission trigger
+//        {
+//            .Key = CO_KEY(0x1400, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = (uintptr_t) 3,
+//        },
+//        {
+//            .Key = CO_KEY(0x1400, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = (uintptr_t) CO_COBID_TPDO_DEFAULT(0) + packs[0].node_ID,
+//        },
+//        {
+//            .Key = CO_KEY(0x1400, 2, CO_UNSIGNED8 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = (uintptr_t) 0xFE,
+//        },
+//
+//        //RPDO1 settings
+//        // 0: RPDO number in index and total number of sub indexes.
+//        // 1: The COB-ID to receive PDOs from.
+//        // 2: transmission trigger
+//        {
+//            .Key = CO_KEY(0x1401, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = (uintptr_t) 3,
+//        },
+//        {
+//            .Key = CO_KEY(0x1401, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = (uintptr_t) CO_COBID_TPDO_DEFAULT(0) + packs[0].node_ID + 1,
+//        },
+//        {
+//            .Key = CO_KEY(0x1401, 2, CO_UNSIGNED8 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = (uintptr_t) 0xFE,
+//        },
+        //PRDO0-1 for Pack 1
+        GEN_PACK_RPDO_CONFIG(0,packs[0].node_ID)
 
-        //RPDO1 settings
-        // 0: RPDO number in index and total number of sub indexes.
-        // 1: The COB-ID to receive PDOs from.
-        // 2: transmission trigger
-        {
-            .Key = CO_KEY(0x1401, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 3,
-        },
-        {
-            .Key = CO_KEY(0x1401, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) CO_COBID_TPDO_DEFAULT(0) + packs[0].node_ID + 1,
-        },
-        {
-            .Key = CO_KEY(0x1401, 2, CO_UNSIGNED8 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 0xFE,
-        },
+//        // RPDO0 mapping, determines the PDO messages to send when TPDO1 is triggered
+//        // 0: The number of PDO messages associated with the TPDO
+//        // 1: Link to the first PDO message
+//        // n: Link to the nth PDO message
+//        {
+//            .Key = CO_KEY(0x1600, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = (uintptr_t) 5,
+//        },
+//        { // Battery Voltage
+//            .Key = CO_KEY(0x1600, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = CO_LINK(0x2100, 1, 16),
+//        },
+//        { // Min Cell Voltage
+//            .Key = CO_KEY(0x1600, 2, CO_UNSIGNED32 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = CO_LINK(0x2100, 2, 16),
+//        },
+//        { // Min Cell Voltage ID
+//            .Key = CO_KEY(0x1600, 3, CO_UNSIGNED32 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = CO_LINK(0x2100, 3, 8),
+//        },
+//        { // Max Cell Voltage
+//            .Key = CO_KEY(0x1600, 4, CO_UNSIGNED32 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = CO_LINK(0x2100, 4, 16),
+//        },
+//        { // Max Cell Voltage ID
+//            .Key = CO_KEY(0x1600, 5, CO_UNSIGNED32 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = CO_LINK(0x2100, 5, 8),
+//        },
+//
+//        // RPDO1 mapping, determines the PDO messages to send when TPDO1 is triggered
+//        // 0: The number of PDO messages associated with the TPDO
+//        // 1: Link to the first PDO message
+//        // n: Link to the nth PDO message
+//        {
+//            .Key = CO_KEY(0x1601, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = (uintptr_t) 7,
+//        },
+//        { // Current - Unused
+//            .Key = CO_KEY(0x1601, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = CO_LINK(0x5000, 0, 8),
+//        },
+//        { // Pack Min Temp
+//            .Key = CO_KEY(0x1601, 2, CO_UNSIGNED32 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = CO_LINK(0x2100, 7, 8),
+//        },
+//        { // Pack Max Temp
+//            .Key = CO_KEY(0x1601, 3, CO_UNSIGNED32 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = CO_LINK(0x2100, 8, 8),
+//        },
+//        { // SOC - Unused
+//            .Key = CO_KEY(0x1601, 4, CO_UNSIGNED32 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = CO_LINK(0x5000, 0, 8),
+//        },
+//        { // State
+//            .Key = CO_KEY(0x1601, 5, CO_UNSIGNED32 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = CO_LINK(0x2100, 10, 8),
+//        },
+//        { //RecapActualAllowed - Unused
+//            .Key = CO_KEY(0x1601, 6, CO_UNSIGNED32 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = CO_LINK(0x5000, 0, 8),
+//        },
+//        { //DischargeActualAllowed - Unused
+//            .Key = CO_KEY(0x1601, 7, CO_UNSIGNED32 | CO_OBJ_D__R_),
+//            .Type = nullptr,
+//            .Data = CO_LINK(0x5000, 0, 8),
+//        },
 
-        // RPDO0 mapping, determines the PDO messages to send when TPDO1 is triggered
-        // 0: The number of PDO messages associated with the TPDO
-        // 1: Link to the first PDO message
-        // n: Link to the nth PDO message
-        {
-            .Key = CO_KEY(0x1600, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 5,
-        },
-        { // Battery Voltage
-            .Key = CO_KEY(0x1600, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = CO_LINK(0x2100, 1, 16),
-        },
-        { // Min Cell Voltage
-            .Key = CO_KEY(0x1600, 2, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = CO_LINK(0x2100, 2, 16),
-        },
-        { // Min Cell Voltage ID
-            .Key = CO_KEY(0x1600, 3, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = CO_LINK(0x2100, 3, 8),
-        },
-        { // Max Cell Voltage
-            .Key = CO_KEY(0x1600, 4, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = CO_LINK(0x2100, 4, 16),
-        },
-        { // Max Cell Voltage ID
-            .Key = CO_KEY(0x1600, 5, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = CO_LINK(0x2100, 5, 8),
-        },
-
-        // RPDO1 mapping, determines the PDO messages to send when TPDO1 is triggered
-        // 0: The number of PDO messages associated with the TPDO
-        // 1: Link to the first PDO message
-        // n: Link to the nth PDO message
-        {
-            .Key = CO_KEY(0x1601, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 7,
-        },
-        { // Current - Unused
-            .Key = CO_KEY(0x1601, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = CO_LINK(0x5000, 0, 8),
-        },
-        { // Pack Min Temp
-            .Key = CO_KEY(0x1601, 2, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = CO_LINK(0x2100, 7, 8),
-        },
-        { // Pack Max Temp
-            .Key = CO_KEY(0x1601, 3, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = CO_LINK(0x2100, 8, 8),
-        },
-        { // SOC - Unused
-            .Key = CO_KEY(0x1601, 4, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = CO_LINK(0x5000, 0, 8),
-        },
-        { // State
-            .Key = CO_KEY(0x1601, 5, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = CO_LINK(0x2100, 10, 8),
-        },
-        { //RecapActualAllowed - Unused
-            .Key = CO_KEY(0x1601, 6, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = CO_LINK(0x5000, 0, 8),
-        },
-        { //DischargeActualAllowed - Unused
-            .Key = CO_KEY(0x1601, 7, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = CO_LINK(0x5000, 0, 8),
-        },
+        //PRDO0-1 map for Pack 1
+        GEN_PACK_RPDO_MAP(0)
 
         // User defined data, this will be where we put elements that can be
         // accessed via SDO and depending on configuration PDO
 
         //Pack 1 Data
-        {
-            .Key = CO_KEY(0x2100, 1, CO_UNSIGNED16 | CO_OBJ___PR_),
-            .Type = nullptr,
-            .Data = (uintptr_t) &packs[0].data.batteryVoltage,
-        },
-        {
-            .Key = CO_KEY(0x2100, 2, CO_UNSIGNED16 | CO_OBJ___PR_),
-            .Type = nullptr,
-            .Data = (uintptr_t) &packs[0].data.minCellVoltage,
-        },
-        {
-            .Key = CO_KEY(0x2100, 3, CO_UNSIGNED8 | CO_OBJ___PR_),
-            .Type = nullptr,
-            .Data = (uintptr_t) &packs[0].data.minCellVoltageID,
-        },
-        {
-            .Key = CO_KEY(0x2100, 4, CO_UNSIGNED16 | CO_OBJ___PR_),
-            .Type = nullptr,
-            .Data = (uintptr_t) &packs[0].data.maxCellVoltage,
-        },
-        {
-            .Key = CO_KEY(0x2100, 5, CO_UNSIGNED8 | CO_OBJ___PR_),
-            .Type = nullptr,
-            .Data = (uintptr_t) &packs[0].data.maxCellVoltageID,
-        },
-        {
-            .Key = CO_KEY(0x2100, 7, CO_SIGNED8 | CO_OBJ___PR_),
-            .Type = nullptr,
-            .Data = (uintptr_t) &packs[0].data.batteryPackMinTemp,
-        },
-        {
-            .Key = CO_KEY(0x2100, 8, CO_SIGNED8 | CO_OBJ___PR_),
-            .Type = nullptr,
-            .Data = (uintptr_t) &packs[0].data.batteryPackMaxTemp,
-        },
-        {
-            .Key = CO_KEY(0x2100, 10, CO_UNSIGNED8 | CO_OBJ___PR_),
-            .Type = nullptr,
-            .Data = (uintptr_t) &packs[0].data.status,
-        },
+//        {
+//            .Key = CO_KEY(0x2100, 1, CO_UNSIGNED16 | CO_OBJ___PR_),
+//            .Type = nullptr,
+//            .Data = (uintptr_t) &packs[0].data.batteryVoltage,
+//        },
+//        {
+//            .Key = CO_KEY(0x2100, 2, CO_UNSIGNED16 | CO_OBJ___PR_),
+//            .Type = nullptr,
+//            .Data = (uintptr_t) &packs[0].data.minCellVoltage,
+//        },
+//        {
+//            .Key = CO_KEY(0x2100, 3, CO_UNSIGNED8 | CO_OBJ___PR_),
+//            .Type = nullptr,
+//            .Data = (uintptr_t) &packs[0].data.minCellVoltageID,
+//        },
+//        {
+//            .Key = CO_KEY(0x2100, 4, CO_UNSIGNED16 | CO_OBJ___PR_),
+//            .Type = nullptr,
+//            .Data = (uintptr_t) &packs[0].data.maxCellVoltage,
+//        },
+//        {
+//            .Key = CO_KEY(0x2100, 5, CO_UNSIGNED8 | CO_OBJ___PR_),
+//            .Type = nullptr,
+//            .Data = (uintptr_t) &packs[0].data.maxCellVoltageID,
+//        },
+//        {
+//            .Key = CO_KEY(0x2100, 7, CO_SIGNED8 | CO_OBJ___PR_),
+//            .Type = nullptr,
+//            .Data = (uintptr_t) &packs[0].data.batteryPackMinTemp,
+//        },
+//        {
+//            .Key = CO_KEY(0x2100, 8, CO_SIGNED8 | CO_OBJ___PR_),
+//            .Type = nullptr,
+//            .Data = (uintptr_t) &packs[0].data.batteryPackMaxTemp,
+//        },
+//        {
+//            .Key = CO_KEY(0x2100, 10, CO_UNSIGNED8 | CO_OBJ___PR_),
+//            .Type = nullptr,
+//            .Data = (uintptr_t) &packs[0].data.status,
+//        },
+
+        //Pack 1 Data
+        GEN_PACK_DATA(0,packs[0].data)
+
         {
             .Key = CO_KEY(0x5000, 0, CO_UNSIGNED8 | CO_OBJ___PR_),
             .Type = nullptr,

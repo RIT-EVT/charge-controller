@@ -20,6 +20,9 @@ else()
     message(FATAL_ERROR "The target device is not supported")
 endif()
 
+add_compile_definitions(CANOPEN_QUEUE_SIZE=50)
+
+
 # Link to the EVT-core library
 add_subdirectory(libs/EVT-core/)
 
