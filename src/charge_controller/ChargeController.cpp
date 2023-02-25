@@ -2,24 +2,26 @@
 
 ChargeController::ChargeController(BMSManager bms, LCDDisplay display,
                                    IO::GPIO &relay)
-    : bms(bms), display(display), relay(relay) {}
+        : bms(bms), display(display), relay(relay) {}
 
 void ChargeController::loop() {
-  switch (state) {
-  case ControllerStates::NO_BATTERY noBatteryState(); break;
-      case ControllerStates::CONNECTED:
-    connectedState();
-    break;
-  case ControllerStates::CHARGING:
-    chargingState();
-    break;
-  case ControllerStates::STANDBY:
-    standbyState();
-    break;
-  case ControllerStates::FAULT:
-    faultState();
-    break;
-  }
+    switch (state) {
+        case ControllerStates::NO_BATTERY:
+            noBatteryState();
+            break;
+        case ControllerStates::CONNECTED:
+            connectedState();
+            break;
+        case ControllerStates::CHARGING:
+            chargingState();
+            break;
+        case ControllerStates::STANDBY:
+            standbyState();
+            break;
+        case ControllerStates::FAULT:
+            faultState();
+            break;
+    }
 }
 
 /**
@@ -27,20 +29,20 @@ void ChargeController::loop() {
  * @return true when everything ok, false if there is a problem
  */
 bool ChargeController::checkBMS() {
-  bool status = true;
-  int temperature = bms.getBattTemperature();
-  int voltage = bms.getBattVoltage();
+    bool status = true;
+    int temperature = bms.getBattTemperature();
+    int voltage = bms.getBattVoltage();
 
-  if (temperature > MAX_TEMPERATURE) {
-    status = false;
-  }
-  if (voltage > MAX_VOLTAGE) {
-    status = false;
-  }
-  if (bms.faultDetected()) {
-    status = false;
-  }
-  return status;
+    if (temperature > MAX_TEMPERATURE) {
+        status = false;
+    }
+    if (voltage > MAX_VOLTAGE) {
+        status = false;
+    }
+    if (bms.faultDetected()) {
+        status = false;
+    }
+    return status;
 }
 
 /**
@@ -48,18 +50,18 @@ bool ChargeController::checkBMS() {
  * shut off the relay and wait for a connection.
  */
 void ChargeController::noBatteryState() {
-  if (changedState) {
-    // Display no battery connected message on LCD
-    relay.writePin(RELAY_OFF);
-    changedState = false;
-  }
+    if (changedState) {
+        // Display no battery connected message on LCD
+        relay.writePin(RELAY_OFF);
+        changedState = false;
+    }
 
-  // When battery gets connected change state to CONNECTED for setup and initial
-  // check
-  if (bms.isConnected()) {
-    changedState = true;
-    state = ControllerStates::CONNECTED;
-  }
+    // When battery gets connected change state to CONNECTED for setup and initial
+    // check
+    if (bms.isConnected()) {
+        changedState = true;
+        state = ControllerStates::CONNECTED;
+    }
 }
 
 /**
@@ -68,18 +70,18 @@ void ChargeController::noBatteryState() {
  * if bms is ready to charge, wait in standby for user to start charge
  */
 void ChargeController::connectedState() {
-  if (changedState) {
-    // display connected LCD message
-    // further init battery communication?
-    changedState = false;
-  }
-  if (checkBMS()) {
-    changedState = true;
-    state = ControllerStates::STANDBY;
-  } else {
-    changedState = true;
-    state = ControllerStates::FAULT;
-  }
+    if (changedState) {
+        // display connected LCD message
+        // further init battery communication?
+        changedState = false;
+    }
+    if (checkBMS()) {
+        changedState = true;
+        state = ControllerStates::STANDBY;
+    } else {
+        changedState = true;
+        state = ControllerStates::FAULT;
+    }
 }
 
 /**
@@ -88,17 +90,17 @@ void ChargeController::connectedState() {
  * state
  */
 void ChargeController::chargingState() {
-  if (changedState) {
-    relay.writePin(RELAY_ON);
-    changedState = false;
-  }
-  if (!bms.isConnected()) {
-    changedState = true;
-    state = ControllerStates::NO_BATTERY;
-  } else if (!checkBMS()) {
-    changedState = true;
-    state = ControllerStates::FAULT;
-  }
+    if (changedState) {
+        relay.writePin(RELAY_ON);
+        changedState = false;
+    }
+    if (!bms.isConnected()) {
+        changedState = true;
+        state = ControllerStates::NO_BATTERY;
+    } else if (!checkBMS()) {
+        changedState = true;
+        state = ControllerStates::FAULT;
+    }
 }
 
 /**
@@ -106,18 +108,18 @@ void ChargeController::chargingState() {
  * wait for user input to start charging as long as the BMS is ok
  */
 void ChargeController::standbyState() {
-  if (changedState) {
-    relay.writePin(RELAY_OFF);
-    changedState = false;
-  }
+    if (changedState) {
+        relay.writePin(RELAY_OFF);
+        changedState = false;
+    }
 
-  if (!bms.isConnected()) {
-    changedState = true;
-    state = ControllerStates::NO_BATTERY;
-  } else if (!checkBMS()) {
-    changedState = true;
-    state = ControllerStates::FAULT;
-  }
+    if (!bms.isConnected()) {
+        changedState = true;
+        state = ControllerStates::NO_BATTERY;
+    } else if (!checkBMS()) {
+        changedState = true;
+        state = ControllerStates::FAULT;
+    }
 }
 
 /**
@@ -125,18 +127,18 @@ void ChargeController::standbyState() {
  * A fault has occurred, stop charging. When fault is cleared, wait in standby
  */
 void ChargeController::faultState() {
-  if (changedState) {
-    relay.writePin(RELAY_OFF);
-    changedState = false;
-  }
+    if (changedState) {
+        relay.writePin(RELAY_OFF);
+        changedState = false;
+    }
 
-  if (!bms.isConnected()) {
-    changedState = true;
-    state = ControllerStates::NO_BATTERY;
-  } else if (checkBMS()) {
-    changedState = true;
-    state = ControllerStates::STANDBY;
-  }
+    if (!bms.isConnected()) {
+        changedState = true;
+        state = ControllerStates::NO_BATTERY;
+    } else if (checkBMS()) {
+        changedState = true;
+        state = ControllerStates::STANDBY;
+    }
 }
 
 void ChargeController::init() { relay.writePin(RELAY_OFF); }
@@ -146,18 +148,18 @@ void ChargeController::init() { relay.writePin(RELAY_OFF); }
  * charge
  */
 void ChargeController::startCharging() {
-  if (state == ControllerStates::STANDBY) {
-    state = ControllerStates::CHARGING;
-    changedState = true;
-  }
+    if (state == ControllerStates::STANDBY) {
+        state = ControllerStates::CHARGING;
+        changedState = true;
+    }
 }
 
 /**
  * stop charging when the stop button is pressed
  */
 void ChargeController::stopCharging() {
-  if (state == ControllerStates::CHARGING) {
-    state = ControllerStates::STANDBY;
-    changedState = true;
-  }
+    if (state == ControllerStates::CHARGING) {
+        state = ControllerStates::STANDBY;
+        changedState = true;
+    }
 }

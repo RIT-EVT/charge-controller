@@ -38,51 +38,51 @@ constexpr IO::Pin CAN_RX_PIN = IO::Pin::PA_11;
 constexpr IO::Pin CAN_TX_PIN = IO::Pin::PA_12;
 
 int main() {
-  IO::init();
+    IO::init();
 
-  constexpr uint8_t BMS_CAN_ADDRESS = 0x00;
+    constexpr uint8_t BMS_CAN_ADDRESS = 0x00;
 
-  // Pin initialization
-  IO::UART &uart = IO::getUART<UART_TX_PIN, UART_RX_PIN>(9600);
-  IO::CAN &can = IO::getCAN<CAN_TX_PIN, CAN_RX_PIN>();
+    // Pin initialization
+    IO::UART &uart = IO::getUART<UART_TX_PIN, UART_RX_PIN>(9600);
+    IO::CAN &can = IO::getCAN<CAN_TX_PIN, CAN_RX_PIN>();
 
-  // GPIO pins
-  IO::GPIO &relayControl =
-      IO::getGPIO<RELAY_CTL_PIN>(IO::GPIO::Direction::OUTPUT);
-  IO::GPIO &statusLED = IO::getGPIO<LED_PIN>(IO::GPIO::Direction::OUTPUT);
-  IO::GPIO &batt1OK = IO::getGPIO<BATTERY_1_OK>(IO::GPIO::Direction::INPUT);
-  IO::GPIO &batt2OK = IO::getGPIO<BATTERY_2_OK>(IO::GPIO::Direction::INPUT);
+    // GPIO pins
+    IO::GPIO &relayControl =
+            IO::getGPIO<RELAY_CTL_PIN>(IO::GPIO::Direction::OUTPUT);
+    IO::GPIO &statusLED = IO::getGPIO<LED_PIN>(IO::GPIO::Direction::OUTPUT);
+    IO::GPIO &batt1OK = IO::getGPIO<BATTERY_1_OK>(IO::GPIO::Direction::INPUT);
+    IO::GPIO &batt2OK = IO::getGPIO<BATTERY_2_OK>(IO::GPIO::Direction::INPUT);
 
-  // Buttons
-  Debounce standbyButton(
-      IO::getGPIO<STANDBY_BUTTON_PIN>(IO::GPIO::Direction::INPUT));
-  Debounce startButton(
-      IO::getGPIO<START_BUTTON_PIN>(IO::GPIO::Direction::INPUT));
-  // LCD
-  IO::GPIO &LCDRegisterSEL =
-      IO::getGPIO<LCD_A0_PIN>(IO::GPIO::Direction::OUTPUT);
-  IO::GPIO &LCDReset = IO::getGPIO<LCD_RST_PIN>(IO::GPIO::Direction::OUTPUT);
-  IO::GPIO *devices[] = {&IO::getGPIO<SPI_CS_PIN>(IO::GPIO::Direction::OUTPUT)};
-  devices[0]->writePin(IO::GPIO::State::HIGH);
+    // Buttons
+    Debounce standbyButton(
+            IO::getGPIO<STANDBY_BUTTON_PIN>(IO::GPIO::Direction::INPUT));
+    Debounce startButton(
+            IO::getGPIO<START_BUTTON_PIN>(IO::GPIO::Direction::INPUT));
+    // LCD
+    IO::GPIO &LCDRegisterSEL =
+            IO::getGPIO<LCD_A0_PIN>(IO::GPIO::Direction::OUTPUT);
+    IO::GPIO &LCDReset = IO::getGPIO<LCD_RST_PIN>(IO::GPIO::Direction::OUTPUT);
+    IO::GPIO *devices[] = {&IO::getGPIO<SPI_CS_PIN>(IO::GPIO::Direction::OUTPUT)};
+    devices[0]->writePin(IO::GPIO::State::HIGH);
 
-  IO::SPI &spi = IO::getSPI<SPI_CLK_PIN, SPI_MOSI_PIN>(devices, 1);
+    IO::SPI &spi = IO::getSPI<SPI_CLK_PIN, SPI_MOSI_PIN>(devices, 1);
 
-  // charge controller module instantiation
-  BMSManager bms(can, BMS_CAN_ADDRESS);
-  LCDDisplay display(spi, LCDRegisterSEL, LCDReset);
-  ChargeController chargeController(bms, display, relayControl);
+    // charge controller module instantiation
+    BMSManager bms(can, BMS_CAN_ADDRESS);
+    LCDDisplay display(spi, LCDRegisterSEL, LCDReset);
+    ChargeController chargeController(bms, display, relayControl);
 
-  display.init();
-  chargeController.init();
+    display.init();
+    chargeController.init();
 
-  while (1) {
-    chargeController.loop();
-    if (standbyButton.read())
-      chargeController.stopCharging();
+    while (1) {
+        chargeController.loop();
+        if (standbyButton.read())
+            chargeController.stopCharging();
 
-    if (startButton.read())
-      chargeController.startCharging();
+        if (startButton.read())
+            chargeController.startCharging();
 
-    time::wait(50);
-  }
+        time::wait(50);
+    }
 }
