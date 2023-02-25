@@ -2,26 +2,33 @@
 
 ChargeController::ChargeController(BMSManager bms, LCDDisplay display,
                                    IO::GPIO &relay)
-        : bms(bms), display(display), relay(relay) {}
+        : bms(bms), lcdDisplay(display), relay(relay) {}
 
 void ChargeController::loop() {
     switch (state) {
         case ControllerStates::NO_BATTERY:
+            lcdDisplay.setStatus("No Battery");
             noBatteryState();
             break;
         case ControllerStates::CONNECTED:
+            lcdDisplay.setStatus("Connected");
             connectedState();
             break;
         case ControllerStates::CHARGING:
+            lcdDisplay.setStatus("Charging");
             chargingState();
             break;
         case ControllerStates::STANDBY:
+            lcdDisplay.setStatus("Standby");
             standbyState();
             break;
         case ControllerStates::FAULT:
+            lcdDisplay.setStatus("Fault");
             faultState();
             break;
     }
+    // Display LCD values
+    lcdDisplay.display();
 }
 
 /**

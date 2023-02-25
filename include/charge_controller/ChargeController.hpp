@@ -28,8 +28,6 @@ public:
     void startCharging();
     void stopCharging();
 
-
-
 private:
     void noBatteryState();
     void connectedState();
@@ -38,7 +36,7 @@ private:
     void faultState();
 
     BMSManager bms;
-    LCDDisplay display;
+    LCDDisplay lcdDisplay;
     IO::GPIO &relay;
 
     ControllerStates state = ControllerStates::NO_BATTERY;

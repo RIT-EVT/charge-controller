@@ -1,5 +1,5 @@
 #include <EVT/io/CAN.hpp>
-#include <EVT/io/manager.hpp>
+#include <EVT/manager.hpp>
 #include <EVT/io/pin.hpp>
 #include <EVT/utils/time.hpp>
 
@@ -37,8 +37,11 @@ constexpr IO::Pin UART_TX_PIN = IO::Pin::PB_6;
 constexpr IO::Pin CAN_RX_PIN = IO::Pin::PA_11;
 constexpr IO::Pin CAN_TX_PIN = IO::Pin::PA_12;
 
+const uint32_t SPI_SPEED = SPI_SPEED_500KHZ;
+const uint8_t deviceCount = 1;
+
 int main() {
-    IO::init();
+    EVT::core::platform::init();
 
     constexpr uint8_t BMS_CAN_ADDRESS = 0x00;
 
@@ -59,22 +62,24 @@ int main() {
     Debounce startButton(
             IO::getGPIO<START_BUTTON_PIN>(IO::GPIO::Direction::INPUT));
     // LCD
-    IO::GPIO &LCDRegisterSEL =
-            IO::getGPIO<LCD_A0_PIN>(IO::GPIO::Direction::OUTPUT);
-    IO::GPIO &LCDReset = IO::getGPIO<LCD_RST_PIN>(IO::GPIO::Direction::OUTPUT);
-    IO::GPIO *devices[] = {&IO::getGPIO<SPI_CS_PIN>(IO::GPIO::Direction::OUTPUT)};
-    devices[0]->writePin(IO::GPIO::State::HIGH);
+    IO::GPIO* devices[deviceCount];
 
-    IO::SPI &spi = IO::getSPI<SPI_CLK_PIN, SPI_MOSI_PIN>(devices, 1);
+    IO::GPIO& LCDRegSelect = IO::getGPIO<IO::Pin::PA_3>(EVT::core::IO::GPIO::Direction::OUTPUT);
+    IO::GPIO& LCDReset = IO::getGPIO<IO::Pin::PB_3>(EVT::core::IO::GPIO::Direction::OUTPUT);
+    devices[0] = &IO::getGPIO<IO::Pin::PB_12>(EVT::core::IO::GPIO::Direction::OUTPUT);
+    devices[0]->writePin(IO::GPIO::State::HIGH);
+    auto& spi = IO::getSPI<IO::Pin::SPI_SCK, IO::Pin::SPI_MOSI>(devices, deviceCount);
+    spi.configureSPI(SPI_SPEED, SPI_MODE0, SPI_MSB_FIRST);
 
     // charge controller module instantiation
     BMSManager bms(can, BMS_CAN_ADDRESS);
-    LCDDisplay display(spi, LCDRegisterSEL, LCDReset);
+    LCDDisplay display(LCDRegSelect, LCDReset, spi);
     ChargeController chargeController(bms, display, relayControl);
 
     display.init();
     chargeController.init();
 
+    display.showSections();
     while (1) {
         chargeController.loop();
         if (standbyButton.read())

@@ -20,6 +20,8 @@ else()
     message(FATAL_ERROR "The target device is not supported")
 endif()
 
+add_compile_definitions(USE_HAL_DRIVER)
+
 # Link to the EVT-core library
 add_subdirectory(libs/EVT-core/)
 
