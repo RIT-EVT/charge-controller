@@ -28,7 +28,7 @@ public:
     void startCharging();
     void stopCharging();
 
-    
+
 
 private:
     void noBatteryState();
