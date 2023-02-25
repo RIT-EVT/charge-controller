@@ -12,27 +12,53 @@ class LCDDisplay {
 public:
     LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi);
 
+    /**
+     * Initializes the LCD driver and displays the splash image.
+     */
     void init();
+    /**
+     * Sets the status string to show on the display.
+     * @param str the status to display
+     */
     void setStatus(const char *str);
 
+    /**
+     * Display the EVT logo as a splash screen.
+     */
     void showSplashScreen();
+    /**
+     * Displays header sections once initialization is complete.
+     */
     void showSections();
+    /**
+     * The display loop that updates the section headers.
+     */
     void display();
-
-
 private:
     DEV::LCD lcd;
 
+    /** The current charge controller status */
     const char* status = "NULL";
+    /** The voltage that is being supplied */
     const uint8_t chargeControllerVoltage = 0;
+    /** The current that is being supplied */
     const uint8_t chargeControllerCurrent = 0;
+    /** The current battery voltage */
     const uint8_t batteryVoltage = 0;
+    /** The minimum temperature for battery one */
     const uint8_t batteryOneMinTemp = 0;
+    /** The maximum temperature for battery one */
     const uint8_t batteryOneMaxTemp = 0;
+    /** The minimum temperature for battery two */
     const uint8_t batteryTwoMinTemp = 0;
+    /** The maximum temperature for battery two */
     const uint8_t batteryTwoMaxTemp = 0;
+    /** How charged the batteries currently are. */
     const uint8_t chargePercentage = 0;
 
+    /**
+     * The 9 section headers to be displayed.
+     */
     static constexpr char* SECTION_TITLES[9] {
             "Status",
             "C Voltage",
@@ -45,6 +71,9 @@ private:
             "B2 Max T",
     };
 
+    /**
+     * The EVT logo used for the splash screen.
+     */
     unsigned char evtBitMap[1024] = {
             0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
             0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
