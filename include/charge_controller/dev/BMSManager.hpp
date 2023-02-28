@@ -13,6 +13,7 @@
 // 0: RPDO number in index and total number of sub indexes.
 // 1: The COB-ID to receive PDOs from.
 // 2: transmission trigger
+// 6 spaces in an array
 #define GEN_PACK_RPDO_CONFIG(NUM, ID)                                        \
     {                                                                       \
         .Key = CO_KEY(0x1400+2*NUM, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),        \
@@ -50,6 +51,7 @@
 // 0: The number of PDO messages associated with the TPDO
 // 1: Link to the first PDO message
 // n: Link to the nth PDO message
+// 14 spaces in an array
 #define GEN_PACK_RPDO_MAP(NUM)                                               \
     {                                                                       \
         .Key = CO_KEY(0x1600+2*NUM, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),        \
@@ -120,8 +122,9 @@
         .Key = CO_KEY(0x1601+2*NUM, 7, CO_UNSIGNED32 | CO_OBJ_D__R_),       \
         .Type = nullptr,                                                    \
         .Data = CO_LINK(0x5000, 0, 8),                                      \
-    },
-
+    },                                                                       \
+                                                                             \
+// 8 spaces in an array
 #define GEN_PACK_DATA(NUM, VAR)                                             \
     {                                                                       \
         .Key = CO_KEY(0x2100+NUM, 1, CO_UNSIGNED16 | CO_OBJ___PR_),         \
@@ -353,50 +356,6 @@ private:
             .Key = CO_KEY(0x1200, 2, CO_UNSIGNED32 | CO_OBJ_D__R_),
             .Type = nullptr,
             .Data = (uintptr_t) 0x580 + NODE_ID,
-        },
-
-        /**
-         * RPDO0 settings
-         * 0: RPDO number in index and total number of sub indexes.
-         * 1: The COB-ID to receive PDOs from.
-         * 2: transmission trigger
-         */
-        {
-            .Key = CO_KEY(0x1400, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 3,
-        },
-        {
-            .Key = CO_KEY(0x1400, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) CO_COBID_TPDO_DEFAULT(0) + BMS_PACK_ONE_ID,
-        },
-        {
-            .Key = CO_KEY(0x1400, 2, CO_UNSIGNED8 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 0xFE,
-        },
-
-        /**
-         * RPDO1 settings
-         * 0: RPDO number in index and total number of sub indexes.
-         * 1: The COB-ID to receive PDOs from.
-         * 2: transmission trigger
-         */
-        {
-            .Key = CO_KEY(0x1401, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 3,
-        },
-        {
-            .Key = CO_KEY(0x1401, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) CO_COBID_TPDO_DEFAULT(0) + BMS_PACK_TWO_ID,
-        },
-        {
-            .Key = CO_KEY(0x1401, 2, CO_UNSIGNED8 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 0xFE,
         },
 
         //RPDO0-0 config for Pack 1
