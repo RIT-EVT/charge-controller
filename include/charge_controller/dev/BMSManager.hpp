@@ -247,7 +247,7 @@ public:
      */
     uint8_t getNumElements();
 
-    static constexpr uint8_t MAX_BMS_PACKS = 1;
+    static constexpr uint8_t MAX_BMS_PACKS = 2;
 private:
     /**
      * State for representing the BMS is in not in an OK state to charge/discharge
@@ -288,8 +288,8 @@ private:
     };
 
     struct BMSConfig packs[MAX_BMS_PACKS] = {
-            {0x05, false},
-//            {0x24, false}
+            {0x20, false},
+            {0x23, false}
     };
 
     BMSData lastValues[MAX_BMS_PACKS];
@@ -392,7 +392,7 @@ private:
 //            .Type = nullptr,
 //            .Data = (uintptr_t) 0xFE,
 //        },
-        //PRDO0-1 for Pack 1
+        //RPDO0-1 for Pack 1
         GEN_PACK_RPDO_CONFIG(0,packs[0].node_ID)
 
 //        // RPDO0 mapping, determines the PDO messages to send when TPDO1 is triggered
