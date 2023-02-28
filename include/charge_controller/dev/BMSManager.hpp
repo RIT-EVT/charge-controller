@@ -198,16 +198,6 @@ public:
 
     BMSManager(IO::CAN &can, IO::GPIO *bmsOK[]);
 
-    int16_t getBatteryVoltage(int packNum);
-
-    int8_t getBatteryMinTemp(int packNum);
-
-    int8_t getBatteryMaxTemp(int packNum);
-
-    int16_t getBatteryMinCellVoltage(int packNum);
-
-    int16_t getBatteryMaxCellVoltage(int packNum);
-
     BMSManager::BMSStatus getBatteryState(int packNum);
 
     bool isConnected(uint8_t packNum);
@@ -360,22 +350,22 @@ private:
             .Data = (uintptr_t) 0x580 + NODE_ID,
         },
 
-        //RPDO0-0 config for Pack 1
+        // RPDO0-0 config for Pack 1
         GEN_PACK_RPDO_CONFIG(0, packs[0].node_ID)
 
-        //RPDO0-0 config for Pack 1
+        // RPDO0-1 config for Pack 2
         GEN_PACK_RPDO_CONFIG(1, packs[1].node_ID)
 
-        //RPDO0-0 map for Pack 1
+        // RPDO0-0 map for Pack 1
         GEN_PACK_RPDO_MAP(0)
 
-        //RPDO0-1 map for Pack 2
+        // RPDO0-1 map for Pack 2
         GEN_PACK_RPDO_MAP(1)
 
-        //Pack 1 Data
+        // Pack 1 Data
         GEN_PACK_DATA(0,packs[0].data)
 
-        //Pack 2 Data
+        // Pack 2 Data
         GEN_PACK_DATA(0,packs[1].data)
 
         // End of dictionary marker
