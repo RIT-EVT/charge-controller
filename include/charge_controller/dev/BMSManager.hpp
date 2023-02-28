@@ -9,7 +9,7 @@
 #include <charge_controller/Logger.h>
 #include <Canopen/co_pdo.h>
 
-//RPDO0-1 settings
+//RPDO-NUM settings
 // 0: RPDO number in index and total number of sub indexes.
 // 1: The COB-ID to receive PDOs from.
 // 2: transmission trigger
@@ -46,7 +46,7 @@
     },
 
 
-// RPDO0-1 mapping, determines the PDO messages to send when TPDO1 is triggered
+// RPDO(NUM) mapping, determines the PDO messages to send when TPDO(NUM) is triggered
 // 0: The number of PDO messages associated with the TPDO
 // 1: Link to the first PDO message
 // n: Link to the nth PDO message
@@ -290,8 +290,8 @@ private:
     };
 
     struct BMSConfig packs[MAX_BMS_PACKS] = {
-            {BMS_PACK_ONE_ID, false},
-            {BMS_PACK_TWO_ID, false}
+            {BMS_PACK_ONE_ID, false, {}},
+            {BMS_PACK_TWO_ID, false, {}}
     };
 
     BMSData lastValues[MAX_BMS_PACKS];
@@ -299,7 +299,7 @@ private:
     uint8_t dummy = 0;
 
     static constexpr uint8_t NODE_ID = 0x0F;
-    static constexpr uint16_t OBJECT_DICTIONARY_SIZE = 36;
+    static constexpr uint16_t OBJECT_DICTIONARY_SIZE = 69;
 
     CO_OBJ_T objectDictionaryBMS[OBJECT_DICTIONARY_SIZE + 1] = {
         // Sync ID, defaults to 0x80
@@ -399,145 +399,23 @@ private:
             .Data = (uintptr_t) 0xFE,
         },
 
-        //RPDO0-1 for Pack 1
-        GEN_PACK_RPDO_CONFIG(0,packs[0].node_ID)
+        //RPDO0-0 config for Pack 1
+        GEN_PACK_RPDO_CONFIG(0, packs[0].node_ID)
 
-//        // RPDO0 mapping, determines the PDO messages to send when TPDO1 is triggered
-//        // 0: The number of PDO messages associated with the TPDO
-//        // 1: Link to the first PDO message
-//        // n: Link to the nth PDO message
-//        {
-//            .Key = CO_KEY(0x1600, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) 5,
-//        },
-//        { // Battery Voltage
-//            .Key = CO_KEY(0x1600, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = CO_LINK(0x2100, 1, 16),
-//        },
-//        { // Min Cell Voltage
-//            .Key = CO_KEY(0x1600, 2, CO_UNSIGNED32 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = CO_LINK(0x2100, 2, 16),
-//        },
-//        { // Min Cell Voltage ID
-//            .Key = CO_KEY(0x1600, 3, CO_UNSIGNED32 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = CO_LINK(0x2100, 3, 8),
-//        },
-//        { // Max Cell Voltage
-//            .Key = CO_KEY(0x1600, 4, CO_UNSIGNED32 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = CO_LINK(0x2100, 4, 16),
-//        },
-//        { // Max Cell Voltage ID
-//            .Key = CO_KEY(0x1600, 5, CO_UNSIGNED32 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = CO_LINK(0x2100, 5, 8),
-//        },
-//
-//        // RPDO1 mapping, determines the PDO messages to send when TPDO1 is triggered
-//        // 0: The number of PDO messages associated with the TPDO
-//        // 1: Link to the first PDO message
-//        // n: Link to the nth PDO message
-//        {
-//            .Key = CO_KEY(0x1601, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) 7,
-//        },
-//        { // Current - Unused
-//            .Key = CO_KEY(0x1601, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = CO_LINK(0x5000, 0, 8),
-//        },
-//        { // Pack Min Temp
-//            .Key = CO_KEY(0x1601, 2, CO_UNSIGNED32 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = CO_LINK(0x2100, 7, 8),
-//        },
-//        { // Pack Max Temp
-//            .Key = CO_KEY(0x1601, 3, CO_UNSIGNED32 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = CO_LINK(0x2100, 8, 8),
-//        },
-//        { // SOC - Unused
-//            .Key = CO_KEY(0x1601, 4, CO_UNSIGNED32 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = CO_LINK(0x5000, 0, 8),
-//        },
-//        { // State
-//            .Key = CO_KEY(0x1601, 5, CO_UNSIGNED32 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = CO_LINK(0x2100, 10, 8),
-//        },
-//        { //RecapActualAllowed - Unused
-//            .Key = CO_KEY(0x1601, 6, CO_UNSIGNED32 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = CO_LINK(0x5000, 0, 8),
-//        },
-//        { //DischargeActualAllowed - Unused
-//            .Key = CO_KEY(0x1601, 7, CO_UNSIGNED32 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = CO_LINK(0x5000, 0, 8),
-//        },
+        //RPDO0-0 config for Pack 1
+        GEN_PACK_RPDO_CONFIG(1, packs[1].node_ID)
 
-        //PRDO0-1 map for Pack 1
+        //RPDO0-0 map for Pack 1
         GEN_PACK_RPDO_MAP(0)
 
-        // User defined data, this will be where we put elements that can be
-        // accessed via SDO and depending on configuration PDO
-
-        //Pack 1 Data
-//        {
-//            .Key = CO_KEY(0x2100, 1, CO_UNSIGNED16 | CO_OBJ___PR_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) &packs[0].data.batteryVoltage,
-//        },
-//        {
-//            .Key = CO_KEY(0x2100, 2, CO_UNSIGNED16 | CO_OBJ___PR_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) &packs[0].data.minCellVoltage,
-//        },
-//        {
-//            .Key = CO_KEY(0x2100, 3, CO_UNSIGNED8 | CO_OBJ___PR_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) &packs[0].data.minCellVoltageID,
-//        },
-//        {
-//            .Key = CO_KEY(0x2100, 4, CO_UNSIGNED16 | CO_OBJ___PR_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) &packs[0].data.maxCellVoltage,
-//        },
-//        {
-//            .Key = CO_KEY(0x2100, 5, CO_UNSIGNED8 | CO_OBJ___PR_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) &packs[0].data.maxCellVoltageID,
-//        },
-//        {
-//            .Key = CO_KEY(0x2100, 7, CO_SIGNED8 | CO_OBJ___PR_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) &packs[0].data.batteryPackMinTemp,
-//        },
-//        {
-//            .Key = CO_KEY(0x2100, 8, CO_SIGNED8 | CO_OBJ___PR_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) &packs[0].data.batteryPackMaxTemp,
-//        },
-//        {
-//            .Key = CO_KEY(0x2100, 10, CO_UNSIGNED8 | CO_OBJ___PR_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) &packs[0].data.status,
-//        },
+        //RPDO0-1 map for Pack 2
+        GEN_PACK_RPDO_MAP(1)
 
         //Pack 1 Data
         GEN_PACK_DATA(0,packs[0].data)
 
-        {
-            .Key = CO_KEY(0x5000, 0, CO_UNSIGNED8 | CO_OBJ___PR_),
-            .Type = nullptr,
-            .Data = (uintptr_t) &dummy,
-        },
+        //Pack 2 Data
+        GEN_PACK_DATA(0,packs[1].data)
 
         // End of dictionary marker
         CO_OBJ_DIR_ENDMARK,
