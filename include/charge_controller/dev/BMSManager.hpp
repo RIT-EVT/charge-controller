@@ -290,8 +290,8 @@ private:
     };
 
     struct BMSConfig packs[MAX_BMS_PACKS] = {
-            {0x20, false},
-            {0x23, false}
+            {BMS_PACK_ONE_ID, false},
+            {BMS_PACK_TWO_ID, false}
     };
 
     BMSData lastValues[MAX_BMS_PACKS];
