@@ -1,9 +1,9 @@
 
 #include <charge_controller/dev/BMSManager.hpp>
 
-#define BMS_DATA_GETTER(packNum, field) \
+#define BMS_DATA_GETTER(packNum, field, defaultRet) \
     if (packNum >= MAX_BMS_PACKS) { \
-        return -1; \
+        return defaultRet; \
     } \
     return packs[packNum].data.field;
 
@@ -14,28 +14,28 @@ BMSManager::BMSManager(IO::CAN &can, IO::GPIO *bmsOK[]) {
     }
 };
 
-int BMSManager::getBatteryVoltage(int packNum) {
-    BMS_DATA_GETTER(packNum, batteryVoltage);
+int16_t BMSManager::getBatteryVoltage(int packNum) {
+    BMS_DATA_GETTER(packNum, batteryVoltage, -1);
 }
 
-int BMSManager::getBatteryMinTemp(int packNum) {
-    BMS_DATA_GETTER(packNum, batteryVoltage);
+int8_t BMSManager::getBatteryMinTemp(int packNum) {
+    BMS_DATA_GETTER(packNum, batteryPackMinTemp, -1);
 }
 
-int BMSManager::getBatteryMaxTemp(int packNum) {
-    BMS_DATA_GETTER(packNum, batteryVoltage);
+int8_t BMSManager::getBatteryMaxTemp(int packNum) {
+    BMS_DATA_GETTER(packNum, batteryPackMaxTemp, -1);
 }
 
-int BMSManager::getBatteryMinCellVoltage(int packNum) {
-    BMS_DATA_GETTER(packNum, batteryVoltage);
+int16_t BMSManager::getBatteryMinCellVoltage(int packNum) {
+    BMS_DATA_GETTER(packNum, minCellVoltage, -1);
 }
 
-int BMSManager::getBatteryMaxCellVoltage(int packNum) {
-    BMS_DATA_GETTER(packNum, batteryVoltage);
+int16_t BMSManager::getBatteryMaxCellVoltage(int packNum) {
+    BMS_DATA_GETTER(packNum, maxCellVoltage, -1);
 }
 
-int BMSManager::getBatteryState(int packNum) {
-    BMS_DATA_GETTER(packNum, batteryVoltage);
+BMSManager::BMSStatus BMSManager::getBatteryState(int packNum) {
+    BMS_DATA_GETTER(packNum, status, BMSStatus::START);
 }
 
 uint8_t BMSManager::numConnected() {

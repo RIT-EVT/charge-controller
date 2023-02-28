@@ -198,17 +198,17 @@ public:
 
     BMSManager(IO::CAN &can, IO::GPIO *bmsOK[]);
 
-    int getBatteryVoltage(int packNum);
+    int16_t getBatteryVoltage(int packNum);
 
-    int getBatteryMinTemp(int packNum);
+    int8_t getBatteryMinTemp(int packNum);
 
-    int getBatteryMaxTemp(int packNum);
+    int8_t getBatteryMaxTemp(int packNum);
 
-    int getBatteryMinCellVoltage(int packNum);
+    int16_t getBatteryMinCellVoltage(int packNum);
 
-    int getBatteryMaxCellVoltage(int packNum);
+    int16_t getBatteryMaxCellVoltage(int packNum);
 
-    int getBatteryState(int packNum);
+    BMSManager::BMSStatus getBatteryState(int packNum);
 
     bool isConnected(uint8_t packNum);
 
