@@ -169,6 +169,8 @@ namespace IO = EVT::core::IO;
 class BMSManager {
     static constexpr uint32_t TOTAL_VOLTAGE_ID = 0x2101;
     static constexpr uint32_t STATE_ID = 0x2102;
+    static constexpr uintptr_t BMS_PACK_ONE_ID = 0x20;
+    static constexpr uintptr_t BMS_PACK_TWO_ID = 0x23;
 public:
     enum class BMSStatus {
         /// When the BMS is powered on
@@ -353,45 +355,50 @@ private:
             .Data = (uintptr_t) 0x580 + NODE_ID,
         },
 
-//        //RPDO0 settings
-//        // 0: RPDO number in index and total number of sub indexes.
-//        // 1: The COB-ID to receive PDOs from.
-//        // 2: transmission trigger
-//        {
-//            .Key = CO_KEY(0x1400, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) 3,
-//        },
-//        {
-//            .Key = CO_KEY(0x1400, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) CO_COBID_TPDO_DEFAULT(0) + packs[0].node_ID,
-//        },
-//        {
-//            .Key = CO_KEY(0x1400, 2, CO_UNSIGNED8 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) 0xFE,
-//        },
-//
-//        //RPDO1 settings
-//        // 0: RPDO number in index and total number of sub indexes.
-//        // 1: The COB-ID to receive PDOs from.
-//        // 2: transmission trigger
-//        {
-//            .Key = CO_KEY(0x1401, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) 3,
-//        },
-//        {
-//            .Key = CO_KEY(0x1401, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) CO_COBID_TPDO_DEFAULT(0) + packs[0].node_ID + 1,
-//        },
-//        {
-//            .Key = CO_KEY(0x1401, 2, CO_UNSIGNED8 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) 0xFE,
-//        },
+        /**
+         * RPDO0 settings
+         * 0: RPDO number in index and total number of sub indexes.
+         * 1: The COB-ID to receive PDOs from.
+         * 2: transmission trigger
+         */
+        {
+            .Key = CO_KEY(0x1400, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),
+            .Type = nullptr,
+            .Data = (uintptr_t) 3,
+        },
+        {
+            .Key = CO_KEY(0x1400, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
+            .Type = nullptr,
+            .Data = (uintptr_t) CO_COBID_TPDO_DEFAULT(0) + BMS_PACK_ONE_ID,
+        },
+        {
+            .Key = CO_KEY(0x1400, 2, CO_UNSIGNED8 | CO_OBJ_D__R_),
+            .Type = nullptr,
+            .Data = (uintptr_t) 0xFE,
+        },
+
+        /**
+         * RPDO1 settings
+         * 0: RPDO number in index and total number of sub indexes.
+         * 1: The COB-ID to receive PDOs from.
+         * 2: transmission trigger
+         */
+        {
+            .Key = CO_KEY(0x1401, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),
+            .Type = nullptr,
+            .Data = (uintptr_t) 3,
+        },
+        {
+            .Key = CO_KEY(0x1401, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
+            .Type = nullptr,
+            .Data = (uintptr_t) CO_COBID_TPDO_DEFAULT(0) + BMS_PACK_TWO_ID,
+        },
+        {
+            .Key = CO_KEY(0x1401, 2, CO_UNSIGNED8 | CO_OBJ_D__R_),
+            .Type = nullptr,
+            .Data = (uintptr_t) 0xFE,
+        },
+
         //RPDO0-1 for Pack 1
         GEN_PACK_RPDO_CONFIG(0,packs[0].node_ID)
 
