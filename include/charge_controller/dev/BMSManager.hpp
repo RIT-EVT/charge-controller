@@ -198,15 +198,17 @@ public:
 
     BMSManager(IO::CAN &can, IO::GPIO *bmsOK[]);
 
-//    void updateBMSData(IO::CANMessage &message);
-//
-//    int getBattVoltage() { return millivolts; };
-//
-//    int getBattTemperature() { return 0; };
-//
-//    BMSStatus getBMSState() { return state; };
-//
-//    int getStateOfCharge();
+    int getBatteryVoltage(int packNum);
+
+    int getBatteryMinTemp(int packNum);
+
+    int getBatteryMaxTemp(int packNum);
+
+    int getBatteryMinCellVoltage(int packNum);
+
+    int getBatteryMaxCellVoltage(int packNum);
+
+    int getBatteryState(int packNum);
 
     bool isConnected(uint8_t packNum);
 
