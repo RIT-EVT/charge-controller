@@ -170,10 +170,14 @@
 namespace IO = EVT::core::IO;
 
 class BMSManager {
-    static constexpr uint32_t TOTAL_VOLTAGE_ID = 0x2101;
-    static constexpr uint32_t STATE_ID = 0x2102;
-    static constexpr uintptr_t BMS_PACK_ONE_ID = 0x20;
-    static constexpr uintptr_t BMS_PACK_TWO_ID = 0x23;
+    static constexpr uint32_t
+    TOTAL_VOLTAGE_ID = 0x2101;
+    static constexpr uint32_t
+    STATE_ID = 0x2102;
+    static constexpr uintptr_t
+    BMS_PACK_ONE_ID = 0x20;
+    static constexpr uintptr_t
+    BMS_PACK_TWO_ID = 0x23;
 public:
     enum class BMSStatus {
         /// When the BMS is powered on
@@ -196,38 +200,123 @@ public:
         CHARGING = 8
     };
 
+    /**
+     * Constructor for BMSManager
+     * @param can
+     * @param bmsOK
+     */
     BMSManager(IO::CAN &can, IO::GPIO *bmsOK[]);
 
-    BMSManager::BMSStatus getBatteryState(int packNum);
-
+    /**
+     * Check if BMS is connected
+     *
+     * @param packNum BMS pack to check
+     * @return  
+     */
     bool isConnected(uint8_t packNum);
 
+    /**
+     * Check the amount of packs connected
+     * 
+     * @return The amount of packs connected 
+     */
     uint8_t numConnected();
 
+    /**
+     * Check if a fault has been detected
+     * 
+     * @param packNum BMS pack to check 
+     * @return True if a fault has been detected
+     */
     bool faultDetected(uint8_t packNum);
 
+    /**
+     * Check if a BMS pack is charging
+     * 
+     * @param packNum BMS pack to check 
+     * @return True if a BMS pack is charging
+     */
     bool isCharging(uint8_t packNum);
 
+    /**
+     * Check if a BMS pack is in a ready state
+     * @param packNum BMS Pack to check
+     * @return True if a BMS pack is ready
+     */
     bool isReady(uint8_t packNum);
 
+    /**
+     * Getter for the total voltage of a battery pack
+     * 
+     * @param packNum BMS pack to check 
+     * @return Battery Voltage of the selected battery pack
+     */
     int16_t getBatteryVoltage(uint8_t packNum);
 
+    /**
+     * Getter for the min cell voltage of a battery pack
+     * 
+     * @param packNum BMS pack to check 
+     * @return Min Cell Voltage of the selected battery pack
+     */
     int16_t getMinCellVoltage(uint8_t packNum);
 
+    /**
+     * Getter for the min cell voltage ID of a battery pack
+     * 
+     * @param packNum BMS pack to check 
+     * @return Min Cell Voltage ID of the selected battery pack
+     */
     uint8_t getMinCellVoltageID(uint8_t packNum);
 
+    /**
+     * Getter for the max cell voltage of a battery pack
+     * 
+     * @param packNum BMS pack to check 
+     * @return Max Cell Voltage of the selected battery pack
+     */
     int16_t getMaxCellVoltage(uint8_t packNum);
 
+    /**
+     * Getter for the max cell voltage ID of the battery pack
+     * 
+     * @param packNum BMS pack to check 
+     * @return Max Cell Voltage ID of the selected battery pack
+     */
     uint8_t getMaxCellVoltageID(uint8_t packNum);
 
+    /**
+     * Getter for the min temp of a battery pack
+     * 
+     * @param packNum BMS pack to check 
+     * @return Min temp of the selected battery pack
+     */
     int8_t getBatteryMinTemp(uint8_t packNum);
 
+    /**
+     * Getter for the max temp of a battery pack
+     * 
+     * @param packNum BMS pack to check 
+     * @return Max temp of the selected battery pack
+     */
     int8_t getBatteryMaxTemp(uint8_t packNum);
 
+    /**
+     * Getter for the status of a battery pack
+     *
+     * @param packNum BMS pack to check
+     * @return Status of selected battery pack
+     */
     BMSStatus getStatus(uint8_t packNum);
 
+    /**
+     * Debug printer for the BMSManager
+     */
     void printDebug();
 
+    /**
+     * Update whether the pack is still connected
+     */
     void update();
 
     /**
@@ -235,7 +324,7 @@ public:
      *
      * @return Pointer to the start of the object dictionary
      */
-    CO_OBJ_T* getObjectDictionary();
+    CO_OBJ_T *getObjectDictionary();
 
     /**
      * Get the number of elements in the object dictionary.
@@ -244,19 +333,22 @@ public:
      */
     uint8_t getNumElements();
 
-    static constexpr uint8_t MAX_BMS_PACKS = 2;
+    static constexpr uint8_t
+    MAX_BMS_PACKS = 2;
 private:
     /**
      * State for representing the BMS is in not in an OK state to charge/discharge
      */
-    static constexpr EVT::core::IO::GPIO::State BMS_OK =
-            EVT::core::IO::GPIO::State::HIGH;
+    static constexpr EVT::core::IO::GPIO::State
+    BMS_OK =
+    EVT::core::IO::GPIO::State::HIGH;
 
     /**
      * State for representing the BMS is in not in an OK state to charge/discharge
      */
-    static constexpr EVT::core::IO::GPIO::State BMS_NOT_OK =
-            EVT::core::IO::GPIO::State::LOW;
+    static constexpr EVT::core::IO::GPIO::State
+    BMS_NOT_OK =
+    EVT::core::IO::GPIO::State::LOW;
 
     IO::CAN *can = nullptr;
     IO::GPIO *bmsOK[MAX_BMS_PACKS];
@@ -293,83 +385,85 @@ private:
 
     uint8_t dummy = 0;
 
-    static constexpr uint8_t NODE_ID = 0x0F;
-    static constexpr uint16_t OBJECT_DICTIONARY_SIZE = 69;
+    static constexpr uint8_t
+    NODE_ID = 0x0F;
+    static constexpr uint16_t
+    OBJECT_DICTIONARY_SIZE = 69;
 
     CO_OBJ_T objectDictionaryBMS[OBJECT_DICTIONARY_SIZE + 1] = {
-        // Sync ID, defaults to 0x80
-        {
-            .Key = CO_KEY(0x1005, 0, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 0x80,
-        },
+            // Sync ID, defaults to 0x80
+            {
+                    .Key = CO_KEY(0x1005, 0, CO_UNSIGNED32 | CO_OBJ_D__R_),
+                    .Type = nullptr,
+                    .Data = (uintptr_t) 0x80,
+            },
 
-        //Heartbeat Producer
+            //Heartbeat Producer
 //        {
 //            .Key = CO_KEY(0x1017, 0, CO_UNSIGNED32 | CO_OBJ_D__R_),
 //            .Type = nullptr,
 //            .Data = (uintptr_t) 500,
 //        },
 
-        // Information about the hardware, hard coded sample values for now
-        // 1: Vendor ID
-        // 2: Product Code
-        // 3: Revision Number
-        // 4: Serial Number
-        {
-            .Key = CO_KEY(0x1018, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 0x10},
-        {
-            .Key = CO_KEY(0x1018, 2, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 0x11,
-        },
-        {
-            .Key = CO_KEY(0x1018, 3, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 0x12,
-        },
-        {
-            .Key = CO_KEY(0x1018, 4, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 0x13,
-        },
+            // Information about the hardware, hard coded sample values for now
+            // 1: Vendor ID
+            // 2: Product Code
+            // 3: Revision Number
+            // 4: Serial Number
+            {
+                    .Key = CO_KEY(0x1018, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
+                    .Type = nullptr,
+                    .Data = (uintptr_t) 0x10},
+            {
+                    .Key = CO_KEY(0x1018, 2, CO_UNSIGNED32 | CO_OBJ_D__R_),
+                    .Type = nullptr,
+                    .Data = (uintptr_t) 0x11,
+            },
+            {
+                    .Key = CO_KEY(0x1018, 3, CO_UNSIGNED32 | CO_OBJ_D__R_),
+                    .Type = nullptr,
+                    .Data = (uintptr_t) 0x12,
+            },
+            {
+                    .Key = CO_KEY(0x1018, 4, CO_UNSIGNED32 | CO_OBJ_D__R_),
+                    .Type = nullptr,
+                    .Data = (uintptr_t) 0x13,
+            },
 
-        // SDO CAN message IDS.
-        // 1: Client -> Server ID, default is 0x600 + NODE_ID
-        // 2: Server -> Client ID, default is 0x580 + NODE_ID
-        {
-            .Key = CO_KEY(0x1200, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 0x600 + NODE_ID,
-        },
-        {
-            .Key = CO_KEY(0x1200, 2, CO_UNSIGNED32 | CO_OBJ_D__R_),
-            .Type = nullptr,
-            .Data = (uintptr_t) 0x580 + NODE_ID,
-        },
+            // SDO CAN message IDS.
+            // 1: Client -> Server ID, default is 0x600 + NODE_ID
+            // 2: Server -> Client ID, default is 0x580 + NODE_ID
+            {
+                    .Key = CO_KEY(0x1200, 1, CO_UNSIGNED32 | CO_OBJ_D__R_),
+                    .Type = nullptr,
+                    .Data = (uintptr_t) 0x600 + NODE_ID,
+            },
+            {
+                    .Key = CO_KEY(0x1200, 2, CO_UNSIGNED32 | CO_OBJ_D__R_),
+                    .Type = nullptr,
+                    .Data = (uintptr_t) 0x580 + NODE_ID,
+            },
 
-        // RPDO0-0 config for Pack 1
-        GEN_PACK_RPDO_CONFIG(0, packs[0].node_ID)
+            // RPDO0-0 config for Pack 1
+            GEN_PACK_RPDO_CONFIG(0, packs[0].node_ID)
 
-        // RPDO0-1 config for Pack 2
-        GEN_PACK_RPDO_CONFIG(1, packs[1].node_ID)
+            // RPDO0-1 config for Pack 2
+            GEN_PACK_RPDO_CONFIG(1, packs[1].node_ID)
 
-        // RPDO0-0 map for Pack 1
-        GEN_PACK_RPDO_MAP(0)
+            // RPDO0-0 map for Pack 1
+            GEN_PACK_RPDO_MAP(0)
 
-        // RPDO0-1 map for Pack 2
-        GEN_PACK_RPDO_MAP(1)
+            // RPDO0-1 map for Pack 2
+            GEN_PACK_RPDO_MAP(1)
 
-        // Pack 1 Data
-        GEN_PACK_DATA(0,packs[0].data)
+            // Pack 1 Data
+            GEN_PACK_DATA(0, packs[0].data)
 
-        // Pack 2 Data
-        GEN_PACK_DATA(0,packs[1].data)
+            // Pack 2 Data
+            GEN_PACK_DATA(0, packs[1].data)
 
-        // End of dictionary marker
-        CO_OBJ_DIR_ENDMARK,
+            // End of dictionary marker
+            CO_OBJ_DIR_ENDMARK,
     };
 };
 
