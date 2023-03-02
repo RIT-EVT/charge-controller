@@ -324,6 +324,13 @@ public:
     CO_OBJ_T *getObjectDictionary();
 
     /**
+     * Get the size of the object dictionary
+     *
+     * @return Size of the object dictionary
+     */
+    uint8_t getObjectDictionarySize();
+
+    /**
      * Get the number of elements in the object dictionary.
      *
      * @return The number of elements in the object dictionary
