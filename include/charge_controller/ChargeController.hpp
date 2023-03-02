@@ -6,14 +6,6 @@
 #include <charge_controller/dev/BMSManager.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
 
-//#define MAX_VOLTAGE 12000
-//#define MAX_PACK_VOLTAGE    12000 //in millivolts
-//#define MIN_PACK_VOLTAGE    5000 //in millivolts
-//#define MAX_CELL_VOLTAGE    4200 //in millivolts
-//#define MIN_CELL_VOLTAGE    3000 //in millivolts
-//#define MAX_TEMPERATURE 90.0
-//#define MIN_TEMPERATURE 5.0
-
 //Temp
 #define MAX_PACK_VOLTAGE    12000 //in millivolts
 #define MIN_PACK_VOLTAGE    -1 //in millivolts
