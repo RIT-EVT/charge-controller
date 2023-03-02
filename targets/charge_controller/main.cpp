@@ -44,9 +44,6 @@ constexpr IO::Pin UART_TX_PIN = IO::Pin::PB_6;
 constexpr IO::Pin CAN_RX_PIN = IO::Pin::PA_11;
 constexpr IO::Pin CAN_TX_PIN = IO::Pin::PA_12;
 
-//
-//constexpr IO::Pin UART_RX_PIN = IO::Pin::UART_RX;
-//constexpr IO::Pin UART_TX_PIN = IO::Pin::UART_TX;
 constexpr IO::Pin LED_PIN = IO::Pin::PB_9;
 constexpr IO::Pin STANDBY_BUTTON_PIN = IO::Pin::PB_3;
 
@@ -69,39 +66,9 @@ void canInterrupt(IO::CANMessage &message, void *priv) {
     struct CANInterruptParams* params = (CANInterruptParams*) priv;
 
     EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage> *queue = params->queue;
-    BMSManager* bms = params->bmsManager;
     if (queue != nullptr)
         queue->append(message);
 }
-
-/////////////////////////////////////////////////////////////////////////////////
-//// CANopen specific Callbacks. Need to be defined in some location
-/////////////////////////////////////////////////////////////////////////////////
-//extern "C" void CONodeFatalError(void) {}
-//
-//extern "C" void COIfCanReceive(CO_IF_FRM *frm) {}
-//
-//extern "C" int16_t COLssStore(uint32_t baudrate, uint8_t nodeId) { return 0; }
-//
-//extern "C" int16_t COLssLoad(uint32_t *baudrate, uint8_t *nodeId) { return 0; }
-//
-//extern "C" void CONmtModeChange(CO_NMT *nmt, CO_MODE mode) {}
-//
-//extern "C" void CONmtHbConsEvent(CO_NMT *nmt, uint8_t nodeId) {}
-//
-//extern "C" void CONmtHbConsChange(CO_NMT *nmt, uint8_t nodeId, CO_MODE mode) {}
-//
-//extern "C" int16_t COParaDefault(CO_PARA *pg) { return 0; }
-//
-//extern "C" void COPdoTransmit(CO_IF_FRM *frm) {}
-//
-//extern "C" int16_t COPdoReceive(CO_IF_FRM *frm) { return 0; }
-//
-//extern "C" void COPdoSyncUpdate(CO_RPDO *pdo) {}
-//
-//extern "C" void COTmrLock(void) {}
-//
-//extern "C" void COTmrUnlock(void) {}
 
 int main() {
     IO::init();
@@ -153,44 +120,6 @@ int main() {
 
     log::LOGGER.setUART(&uart);
     log::LOGGER.setLogLevel(log::Logger::LogLevel::DEBUG);
-
-//    // Reserved memory for CANopen stack usage
-//    uint8_t sdoBuffer[1][CO_SDO_BUF_BYTE];
-//    CO_TMR_MEM appTmrMem[4];
-//
-//    CO_IF_DRV canStackDriver;
-//    CO_IF_CAN_DRV canDriver;
-//    CO_IF_TIMER_DRV timerDriver;
-//    CO_IF_NVM_DRV nvmDriver;
-//    IO::getCANopenCANDriver(&can, &canOpenQueue, &canDriver);
-//    IO::getCANopenTimerDriver(&timer, &timerDriver);
-//    IO::getCANopenNVMDriver(&nvmDriver);
-//
-//    canStackDriver.Can = &canDriver;
-//    canStackDriver.Timer = &timerDriver;
-//    canStackDriver.Nvm = &nvmDriver;
-//
-//    CO_NODE_SPEC canSpec = {
-//        .NodeId = 0x01,
-//        .Baudrate = IO::CAN::DEFAULT_BAUD,
-//        .Dict = testCanNode.getObjectDictionary(),
-//        .DictLen = testCanNode.getNumElements(),
-//        .EmcyCode = NULL,
-//        .TmrMem = appTmrMem,
-//        .TmrNum = 16,
-//        .TmrFreq = 100,
-//        .Drv = &canStackDriver,
-//        .SdoBuf = reinterpret_cast<uint8_t*>(&sdoBuffer[0]),
-//    };
-//
-//    CO_NODE canNode;
-//    time::wait(500);
-//
-//    can.connect();
-//
-//    CONodeInit(&canNode, &canSpec);
-//    CONodeStart(&canNode);
-//    CONmtSetMode(&canNode.Nmt, CO_OPERATIONAL);
 
     uart.printf("Running!\r\n");
 
