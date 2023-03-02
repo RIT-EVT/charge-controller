@@ -170,14 +170,10 @@
 namespace IO = EVT::core::IO;
 
 class BMSManager {
-    static constexpr uint32_t
-    TOTAL_VOLTAGE_ID = 0x2101;
-    static constexpr uint32_t
-    STATE_ID = 0x2102;
-    static constexpr uintptr_t
-    BMS_PACK_ONE_ID = 0x20;
-    static constexpr uintptr_t
-    BMS_PACK_TWO_ID = 0x23;
+    static constexpr uint32_t TOTAL_VOLTAGE_ID = 0x2101;
+    static constexpr uint32_t STATE_ID = 0x2102;
+    static constexpr uintptr_t BMS_PACK_ONE_ID = 0x20;
+    static constexpr uintptr_t BMS_PACK_TWO_ID = 0x23;
 public:
     enum class BMSStatus {
         /// When the BMS is powered on
@@ -240,6 +236,7 @@ public:
 
     /**
      * Check if a BMS pack is in a ready state
+     *
      * @param packNum BMS Pack to check
      * @return True if a BMS pack is ready
      */
@@ -337,22 +334,17 @@ public:
     MAX_BMS_PACKS = 2;
 private:
     /**
-     * State for representing the BMS is in not in an OK state to charge/discharge
+     * State for representing the BMS is not in an OK state to charge/discharge
      */
-    static constexpr EVT::core::IO::GPIO::State
-    BMS_OK =
-    EVT::core::IO::GPIO::State::HIGH;
+    static constexpr EVT::core::IO::GPIO::State BMS_OK = EVT::core::IO::GPIO::State::HIGH;
 
     /**
      * State for representing the BMS is in not in an OK state to charge/discharge
      */
-    static constexpr EVT::core::IO::GPIO::State
-    BMS_NOT_OK =
-    EVT::core::IO::GPIO::State::LOW;
+    static constexpr EVT::core::IO::GPIO::State BMS_NOT_OK = EVT::core::IO::GPIO::State::LOW;
 
     IO::CAN *can = nullptr;
     IO::GPIO *bmsOK[MAX_BMS_PACKS];
-//    IO::GPIO &bmsOK2;
 
 //    uint32_t millivolts = 0; //TODO Replace
 //    uint32_t temperature = 5; //TODO Replace
@@ -383,7 +375,6 @@ private:
 
     BMSData lastValues[MAX_BMS_PACKS];
 
-    uint8_t dummy = 0;
 
     static constexpr uint8_t
     NODE_ID = 0x0F;
@@ -398,12 +389,13 @@ private:
                     .Data = (uintptr_t) 0x80,
             },
 
+
             //Heartbeat Producer
-//        {
-//            .Key = CO_KEY(0x1017, 0, CO_UNSIGNED32 | CO_OBJ_D__R_),
-//            .Type = nullptr,
-//            .Data = (uintptr_t) 500,
-//        },
+        {
+            .Key = CO_KEY(0x1017, 0, CO_UNSIGNED32 | CO_OBJ_D__R_),
+            .Type = nullptr,
+            .Data = (uintptr_t) 500,
+        },
 
             // Information about the hardware, hard coded sample values for now
             // 1: Vendor ID
