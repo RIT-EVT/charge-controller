@@ -76,5 +76,3 @@ install_and_expose(${PROJECT_NAME})
 # Build Target Code
 ###############################################################################
 add_subdirectory(targets)
-
-add_compile_definitions(CANOPEN_QUEUE_SIZE=50)
