@@ -3,11 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-<<<<<<< HEAD
 Welcome to charge-controller's documentation!
-=======
-Welcome to BOARD_NAME's documentation!
->>>>>>> template/main
 ======================================
 
 .. toctree::
