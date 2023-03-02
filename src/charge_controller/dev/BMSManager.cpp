@@ -1,10 +1,8 @@
-
 #include <charge_controller/dev/BMSManager.hpp>
 
 namespace log = EVT::core::log;
 
-BMSManager::BMSManager(IO::CAN &can, IO::GPIO *bmsOK[]) {
-    this->can = &can;
+BMSManager::BMSManager(IO::CAN &can, IO::GPIO *bmsOK[]) : can(&can) {
     for (int i = 0; i < MAX_BMS_PACKS; i++) {
         this->bmsOK[i] = bmsOK[i];
     }
@@ -72,12 +70,12 @@ BMSManager::BMSStatus BMSManager::getStatus(uint8_t packNum) {
     return packs[packNum].data.status;
 }
 
-uint8_t BMSManager::getNumElements() {
+uint8_t BMSManager::getObjectDictionarySize() {
     return OBJECT_DICTIONARY_SIZE;
 }
 
 CO_OBJ_T *BMSManager::getObjectDictionary() {
-    return &objectDictionaryBMS[0];
+    return objectDictionaryBMS;
 }
 
 
