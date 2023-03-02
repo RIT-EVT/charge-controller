@@ -1,6 +1,8 @@
 
 #include <charge_controller/dev/BMSManager.hpp>
 
+namespace log = EVT::core::log;
+
 BMSManager::BMSManager(IO::CAN &can, IO::GPIO *bmsOK[]) {
     this->can = &can;
     for (int i = 0; i < MAX_BMS_PACKS; i++) {
@@ -82,28 +84,28 @@ CO_OBJ_T *BMSManager::getObjectDictionary() {
 void BMSManager::printDebug() {
     for (int i = 0; i < MAX_BMS_PACKS; i++) {
         if (packs[i].data.batteryVoltage != lastValues[i].batteryVoltage) {
-            LOG.log(Logger::DEBUG, "Pack%d->batteryVoltage=%d", i, packs[i].data.batteryVoltage);
+            log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack%d->batteryVoltage=%d", i, packs[i].data.batteryVoltage);
         }
         if (packs[i].data.minCellVoltage != lastValues[i].minCellVoltage) {
-            LOG.log(Logger::DEBUG, "Pack%d->minCellVoltage=%d", i, packs[i].data.minCellVoltage);
+            log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack%d->minCellVoltage=%d", i, packs[i].data.minCellVoltage);
         }
         if (packs[i].data.minCellVoltageID != lastValues[i].minCellVoltageID) {
-            LOG.log(Logger::DEBUG, "Pack%d->minCellVoltageID=%d", i, packs[i].data.minCellVoltageID);
+            log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack%d->minCellVoltageID=%d", i, packs[i].data.minCellVoltageID);
         }
         if (packs[i].data.maxCellVoltage != lastValues[i].maxCellVoltage) {
-            LOG.log(Logger::DEBUG, "Pack%d->maxCellVoltage=%d", i, packs[i].data.maxCellVoltage);
+            log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack%d->maxCellVoltage=%d", i, packs[i].data.maxCellVoltage);
         }
         if (packs[i].data.maxCellVoltageID != lastValues[i].maxCellVoltageID) {
-            LOG.log(Logger::DEBUG, "Pack%d->maxCellVoltageID=%d", i, packs[i].data.maxCellVoltageID);
+            log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack%d->maxCellVoltageID=%d", i, packs[i].data.maxCellVoltageID);
         }
         if (packs[i].data.batteryPackMinTemp != lastValues[i].batteryPackMinTemp) {
-            LOG.log(Logger::DEBUG, "Pack%d->batteryPackMinTemp=%d", i, packs[i].data.batteryPackMinTemp);
+            log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack%d->batteryPackMinTemp=%d", i, packs[i].data.batteryPackMinTemp);
         }
         if (packs[i].data.batteryPackMaxTemp != lastValues[i].batteryPackMaxTemp) {
-            LOG.log(Logger::DEBUG, "Pack%d->batteryPackMaxTemp=%d", i, packs[i].data.batteryPackMaxTemp);
+            log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack%d->batteryPackMaxTemp=%d", i, packs[i].data.batteryPackMaxTemp);
         }
         if (packs[i].data.status != lastValues[i].status) {
-            LOG.log(Logger::DEBUG, "Pack%d->status=%d", i, packs[i].data.status);
+            log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack%d->status=%d", i, packs[i].data.status);
         }
         lastValues[i] = packs[i].data;
     }

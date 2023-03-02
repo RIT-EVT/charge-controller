@@ -54,7 +54,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         src/charge_controller/dev/BMSManager.cpp
         src/charge_controller/dev/Debounce.cpp
         src/charge_controller/dev/LCDDisplay.cpp
-        src/charge_controller/Logger.cpp
         )
 
 ###############################################################################

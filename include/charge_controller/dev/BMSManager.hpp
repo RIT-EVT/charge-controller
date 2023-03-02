@@ -6,7 +6,7 @@
 #include <EVT/io/GPIO.hpp>
 #include <Canopen/co_obj.h>
 
-#include <charge_controller/Logger.h>
+#include <EVT/utils/log.hpp>
 #include <Canopen/co_pdo.h>
 
 //RPDO-NUM settings

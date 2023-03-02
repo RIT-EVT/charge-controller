@@ -3,8 +3,8 @@
 #include <EVT/io/pin.hpp>
 #include <EVT/utils/time.hpp>
 #include <EVT/utils/types/FixedQueue.hpp>
-#include <EVT/io/CANopen.hpp>
 #include <EVT/dev/platform/f3xx/f302x8/Timerf302x8.hpp>
+#include <EVT/utils/log.hpp>
 
 #include <Canopen/co_core.h>
 
@@ -12,12 +12,12 @@
 #include <charge_controller/dev/BMSManager.hpp>
 #include <charge_controller/dev/Debounce.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
-#include <charge_controller/Logger.h>
 
 
 namespace IO = EVT::core::IO;
 namespace DEV = EVT::core::DEV;
 namespace time = EVT::core::time;
+namespace log = EVT::core::log;
 
 #define HEARTBEAT_INTERVAL     1000
 
@@ -151,8 +151,8 @@ int main() {
     can.addIRQHandler(canInterrupt, reinterpret_cast<void*>(&canParams));
     DEV::Timerf302x8 timer(TIM2, 100);
 
-    LOG.setUART(&uart);
-    LOG.setLogLevel(Logger::LogLevel::DEBUG);
+    log::LOGGER.setUART(&uart);
+    log::LOGGER.setLogLevel(log::Logger::LogLevel::DEBUG);
 
 //    // Reserved memory for CANopen stack usage
 //    uint8_t sdoBuffer[1][CO_SDO_BUF_BYTE];
@@ -210,7 +210,7 @@ int main() {
         }
 
         if(bms.numConnected() != oldCount){
-            LOG.log(Logger::DEBUG,"%d batteries connected", bms.numConnected());
+            log::LOGGER.log(log::Logger::LogLevel::DEBUG,"%d batteries connected", bms.numConnected());
             oldCount = bms.numConnected();
         }
 

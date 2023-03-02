@@ -1,6 +1,7 @@
 #include <charge_controller/ChargeController.hpp>
-#include <charge_controller/Logger.h>
+#include <EVT/utils/log.hpp>
 
+namespace log = EVT::core::log;
 ChargeController::ChargeController(BMSManager &bms, LCDDisplay &display,
                                    IO::GPIO& relay)
     : bms(bms), display(display), relay(relay) {}
@@ -36,23 +37,23 @@ uint8_t ChargeController::checkBMS() {
     for (int i = 0; i < bms.MAX_BMS_PACKS; i++) {
         if (!CHECK_IN_RANGE(bms.getBatteryVoltage(i), MAX_PACK_VOLTAGE, MIN_PACK_VOLTAGE)){
             status |= BAD_PACK_VOLTAGE;
-            //LOG.log(Logger::DEBUG, "Pack %d, Bad Voltage: %dV", i, bms.getBatteryVoltage(i));
+            //log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack %d, Bad Voltage: %dV", i, bms.getBatteryVoltage(i));
         }
         if(!CHECK_IN_RANGE(bms.getMaxCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)){
             status |= BAD_MAX_CELL_VOLTAGE;
-            //LOG.log(Logger::DEBUG, "Pack %d, Bad Max Cell(%d) Voltage: %dV", i, bms.getMaxCellVoltageID(i), bms.getMaxCellVoltage(i));
+            //log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack %d, Bad Max Cell(%d) Voltage: %dV", i, bms.getMaxCellVoltageID(i), bms.getMaxCellVoltage(i));
         }
         if(!CHECK_IN_RANGE(bms.getMinCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)){
             status |= BAD_MIN_CELL_VOLTAGE;
-            //LOG.log(Logger::DEBUG, "Pack %d, Bad Min Cell(%d) Voltage: %dV", i, bms.getMinCellVoltageID(i), bms.getMinCellVoltage(i));
+            //log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack %d, Bad Min Cell(%d) Voltage: %dV", i, bms.getMinCellVoltageID(i), bms.getMinCellVoltage(i));
         }
         if(!CHECK_IN_RANGE(bms.getBatteryMaxTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)){
             status |= BAD_MAX_TEMP;
-            //LOG.log(Logger::DEBUG, "Pack %d, Bad Max Temp: %d", i, bms.getBatteryMaxTemp(i));
+            //log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack %d, Bad Max Temp: %d", i, bms.getBatteryMaxTemp(i));
         }
         if(!CHECK_IN_RANGE(bms.getBatteryMinTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)){
             status |= BAD_MIN_TEMP;
-            //LOG.log(Logger::DEBUG, "Pack %d, Bad Min Temp: %d", i, bms.getBatteryMinTemp(i));
+            //log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack %d, Bad Min Temp: %d", i, bms.getBatteryMinTemp(i));
         }
         if(bms.faultDetected(i)){
             status |= BAD_FAULT_STATE;
@@ -67,7 +68,7 @@ uint8_t ChargeController::checkBMS() {
  */
 void ChargeController::noBatteryState() {
     if (changedState) {
-        LOG.log(Logger::DEBUG, "Changed state->No Battery");
+        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Changed state->No Battery");
         // Display no battery connected message on LCD
         relay.writePin(RELAY_OFF);
         changedState = false;
@@ -88,8 +89,8 @@ void ChargeController::noBatteryState() {
  */
 void ChargeController::connectedState() {
     if (changedState) {
-        LOG.log(Logger::DEBUG, "Changed state->Connected State");
-        LOG.log(Logger::DEBUG, "%d pack(s) connected", bms.numConnected());
+        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Changed state->Connected State");
+        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "%d pack(s) connected", bms.numConnected());
         // display connected LCD message
         // further init battery communication?
         changedState = false;
@@ -110,7 +111,7 @@ void ChargeController::connectedState() {
  */
 void ChargeController::chargingState() {
     if (changedState) {
-        LOG.log(Logger::DEBUG, "Changed state->Charging State");
+        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Changed state->Charging State");
         relay.writePin(RELAY_ON);
         changedState = false;
     }
@@ -129,7 +130,7 @@ void ChargeController::chargingState() {
  */
 void ChargeController::standbyState() {
     if (changedState) {
-        LOG.log(Logger::DEBUG, "Changed state->Standby State, waiting for button");
+        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Changed state->Standby State, waiting for button");
         relay.writePin(RELAY_OFF);
         changedState = false;
     }
@@ -149,7 +150,7 @@ void ChargeController::standbyState() {
  */
 void ChargeController::faultState() {
     if (changedState) {
-        LOG.log(Logger::DEBUG, "Changed state->Fault State");
+        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Changed state->Fault State");
         relay.writePin(RELAY_OFF);
         changedState = false;
     }
@@ -172,12 +173,12 @@ void ChargeController::init() { relay.writePin(RELAY_OFF); }
 void ChargeController::startCharging() {
     switch (state) {
         case ControllerStates::STANDBY:
-            LOG.log(Logger::DEBUG, "Start button pressed, starting charge");
+            log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Start button pressed, starting charge");
             break;
         case ControllerStates::CHARGING:
             break;
         default:
-            LOG.log(Logger::DEBUG, "Start button pressed, Bad State");
+            log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Start button pressed, Bad State");
             break;
     }
 
@@ -191,7 +192,7 @@ void ChargeController::startCharging() {
  * stop charging when the stop button is pressed
  */
 void ChargeController::stopCharging() {
-    LOG.log(Logger::DEBUG, "Stop button pressed, stopping charge");
+    log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Stop button pressed, stopping charge");
     if (state == ControllerStates::CHARGING) {
         state = ControllerStates::STANDBY;
         changedState = true;

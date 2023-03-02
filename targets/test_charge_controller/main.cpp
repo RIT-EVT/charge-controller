@@ -5,6 +5,7 @@
 #include <EVT/utils/types/FixedQueue.hpp>
 #include <EVT/io/CANopen.hpp>
 #include <EVT/dev/platform/f3xx/f302x8/Timerf302x8.hpp>
+#include <EVT/utils/log.hpp>
 
 #include <Canopen/co_core.h>
 
@@ -12,11 +13,11 @@
 #include <charge_controller/dev/BMSManager.hpp>
 #include <charge_controller/dev/Debounce.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
-#include <charge_controller/Logger.h>
 
 namespace IO = EVT::core::IO;
 namespace DEV = EVT::core::DEV;
 namespace time = EVT::core::time;
+namespace log = EVT::core::log;
 
 #define HEARTBEAT_INTERVAL     500
 
@@ -169,8 +170,8 @@ int main() {
     }
     //uart.printf("Size of CanMessage: %d\r\n", sizeof(IO::CANMessage));
     //Setup Logging
-    LOG.setUART(&uart);
-    LOG.setLogLevel(Logger::LogLevel::DEBUG);
+    log::LOGGER.setUART(&uart);
+    log::LOGGER.setLogLevel(log::Logger::LogLevel::DEBUG);
     ///////////////////////////////////////////////////////////////////////////
     // Setup CAN configuration, this handles making drivers, applying settings.
     // And generally creating the CANopen stack node which is the interface
@@ -216,12 +217,12 @@ int main() {
     //print any CANopen errors
     uart.printf("Error: %d\r\n", CONodeGetErr(&canNode));
 
-    LOG.log(Logger::INFO, "Initialized");
+    log::LOGGER.log(log::Logger::LogLevel::INFO, "Initialized");
 
     display.init();
     chargeController.init();
 
-    LOG.log(Logger::INFO, "Started");
+    log::LOGGER.log(log::Logger::LogLevel::INFO, "Started");
     uint32_t lastHeartBeat = time::millis();
     while (true) {
         chargeController.loop();
