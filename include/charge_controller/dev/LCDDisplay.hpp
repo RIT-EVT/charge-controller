@@ -10,18 +10,19 @@ namespace DEV = EVT::core::DEV;
 
 class LCDDisplay {
 public:
+    /**
+     * Initializer for the LCD Display class.
+     *
+     * @param[in] regSelect Register select pin
+     * @param[in] reset Reset pin
+     * @param[in] spi SPI class for communication
+     */
     LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi);
 
     /**
      * Initializes the LCD driver and displays the splash image.
      */
     void init();
-    /**
-     * Sets the status string to show on the display.
-     * @param str the status to display
-     */
-    void setStatus(const char *str);
-
     /**
      * Display the EVT logo as a splash screen.
      */
@@ -34,17 +35,32 @@ public:
      * The display loop that updates the section headers.
      */
     void display();
+
+    /**
+     * Set the charge controller status display
+     */
+     void setChargeControllerStatus(const char *str);
 private:
+    /**
+     * The internal LCD driver.
+     */
     DEV::LCD lcd;
 
+    /** The current status of the charge controller */
+    const char* chargeControllerStatus = "NULL";
+    /** The current status for battery  */
+    const char* batteryOneStatus = "NULL";
     /** The current charge controller status */
-    const char* status = "NULL";
+    const char* batteryTwoStatus = "NULL";
     /** The voltage that is being supplied */
     const uint8_t chargeControllerVoltage = 0;
     /** The current that is being supplied */
     const uint8_t chargeControllerCurrent = 0;
-    /** The current battery voltage */
-    const uint8_t batteryVoltage = 0;
+    /** The current battery one voltage */
+    const uint8_t batteryOneVoltage = 0;
+    /** The current battery two voltage */
+    const uint8_t batteryTwoVoltage = 0;
+
     /** The minimum temperature for battery one */
     const uint8_t batteryOneMinTemp = 0;
     /** The maximum temperature for battery one */
@@ -59,16 +75,11 @@ private:
     /**
      * The 9 section headers to be displayed.
      */
-    static constexpr char* SECTION_TITLES[9] {
-            "Status",
-            "C Voltage",
-            "C Current",
-            "B Voltage",
-            "B1 Min T",
-            "B1 Max T",
-            "Charge %",
-            "B2 Min T",
-            "B2 Max T",
+    static constexpr char* SECTION_TITLES[12] {
+            "B1 Status", "CC Status", "B2 Status",
+            "B1 Voltage", "Charge %", "B2 Voltage",
+            "B1 Min T", "C Voltage", "B2 Min T",
+            "B1 Max T", "C Current", "B2 Max T",
     };
 
     /**

@@ -7,23 +7,23 @@ ChargeController::ChargeController(BMSManager bms, LCDDisplay display,
 void ChargeController::loop() {
     switch (state) {
         case ControllerStates::NO_BATTERY:
-            lcdDisplay.setStatus("No Battery");
+            lcdDisplay.setChargeControllerStatus("No Battery");
             noBatteryState();
             break;
         case ControllerStates::CONNECTED:
-            lcdDisplay.setStatus("Connected");
+            lcdDisplay.setChargeControllerStatus("Connected");
             connectedState();
             break;
         case ControllerStates::CHARGING:
-            lcdDisplay.setStatus("Charging");
+            lcdDisplay.setChargeControllerStatus("Charging");
             chargingState();
             break;
         case ControllerStates::STANDBY:
-            lcdDisplay.setStatus("Standby");
+            lcdDisplay.setChargeControllerStatus("Standby");
             standbyState();
             break;
         case ControllerStates::FAULT:
-            lcdDisplay.setStatus("Fault");
+            lcdDisplay.setChargeControllerStatus("Fault");
             faultState();
             break;
     }
