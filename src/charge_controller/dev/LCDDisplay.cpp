@@ -34,14 +34,14 @@ void LCDDisplay::display() {
     lcd.setTextForSection(2, batteryTwoStatus);
 
     char batteryOneVolt[32];
-    std::sprintf(batteryOneVolt, "%d v", batteryOneVoltage);
+    std::sprintf(batteryOneVolt, "%d V", batteryOneVoltage);
     lcd.setTextForSection(3, batteryOneVolt);
     char percentage[32];
     std::sprintf(percentage, "%d.%02d", chargePercentage / 100, chargePercentage % 100);
     lcd.setTextForSection(4, percentage);
 
     char batteryTwoVolt[32];
-    std::sprintf(batteryTwoVolt, "%d v", batteryTwoVoltage);
+    std::sprintf(batteryTwoVolt, "%d V", batteryTwoVoltage);
     lcd.setTextForSection(5, batteryTwoVolt);
 
     char bat1MinTemp[32];
@@ -49,7 +49,7 @@ void LCDDisplay::display() {
     lcd.setTextForSection(6, bat1MinTemp);
 
     char chargerVoltage[32];
-    std::sprintf(chargerVoltage, "%d v", chargeControllerVoltage);
+    std::sprintf(chargerVoltage, "%d V", chargeControllerVoltage);
     lcd.setTextForSection(7, chargerVoltage);
 
     char bat2MinTemp[32];

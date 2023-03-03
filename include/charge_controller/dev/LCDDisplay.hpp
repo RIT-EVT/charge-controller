@@ -23,14 +23,17 @@ public:
      * Initializes the LCD driver and displays the splash image.
      */
     void init();
+
     /**
      * Display the EVT logo as a splash screen.
      */
     void showSplashScreen();
+
     /**
      * Displays header sections once initialization is complete.
      */
     void showSections();
+
     /**
      * The display loop that updates the section headers.
      */
