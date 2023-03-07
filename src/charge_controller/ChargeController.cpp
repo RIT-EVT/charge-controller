@@ -2,7 +2,7 @@
 #include <charge_controller/ChargeController.hpp>
 
 namespace log = EVT::core::log;
-ChargeController::ChargeController(BMSManager& bms, LCDDisplay& display,
+ChargeController::ChargeController(BMSManager bms, LCDDisplay& display,
                                    IO::GPIO& relay)
     : bms(bms), display(display), relay(relay) {}
 

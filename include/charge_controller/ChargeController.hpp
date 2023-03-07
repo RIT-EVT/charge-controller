@@ -32,7 +32,7 @@ public:
         STANDBY,
         FAULT
     };
-    ChargeController(BMSManager& bms, LCDDisplay& display, IO::GPIO& relay);
+    ChargeController(BMSManager bms, LCDDisplay& display, IO::GPIO& relay);
     void init();
     void loop();
     uint8_t checkBMS();
@@ -49,7 +49,7 @@ private:
     void standbyState();
     void faultState();
 
-    BMSManager& bms;
+    BMSManager bms;
     LCDDisplay& display;
     IO::GPIO& relay;
 
