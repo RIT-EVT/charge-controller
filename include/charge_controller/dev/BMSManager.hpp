@@ -210,8 +210,9 @@ public:
 
     /**
      * Constructor for BMSManager
-     * @param can
-     * @param bmsOK
+     *
+     * @param can - CAN object for interfacing with CAN
+     * @param bmsOK - Array of pointers to BMS status GPIO
      */
     BMSManager(IO::CAN& can, IO::GPIO* bmsOK[]);
 
