@@ -1,10 +1,12 @@
-#include <EVT/dev/platform/f3xx/f302x8/Timerf302x8.hpp>
+// clang-format off
 #include <EVT/io/CAN.hpp>
 #include <EVT/io/manager.hpp>
 #include <EVT/io/pin.hpp>
 #include <EVT/utils/log.hpp>
 #include <EVT/utils/time.hpp>
 #include <EVT/utils/types/FixedQueue.hpp>
+#include <EVT/dev/platform/f3xx/f302x8/Timerf302x8.hpp> // TODO: clang will put this at the top causing compilation problem
+// clang-format on
 
 #include <Canopen/co_core.h>
 
