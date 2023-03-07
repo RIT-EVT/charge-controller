@@ -2,7 +2,7 @@
 
 namespace log = EVT::core::log;
 
-BMSManager::BMSManager(IO::CAN &can, IO::GPIO *bmsOK[]) : can(&can) {
+BMSManager::BMSManager(IO::CAN& can, IO::GPIO* bmsOK[]) : can(&can) {
     for (int i = 0; i < MAX_BMS_PACKS; i++) {
         this->bmsOK[i] = bmsOK[i];
     }
@@ -23,9 +23,7 @@ bool BMSManager::isConnected(uint8_t packNum) {
 }
 
 bool BMSManager::faultDetected(uint8_t packNum) {
-    return bmsOK[packNum]->readPin() == BMS_NOT_OK ||
-           packs[packNum].data.status == BMSStatus::UNSAFE_CONDITIONS_ERROR ||
-           packs[packNum].data.status == BMSStatus::INITIALIZATION_ERROR;
+    return bmsOK[packNum]->readPin() == BMS_NOT_OK || packs[packNum].data.status == BMSStatus::UNSAFE_CONDITIONS_ERROR || packs[packNum].data.status == BMSStatus::INITIALIZATION_ERROR;
 }
 
 bool BMSManager::isCharging(uint8_t packNum) {
@@ -33,9 +31,7 @@ bool BMSManager::isCharging(uint8_t packNum) {
 }
 
 bool BMSManager::isReady(uint8_t packNum) {
-    return packs[packNum].data.status == BMSStatus::SYSTEM_READY ||
-           packs[packNum].data.status == BMSStatus::DEEP_SLEEP ||
-           packs[packNum].data.status == BMSStatus::CHARGING;
+    return packs[packNum].data.status == BMSStatus::SYSTEM_READY || packs[packNum].data.status == BMSStatus::DEEP_SLEEP || packs[packNum].data.status == BMSStatus::CHARGING;
 }
 
 int16_t BMSManager::getBatteryVoltage(uint8_t packNum) {
@@ -74,10 +70,9 @@ uint8_t BMSManager::getObjectDictionarySize() {
     return OBJECT_DICTIONARY_SIZE;
 }
 
-CO_OBJ_T *BMSManager::getObjectDictionary() {
+CO_OBJ_T* BMSManager::getObjectDictionary() {
     return objectDictionaryBMS;
 }
-
 
 void BMSManager::printDebug() {
     for (int i = 0; i < MAX_BMS_PACKS; i++) {

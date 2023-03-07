@@ -1,10 +1,10 @@
+#include <EVT/dev/platform/f3xx/f302x8/Timerf302x8.hpp>
 #include <EVT/io/CAN.hpp>
 #include <EVT/io/manager.hpp>
 #include <EVT/io/pin.hpp>
+#include <EVT/utils/log.hpp>
 #include <EVT/utils/time.hpp>
 #include <EVT/utils/types/FixedQueue.hpp>
-#include <EVT/dev/platform/f3xx/f302x8/Timerf302x8.hpp>
-#include <EVT/utils/log.hpp>
 
 #include <Canopen/co_core.h>
 
@@ -13,13 +13,12 @@
 #include <charge_controller/dev/Debounce.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
 
-
 namespace IO = EVT::core::IO;
 namespace DEV = EVT::core::DEV;
 namespace time = EVT::core::time;
 namespace log = EVT::core::log;
 
-#define HEARTBEAT_INTERVAL     1000
+#define HEARTBEAT_INTERVAL 1000
 
 // IO pins
 constexpr IO::Pin RELAY_CTL_PIN = IO::Pin::PB_0;
@@ -62,10 +61,10 @@ struct CANInterruptParams {
  *
  * @param message[in] The passed in CAN message that was read.
  */
-void canInterrupt(IO::CANMessage &message, void *priv) {
+void canInterrupt(IO::CANMessage& message, void* priv) {
     struct CANInterruptParams* params = (CANInterruptParams*) priv;
 
-    EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage> *queue = params->queue;
+    EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage>* queue = params->queue;
     if (queue != nullptr)
         queue->append(message);
 }
@@ -78,33 +77,32 @@ int main() {
     EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage> canOpenQueue;
 
     // Pin initialization
-    IO::UART &uart = IO::getUART<UART_TX_PIN, UART_RX_PIN>(9600);
-    IO::CAN &can = IO::getCAN<CAN_TX_PIN, CAN_RX_PIN>();
+    IO::UART& uart = IO::getUART<UART_TX_PIN, UART_RX_PIN>(9600);
+    IO::CAN& can = IO::getCAN<CAN_TX_PIN, CAN_RX_PIN>();
 
     // GPIO pins
-    IO::GPIO &relayControl =
-            IO::getGPIO<RELAY_CTL_PIN>(IO::GPIO::Direction::OUTPUT);
-    IO::GPIO &statusLED = IO::getGPIO<LED_PIN>(IO::GPIO::Direction::OUTPUT);
-//    IO::GPIO &batt1OK = IO::getGPIO<BATTERY_1_OK>(IO::GPIO::Direction::INPUT);
-//    IO::GPIO &batt2OK = IO::getGPIO<BATTERY_2_OK>(IO::GPIO::Direction::INPUT);
-    IO::GPIO *bmsOK[] = {
-            &IO::getGPIO<BATTERY_1_OK>(IO::GPIO::Direction::INPUT),
-            &IO::getGPIO<BATTERY_2_OK>(IO::GPIO::Direction::INPUT)
-    };
+    IO::GPIO& relayControl =
+        IO::getGPIO<RELAY_CTL_PIN>(IO::GPIO::Direction::OUTPUT);
+    IO::GPIO& statusLED = IO::getGPIO<LED_PIN>(IO::GPIO::Direction::OUTPUT);
+    //    IO::GPIO &batt1OK = IO::getGPIO<BATTERY_1_OK>(IO::GPIO::Direction::INPUT);
+    //    IO::GPIO &batt2OK = IO::getGPIO<BATTERY_2_OK>(IO::GPIO::Direction::INPUT);
+    IO::GPIO* bmsOK[] = {
+        &IO::getGPIO<BATTERY_1_OK>(IO::GPIO::Direction::INPUT),
+        &IO::getGPIO<BATTERY_2_OK>(IO::GPIO::Direction::INPUT)};
 
     // Buttons
     Debounce standbyButton(
-            IO::getGPIO<STANDBY_BUTTON_PIN>(IO::GPIO::Direction::INPUT));
+        IO::getGPIO<STANDBY_BUTTON_PIN>(IO::GPIO::Direction::INPUT));
     Debounce startButton(
-            IO::getGPIO<START_BUTTON_PIN>(IO::GPIO::Direction::INPUT));
+        IO::getGPIO<START_BUTTON_PIN>(IO::GPIO::Direction::INPUT));
     // LCD
-    IO::GPIO &LCDRegisterSEL =
-            IO::getGPIO<LCD_A0_PIN>(IO::GPIO::Direction::OUTPUT);
-    IO::GPIO &LCDReset = IO::getGPIO<LCD_RST_PIN>(IO::GPIO::Direction::OUTPUT);
-    IO::GPIO *devices[] = {&IO::getGPIO<SPI_CS_PIN>(IO::GPIO::Direction::OUTPUT)};
+    IO::GPIO& LCDRegisterSEL =
+        IO::getGPIO<LCD_A0_PIN>(IO::GPIO::Direction::OUTPUT);
+    IO::GPIO& LCDReset = IO::getGPIO<LCD_RST_PIN>(IO::GPIO::Direction::OUTPUT);
+    IO::GPIO* devices[] = {&IO::getGPIO<SPI_CS_PIN>(IO::GPIO::Direction::OUTPUT)};
     devices[0]->writePin(IO::GPIO::State::HIGH);
 
-    IO::SPI &spi = IO::getSPI<SPI_CLK_PIN, SPI_MOSI_PIN>(devices, 1);
+    IO::SPI& spi = IO::getSPI<SPI_CLK_PIN, SPI_MOSI_PIN>(devices, 1);
 
     // charge controller module instantiation
     BMSManager bms(can, bmsOK);
@@ -112,8 +110,8 @@ int main() {
     ChargeController chargeController(bms, display, relayControl);
 
     struct CANInterruptParams canParams = {
-            .queue = &canOpenQueue,
-            .bmsManager = &bms,
+        .queue = &canOpenQueue,
+        .bmsManager = &bms,
     };
     can.addIRQHandler(canInterrupt, reinterpret_cast<void*>(&canParams));
     DEV::Timerf302x8 timer(TIM2, 100);
@@ -138,19 +136,19 @@ int main() {
             chargeController.startCharging();
         }
 
-        if(bms.numConnected() != oldCount){
-            log::LOGGER.log(log::Logger::LogLevel::DEBUG,"%d batteries connected", bms.numConnected());
+        if (bms.numConnected() != oldCount) {
+            log::LOGGER.log(log::Logger::LogLevel::DEBUG, "%d batteries connected", bms.numConnected());
             oldCount = bms.numConnected();
         }
 
-        if(time::millis()-lastHeartBeat > HEARTBEAT_INTERVAL) {
+        if (time::millis() - lastHeartBeat > HEARTBEAT_INTERVAL) {
             switch (statusLED.readPin()) {
-                case IO::GPIO::State::LOW:
-                    statusLED.writePin(IO::GPIO::State::HIGH);
-                    break;
-                case IO::GPIO::State::HIGH:
-                    statusLED.writePin(IO::GPIO::State::LOW);
-                    break;
+            case IO::GPIO::State::LOW:
+                statusLED.writePin(IO::GPIO::State::HIGH);
+                break;
+            case IO::GPIO::State::HIGH:
+                statusLED.writePin(IO::GPIO::State::LOW);
+                break;
             }
             lastHeartBeat = time::millis();
         }
