@@ -37,23 +37,18 @@ uint8_t ChargeController::checkBMS() {
     for (int i = 0; i < bms.MAX_BMS_PACKS; i++) {
         if (!CHECK_IN_RANGE(bms.getBatteryVoltage(i), MAX_PACK_VOLTAGE, MIN_PACK_VOLTAGE)) {
             status |= BAD_PACK_VOLTAGE;
-            //log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack %d, Bad Voltage: %dV", i, bms.getBatteryVoltage(i));
         }
         if (!CHECK_IN_RANGE(bms.getMaxCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)) {
             status |= BAD_MAX_CELL_VOLTAGE;
-            //log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack %d, Bad Max Cell(%d) Voltage: %dV", i, bms.getMaxCellVoltageID(i), bms.getMaxCellVoltage(i));
         }
         if (!CHECK_IN_RANGE(bms.getMinCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)) {
             status |= BAD_MIN_CELL_VOLTAGE;
-            //log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack %d, Bad Min Cell(%d) Voltage: %dV", i, bms.getMinCellVoltageID(i), bms.getMinCellVoltage(i));
         }
         if (!CHECK_IN_RANGE(bms.getBatteryMaxTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)) {
             status |= BAD_MAX_TEMP;
-            //log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack %d, Bad Max Temp: %d", i, bms.getBatteryMaxTemp(i));
         }
         if (!CHECK_IN_RANGE(bms.getBatteryMinTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)) {
             status |= BAD_MIN_TEMP;
-            //log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack %d, Bad Min Temp: %d", i, bms.getBatteryMinTemp(i));
         }
         if (bms.faultDetected(i)) {
             status |= BAD_FAULT_STATE;
