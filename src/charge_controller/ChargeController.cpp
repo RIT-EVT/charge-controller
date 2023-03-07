@@ -72,7 +72,6 @@ void ChargeController::noBatteryState() {
     }
 }
 
-
 void ChargeController::connectedState() {
     if (changedState) {
         log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Changed state->Connected State");
@@ -138,7 +137,6 @@ void ChargeController::faultState() {
 }
 
 void ChargeController::init() { relay.writePin(RELAY_OFF); }
-
 
 void ChargeController::startCharging() {
     switch (state) {
