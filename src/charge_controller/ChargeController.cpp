@@ -26,14 +26,9 @@ void ChargeController::loop() {
     }
 }
 
-/**
- * checks the status of the bms and that all measurements are in spec
- * @return true when everything ok, false if there is a problem
- */
 uint8_t ChargeController::checkBMS() {
     bool status = 0;
-    //    int temperature = bms.getBattTemperature();
-    //    int voltage = bms.getBattVoltage();
+
     for (int i = 0; i < bms.MAX_BMS_PACKS; i++) {
         if (!CHECK_IN_RANGE(bms.getBatteryVoltage(i), MAX_PACK_VOLTAGE, MIN_PACK_VOLTAGE)) {
             status |= BAD_PACK_VOLTAGE;
@@ -77,11 +72,7 @@ void ChargeController::noBatteryState() {
     }
 }
 
-/**
- * battery connected state
- * initialize connection with the bms and do initial safety check
- * if bms is ready to charge, wait in standby for user to start charge
- */
+
 void ChargeController::connectedState() {
     if (changedState) {
         log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Changed state->Connected State");
@@ -99,11 +90,6 @@ void ChargeController::connectedState() {
     }
 }
 
-/**
- * battery charging state
- * monitor the battery while it charges. If a fault occurs transition to fault
- * state
- */
 void ChargeController::chargingState() {
     if (changedState) {
         log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Changed state->Charging State");
@@ -119,10 +105,6 @@ void ChargeController::chargingState() {
     }
 }
 
-/**
- * standby state
- * wait for user input to start charging as long as the BMS is ok
- */
 void ChargeController::standbyState() {
     if (changedState) {
         log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Changed state->Standby State, waiting for button");
@@ -139,10 +121,6 @@ void ChargeController::standbyState() {
     }
 }
 
-/**
- * Fault occurred state
- * A fault has occurred, stop charging. When fault is cleared, wait in standby
- */
 void ChargeController::faultState() {
     if (changedState) {
         log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Changed state->Fault State");
@@ -161,10 +139,7 @@ void ChargeController::faultState() {
 
 void ChargeController::init() { relay.writePin(RELAY_OFF); }
 
-/**
- * when the start button is pressed, start charging if the bms is ready to
- * charge
- */
+
 void ChargeController::startCharging() {
     switch (state) {
     case ControllerStates::STANDBY:
