@@ -99,7 +99,9 @@ int main() {
     IO::GPIO& LCDRegisterSEL =
         IO::getGPIO<LCD_A0_PIN>(IO::GPIO::Direction::OUTPUT);
     IO::GPIO& LCDReset = IO::getGPIO<LCD_RST_PIN>(IO::GPIO::Direction::OUTPUT);
-    IO::GPIO* devices[] = {&IO::getGPIO<SPI_CS_PIN>(IO::GPIO::Direction::OUTPUT),};
+    IO::GPIO* devices[] = {
+        &IO::getGPIO<SPI_CS_PIN>(IO::GPIO::Direction::OUTPUT),
+    };
     devices[0]->writePin(IO::GPIO::State::HIGH);
 
     IO::SPI& spi = IO::getSPI<SPI_CLK_PIN, SPI_MOSI_PIN>(devices, 1);

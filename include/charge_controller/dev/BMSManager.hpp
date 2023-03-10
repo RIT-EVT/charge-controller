@@ -391,7 +391,8 @@ private:
 
     struct BMSConfig packs[MAX_BMS_PACKS] = {
         {BMS_PACK_ONE_ID, false, {}},
-        {BMS_PACK_TWO_ID, false, {}},};
+        {BMS_PACK_TWO_ID, false, {}},
+    };
 
     BMSData lastValues[MAX_BMS_PACKS];
 
