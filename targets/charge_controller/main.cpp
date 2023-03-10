@@ -86,8 +86,6 @@ int main() {
     IO::GPIO& relayControl =
         IO::getGPIO<RELAY_CTL_PIN>(IO::GPIO::Direction::OUTPUT);
     IO::GPIO& statusLED = IO::getGPIO<LED_PIN>(IO::GPIO::Direction::OUTPUT);
-    //    IO::GPIO &batt1OK = IO::getGPIO<BATTERY_1_OK>(IO::GPIO::Direction::INPUT);
-    //    IO::GPIO &batt2OK = IO::getGPIO<BATTERY_2_OK>(IO::GPIO::Direction::INPUT);
     IO::GPIO* bmsOK[] = {
         &IO::getGPIO<BATTERY_1_OK>(IO::GPIO::Direction::INPUT),
         &IO::getGPIO<BATTERY_2_OK>(IO::GPIO::Direction::INPUT)};
@@ -101,7 +99,7 @@ int main() {
     IO::GPIO& LCDRegisterSEL =
         IO::getGPIO<LCD_A0_PIN>(IO::GPIO::Direction::OUTPUT);
     IO::GPIO& LCDReset = IO::getGPIO<LCD_RST_PIN>(IO::GPIO::Direction::OUTPUT);
-    IO::GPIO* devices[] = {&IO::getGPIO<SPI_CS_PIN>(IO::GPIO::Direction::OUTPUT)};
+    IO::GPIO* devices[] = {&IO::getGPIO<SPI_CS_PIN>(IO::GPIO::Direction::OUTPUT),};
     devices[0]->writePin(IO::GPIO::State::HIGH);
 
     IO::SPI& spi = IO::getSPI<SPI_CLK_PIN, SPI_MOSI_PIN>(devices, 1);

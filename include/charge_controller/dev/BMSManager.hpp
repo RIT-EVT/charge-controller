@@ -220,7 +220,7 @@ public:
      * Check if BMS is connected
      *
      * @param packNum BMS pack to check
-     * @return  
+     * @return Whether the BMS is connected or not
      */
     bool isConnected(uint8_t packNum);
 
@@ -391,7 +391,7 @@ private:
 
     struct BMSConfig packs[MAX_BMS_PACKS] = {
         {BMS_PACK_ONE_ID, false, {}},
-        {BMS_PACK_TWO_ID, false, {}}};
+        {BMS_PACK_TWO_ID, false, {}},};
 
     BMSData lastValues[MAX_BMS_PACKS];
 

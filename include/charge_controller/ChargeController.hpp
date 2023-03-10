@@ -37,10 +37,10 @@ public:
     void loop();
 
     /**
-    * Check the status of the BMS and if all the measurements are in spec
+     * Check the status of the BMS and if all the measurements are in spec
      *
-    * @return 0 if OK. Otherwise there is an error
-    */
+     * @return 0 if OK. Otherwise there is an error
+     */
     uint8_t checkBMS();
 
     /**
