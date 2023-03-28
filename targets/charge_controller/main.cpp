@@ -1,11 +1,11 @@
 // clang-format off
 #include <EVT/io/CAN.hpp>
-#include <EVT/io/manager.hpp>
+#include <EVT/manager.hpp>
 #include <EVT/io/pin.hpp>
 #include <EVT/utils/log.hpp>
 #include <EVT/utils/time.hpp>
 #include <EVT/utils/types/FixedQueue.hpp>
-#include <EVT/dev/platform/f3xx/f302x8/Timerf302x8.hpp> // TODO: clang will put this at the top causing compilation problem
+#include <EVT/dev/platform/f3xx/Timerf3xx.hpp> // TODO: clang will put this at the top causing compilation problem
 // clang-format on
 
 #include <Canopen/co_core.h>
@@ -19,6 +19,7 @@ namespace IO = EVT::core::IO;
 namespace DEV = EVT::core::DEV;
 namespace time = EVT::core::time;
 namespace log = EVT::core::log;
+namespace platform = EVT::core::platform;
 
 #define HEARTBEAT_INTERVAL 1000
 
@@ -72,7 +73,7 @@ void canInterrupt(IO::CANMessage& message, void* priv) {
 }
 
 int main() {
-    IO::init();
+    platform::init();
 
     // Will store CANopen messages that will be populated by the EVT-core CAN
     // interrupt
@@ -108,7 +109,7 @@ int main() {
 
     // charge controller module instantiation
     BMSManager bms(can, bmsOK);
-    LCDDisplay display(spi, LCDRegisterSEL, LCDReset);
+    LCDDisplay display(LCDRegisterSEL, LCDReset, spi);
     ChargeController chargeController(bms, display, relayControl);
 
     struct CANInterruptParams canParams = {
@@ -116,7 +117,7 @@ int main() {
         .bmsManager = &bms,
     };
     can.addIRQHandler(canInterrupt, reinterpret_cast<void*>(&canParams));
-    DEV::Timerf302x8 timer(TIM2, 100);
+    DEV::Timerf3xx timer(TIM2, 100);
 
     log::LOGGER.setUART(&uart);
     log::LOGGER.setLogLevel(log::Logger::LogLevel::DEBUG);
@@ -154,6 +155,7 @@ int main() {
             }
             lastHeartBeat = time::millis();
         }
+
         time::wait(50);
     }
 }

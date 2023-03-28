@@ -58,7 +58,6 @@ uint8_t ChargeController::checkBMS() {
  */
 void ChargeController::noBatteryState() {
     if (changedState) {
-        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Changed state->No Battery");
         // Display no battery connected message on LCD
         relay.writePin(RELAY_OFF);
         changedState = false;
@@ -74,12 +73,11 @@ void ChargeController::noBatteryState() {
 
 void ChargeController::connectedState() {
     if (changedState) {
-        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Changed state->Connected State");
-        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "%d pack(s) connected", bms.numConnected());
         // display connected LCD message
         // further init battery communication?
         changedState = false;
     }
+
     if (checkBMS() == 0) {
         changedState = true;
         state = ControllerStates::STANDBY;
@@ -91,7 +89,6 @@ void ChargeController::connectedState() {
 
 void ChargeController::chargingState() {
     if (changedState) {
-        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Changed state->Charging State");
         relay.writePin(RELAY_ON);
         changedState = false;
     }
@@ -106,7 +103,6 @@ void ChargeController::chargingState() {
 
 void ChargeController::standbyState() {
     if (changedState) {
-        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Changed state->Standby State, waiting for button");
         relay.writePin(RELAY_OFF);
         changedState = false;
     }
@@ -122,7 +118,6 @@ void ChargeController::standbyState() {
 
 void ChargeController::faultState() {
     if (changedState) {
-        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Changed state->Fault State");
         relay.writePin(RELAY_OFF);
         changedState = false;
     }
@@ -139,17 +134,6 @@ void ChargeController::faultState() {
 void ChargeController::init() { relay.writePin(RELAY_OFF); }
 
 void ChargeController::startCharging() {
-    switch (state) {
-    case ControllerStates::STANDBY:
-        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Start button pressed, starting charge");
-        break;
-    case ControllerStates::CHARGING:
-        break;
-    default:
-        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Start button pressed, Bad State");
-        break;
-    }
-
     if (state == ControllerStates::STANDBY) {
         state = ControllerStates::CHARGING;
         changedState = true;
@@ -160,7 +144,6 @@ void ChargeController::startCharging() {
  * stop charging when the stop button is pressed
  */
 void ChargeController::stopCharging() {
-    log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Stop button pressed, stopping charge");
     if (state == ControllerStates::CHARGING) {
         state = ControllerStates::STANDBY;
         changedState = true;

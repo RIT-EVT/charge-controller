@@ -32,6 +32,7 @@ public:
         STANDBY,
         FAULT
     };
+
     ChargeController(BMSManager bms, LCDDisplay& display, IO::GPIO& relay);
     void init();
     void loop();
@@ -55,6 +56,10 @@ public:
      * Start charging if the BMS is ready and the button is pressed
      */
     void startCharging();
+
+    /**
+     * Stops charging if the BMS is charging
+     */
     void stopCharging();
 
 private:
