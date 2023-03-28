@@ -1,53 +1,53 @@
+#include <EVT/utils/log.hpp>
 #include <charge_controller/ChargeController.hpp>
 
-ChargeController::ChargeController(BMSManager bms, LCDDisplay display,
-                                   IO::GPIO &relay)
-        : bms(bms), lcdDisplay(display), relay(relay) {}
+namespace log = EVT::core::log;
+ChargeController::ChargeController(BMSManager bms, LCDDisplay& display,
+                                   IO::GPIO& relay)
+    : bms(bms), display(display), relay(relay) {}
 
 void ChargeController::loop() {
     switch (state) {
-        case ControllerStates::NO_BATTERY:
-            lcdDisplay.setChargeControllerStatus("No Battery");
-            noBatteryState();
-            break;
-        case ControllerStates::CONNECTED:
-            lcdDisplay.setChargeControllerStatus("Connected");
-            connectedState();
-            break;
-        case ControllerStates::CHARGING:
-            lcdDisplay.setChargeControllerStatus("Charging");
-            chargingState();
-            break;
-        case ControllerStates::STANDBY:
-            lcdDisplay.setChargeControllerStatus("Standby");
-            standbyState();
-            break;
-        case ControllerStates::FAULT:
-            lcdDisplay.setChargeControllerStatus("Fault");
-            faultState();
-            break;
+    case ControllerStates::NO_BATTERY:
+        noBatteryState();
+        break;
+    case ControllerStates::CONNECTED:
+        connectedState();
+        break;
+    case ControllerStates::CHARGING:
+        chargingState();
+        break;
+    case ControllerStates::STANDBY:
+        standbyState();
+        break;
+    case ControllerStates::FAULT:
+        faultState();
+        break;
     }
-    // Display LCD values
-    lcdDisplay.display();
 }
 
-/**
- * checks the status of the bms and that all measurements are in spec
- * @return true when everything ok, false if there is a problem
- */
-bool ChargeController::checkBMS() {
-    bool status = true;
-    int temperature = bms.getBattTemperature();
-    int voltage = bms.getBattVoltage();
+uint8_t ChargeController::checkBMS() {
+    bool status = 0;
 
-    if (temperature > MAX_TEMPERATURE) {
-        status = false;
-    }
-    if (voltage > MAX_VOLTAGE) {
-        status = false;
-    }
-    if (bms.faultDetected()) {
-        status = false;
+    for (int i = 0; i < bms.MAX_BMS_PACKS; i++) {
+        if (!CHECK_IN_RANGE(bms.getBatteryVoltage(i), MAX_PACK_VOLTAGE, MIN_PACK_VOLTAGE)) {
+            status |= BAD_PACK_VOLTAGE;
+        }
+        if (!CHECK_IN_RANGE(bms.getMaxCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)) {
+            status |= BAD_MAX_CELL_VOLTAGE;
+        }
+        if (!CHECK_IN_RANGE(bms.getMinCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)) {
+            status |= BAD_MIN_CELL_VOLTAGE;
+        }
+        if (!CHECK_IN_RANGE(bms.getBatteryMaxTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)) {
+            status |= BAD_MAX_TEMP;
+        }
+        if (!CHECK_IN_RANGE(bms.getBatteryMinTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)) {
+            status |= BAD_MIN_TEMP;
+        }
+        if (bms.faultDetected(i)) {
+            status |= BAD_FAULT_STATE;
+        }
     }
     return status;
 }
@@ -65,24 +65,20 @@ void ChargeController::noBatteryState() {
 
     // When battery gets connected change state to CONNECTED for setup and initial
     // check
-    if (bms.isConnected()) {
+    if (bms.numConnected()) {
         changedState = true;
         state = ControllerStates::CONNECTED;
     }
 }
 
-/**
- * battery connected state
- * initialize connection with the bms and do initial safety check
- * if bms is ready to charge, wait in standby for user to start charge
- */
 void ChargeController::connectedState() {
     if (changedState) {
         // display connected LCD message
         // further init battery communication?
         changedState = false;
     }
-    if (checkBMS()) {
+
+    if (checkBMS() == 0) {
         changedState = true;
         state = ControllerStates::STANDBY;
     } else {
@@ -91,58 +87,45 @@ void ChargeController::connectedState() {
     }
 }
 
-/**
- * battery charging state
- * monitor the battery while it charges. If a fault occurs transition to fault
- * state
- */
 void ChargeController::chargingState() {
     if (changedState) {
         relay.writePin(RELAY_ON);
         changedState = false;
     }
-    if (!bms.isConnected()) {
+    if (bms.numConnected() == 0) {
         changedState = true;
         state = ControllerStates::NO_BATTERY;
-    } else if (!checkBMS()) {
+    } else if (checkBMS() != 0) {
         changedState = true;
         state = ControllerStates::FAULT;
     }
 }
 
-/**
- * standby state
- * wait for user input to start charging as long as the BMS is ok
- */
 void ChargeController::standbyState() {
     if (changedState) {
         relay.writePin(RELAY_OFF);
         changedState = false;
     }
 
-    if (!bms.isConnected()) {
+    if (bms.numConnected() == 0) {
         changedState = true;
         state = ControllerStates::NO_BATTERY;
-    } else if (!checkBMS()) {
+    } else if (checkBMS() != 0) {
         changedState = true;
         state = ControllerStates::FAULT;
     }
 }
 
-/**
- * Fault occurred state
- * A fault has occurred, stop charging. When fault is cleared, wait in standby
- */
 void ChargeController::faultState() {
     if (changedState) {
         relay.writePin(RELAY_OFF);
         changedState = false;
     }
 
-    if (!bms.isConnected()) {
+    if (bms.numConnected() == 0) {
         changedState = true;
         state = ControllerStates::NO_BATTERY;
-    } else if (checkBMS()) {
+    } else if (checkBMS() == 0) {
         changedState = true;
         state = ControllerStates::STANDBY;
     }
@@ -150,10 +133,6 @@ void ChargeController::faultState() {
 
 void ChargeController::init() { relay.writePin(RELAY_OFF); }
 
-/**
- * when the start button is pressed, start charging if the bms is ready to
- * charge
- */
 void ChargeController::startCharging() {
     if (state == ControllerStates::STANDBY) {
         state = ControllerStates::CHARGING;
