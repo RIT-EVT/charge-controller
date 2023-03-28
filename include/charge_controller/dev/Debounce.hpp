@@ -12,8 +12,7 @@ class Debounce {
 public:
     static constexpr uint32_t DEFAULT_TIME = 50;
 
-
-    Debounce(IO::GPIO &pin);
+    Debounce(IO::GPIO& pin);
 
     void setPressedState(IO::GPIO::State pressedState) {
         this->pressedState = pressedState;
@@ -27,7 +26,7 @@ private:
     uint32_t debounceTime = DEFAULT_TIME;
     uint32_t lastPressed = time::millis();
 
-    IO::GPIO &pin;
+    IO::GPIO& pin;
 
     IO::GPIO::State pressedState = IO::GPIO::State::HIGH;
     IO::GPIO::State lastState;

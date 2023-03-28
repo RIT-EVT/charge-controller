@@ -9,7 +9,8 @@ public:
     /**
      * Represents if the LED is active high or active low.
      */
-    enum class ActiveState { HIGH = 0u, LOW = 1u };
+    enum class ActiveState { HIGH = 0u,
+                             LOW = 1u };
 
     /**
      * Create an instance of the LED based on the given GPIO pin.
@@ -17,7 +18,7 @@ public:
      * @param gpio GPIO pin
      * @param activeState Represents if the LED is active high or active low
      */
-    LED(EVT::core::IO::GPIO &gpio, ActiveState activeState);
+    LED(EVT::core::IO::GPIO& gpio, ActiveState activeState);
 
     /**
      * Toggle the current state of the LED
@@ -33,10 +34,10 @@ public:
 
 private:
     /// The gpio pin used by the LED
-    EVT::core::IO::GPIO &gpio;
+    EVT::core::IO::GPIO& gpio;
     /// If the LED is active high or active low
     ActiveState activeState;
 };
-} // namespace charge_controller::DEV
+}// namespace charge_controller::DEV
 
 #endif

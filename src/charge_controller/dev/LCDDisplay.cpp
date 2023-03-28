@@ -2,9 +2,7 @@
 #include <charge_controller/dev/LCDDisplay.hpp>
 #include <cstdio>
 
-
-LCDDisplay::LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi) :
-lcd(DEV::LCD(reg_select, reset, spi, 12, 3, 2)) { }
+LCDDisplay::LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi) : lcd(DEV::LCD(reg_select, reset, spi, 12, 3, 2)) {}
 
 void LCDDisplay::init() {
     lcd.initLCD();
@@ -23,7 +21,7 @@ void LCDDisplay::showSections() {
     lcd.displaySectionHeaders();
 }
 
-void LCDDisplay::setChargeControllerStatus(const char *str) {
+void LCDDisplay::setChargeControllerStatus(const char* str) {
     chargeControllerStatus = str;
 }
 
