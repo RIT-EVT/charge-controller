@@ -128,6 +128,7 @@ int main() {
     chargeController.init();
     uint32_t lastHeartBeat = time::millis();
     uint8_t oldCount = 0;
+
     while (true) {
         chargeController.loop();
         bms.update();

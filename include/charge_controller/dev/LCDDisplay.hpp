@@ -3,6 +3,7 @@
 
 #include <EVT/dev/LCD.hpp>
 #include <EVT/io/SPI.hpp>
+#include <charge_controller/dev/BMSManager.hpp>
 #include <cstdint>
 
 namespace IO = EVT::core::IO;
@@ -25,16 +26,6 @@ public:
     void init();
 
     /**
-     * Display the EVT logo as a splash screen.
-     */
-    void showSplashScreen();
-
-    /**
-     * Displays header sections once initialization is complete.
-     */
-    void showSections();
-
-    /**
      * The display loop that updates the section headers.
      */
     void display();
@@ -43,6 +34,31 @@ public:
      * Set the charge controller status display
      */
     void setChargeControllerStatus(const char* str);
+
+    /**
+     *
+     */
+     void setBatteryStatuses(BMSManager::BMSStatus batteryOneStatus, BMSManager::BMSStatus batteryTwoStatus);
+
+    /**
+    *
+    */
+    void setMinCellVoltages(int16_t batteryOneMinCellVoltage, int16_t batteryTwoMinCellVoltage);
+
+    /**
+    *
+    */
+    void setMaxCellVoltages(int16_t batteryOneMaxCellVoltage, int16_t batteryTwoMaxCellVoltage);
+
+    /**
+    *
+    */
+    void setMinTemps(int16_t batteryOneTemp, int16_t batteryTwoTemp);
+
+    /**
+    *
+    */
+    void setMaxTemps(int16_t batteryOneTemp, int16_t batteryTwoTemp);
 
 private:
     /**
@@ -53,26 +69,26 @@ private:
     /** The current status of the charge controller */
     const char* chargeControllerStatus = "NULL";
     /** The current status for battery  */
-    const char* batteryOneStatus = "NULL";
+    char* batteryOneStatus = "NULL";
     /** The current charge controller status */
-    const char* batteryTwoStatus = "NULL";
+    char* batteryTwoStatus = "NULL";
     /** The voltage that is being supplied */
     const uint8_t chargeControllerVoltage = 0;
     /** The current that is being supplied */
     const uint8_t chargeControllerCurrent = 0;
     /** The current battery one voltage */
-    const uint8_t batteryOneVoltage = 0;
+    int16_t batteryOneVoltage = 0;
     /** The current battery two voltage */
-    const uint8_t batteryTwoVoltage = 0;
+    int16_t batteryTwoVoltage = 0;
 
     /** The minimum temperature for battery one */
-    const uint8_t batteryOneMinTemp = 0;
+    int16_t batteryOneMinTemp = 0;
     /** The maximum temperature for battery one */
-    const uint8_t batteryOneMaxTemp = 0;
+    int16_t batteryOneMaxTemp = 0;
     /** The minimum temperature for battery two */
-    const uint8_t batteryTwoMinTemp = 0;
+    int16_t batteryTwoMinTemp = 0;
     /** The maximum temperature for battery two */
-    const uint8_t batteryTwoMaxTemp = 0;
+    int16_t batteryTwoMaxTemp = 0;
     /** How charged the batteries currently are. */
     const uint8_t chargePercentage = 0;
 
