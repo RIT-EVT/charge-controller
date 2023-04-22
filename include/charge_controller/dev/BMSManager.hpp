@@ -205,7 +205,9 @@ public:
         /// When the BMS is on the bike and delivering power
         POWER_DELIVERY = 7,
         /// When the BMS is handling charging the battery pack
-        CHARGING = 8
+        CHARGING = 8,
+        /// NO BMS CONNECTED (USED FOR DISPlAY)
+        NOT_CONNECTED = 9
     };
 
     /**
@@ -353,6 +355,8 @@ public:
     static constexpr uint8_t
         MAX_BMS_PACKS = 2;
 
+    static constexpr uint8_t
+        NODE_ID = 0x16;
 private:
     /**
      * State for representing the BMS is not in an OK state to charge/discharge
@@ -396,8 +400,6 @@ private:
 
     BMSData lastValues[MAX_BMS_PACKS];
 
-    static constexpr uint8_t
-        NODE_ID = 0x0F;
     static constexpr uint16_t
         OBJECT_DICTIONARY_SIZE = 69;
 

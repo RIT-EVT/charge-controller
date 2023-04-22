@@ -30,17 +30,25 @@ void ChargeController::loop() {
         break;
     }
 
-    display.setBatteryStatuses(bms.getStatus(0), bms.getStatus(1));
-    display.setMinCellVoltages(bms.getMinCellVoltage(0), bms.getMinCellVoltage(1));
-    display.setMinTemps(bms.getBatteryMinTemp(0), bms.getBatteryMinTemp(1));
-    display.setMaxTemps(bms.getBatteryMaxTemp(0), bms.getBatteryMaxTemp(1));
-    display.display();
+    if (bms.numConnected() == 2) {
+        display.setBatteryStatuses(bms.getStatus(0), bms.getStatus(1));
+        display.setMinCellVoltages(bms.getMinCellVoltage(0), bms.getMinCellVoltage(1));
+        display.setMinTemps(bms.getBatteryMinTemp(0), bms.getBatteryMinTemp(1));
+        display.setMaxTemps(bms.getBatteryMaxTemp(0), bms.getBatteryMaxTemp(1));
+        display.display();
+    } else {
+        display.setBatteryStatuses(bms.getStatus(0), BMSManager::BMSStatus::NOT_CONNECTED);
+        display.setMinCellVoltages(bms.getMinCellVoltage(0), 0);
+        display.setMinTemps(bms.getBatteryMinTemp(0), 0);
+        display.setMaxTemps(bms.getBatteryMaxTemp(0), 0);
+        display.display();
+    }
 }
 
 uint8_t ChargeController::checkBMS() {
     bool status = 0;
 
-    for (int i = 0; i < bms.MAX_BMS_PACKS; i++) {
+    for (int i = 0; i < BMSManager::MAX_BMS_PACKS; i++) {
         if (!CHECK_IN_RANGE(bms.getBatteryVoltage(i), MAX_PACK_VOLTAGE, MIN_PACK_VOLTAGE)) {
             status |= BAD_PACK_VOLTAGE;
         }

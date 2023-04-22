@@ -112,7 +112,9 @@ void LCDDisplay::setBatteryStatuses(BMSManager::BMSStatus batteryOneStatus, BMSM
         case BMSManager::BMSStatus::CHARGING:
             this->batteryOneStatus = "Charging";
             break;
-    }
+        case BMSManager::BMSStatus::NOT_CONNECTED:
+            this->batteryOneStatus = "Not Connected";
+            break;}
 
     switch (batteryTwoStatus) {
         case BMSManager::BMSStatus::START:
@@ -142,6 +144,8 @@ void LCDDisplay::setBatteryStatuses(BMSManager::BMSStatus batteryOneStatus, BMSM
         case BMSManager::BMSStatus::CHARGING:
             this->batteryTwoStatus = "Charging";
             break;
+        case BMSManager::BMSStatus::NOT_CONNECTED:
+            this->batteryTwoStatus = "No Conn";
+            break;
     }
-
 }
