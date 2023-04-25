@@ -173,7 +173,7 @@ int main() {
     // charge controller module instantiation
     BMSManager bms(can, bmsOK);
     LCDDisplay display(LCDRegisterSEL, LCDReset, spi);
-    ChargeController chargeController(bms, display, relayControl);
+    ChargeController chargeController(bms, display, relayControl, can);
 
     uart.printf("Modules Initialized\n\r");
 
@@ -264,16 +264,18 @@ int main() {
             }
 
             // Need to send heartbeat can message to the charger
+            chargeController.sendChargerMessage();
+            chargeController.receiveChargerStatus();
 
             lastHeartBeat = time::millis();
         }
 
         // Process the BMS RPDOs
-        //        CONodeProcess(&canNode);
-        //        // Update the state of timer based events
-        //        COTmrService(&canNode.Tmr);
-        //        // Handle executing timer events that have elapsed
-//        COTmrProcess(&canNode.Tmr);
+        CONodeProcess(&canNode);
+        // Update the state of timer based events
+        COTmrService(&canNode.Tmr);
+        // Handle executing timer events that have elapsed
+        COTmrProcess(&canNode.Tmr);
 
         time::wait(50);
     }

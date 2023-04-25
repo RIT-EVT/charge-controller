@@ -3,31 +3,33 @@
 
 namespace log = EVT::core::log;
 ChargeController::ChargeController(BMSManager bms, LCDDisplay& display,
-                                   IO::GPIO& relay)
-    : bms(bms), display(display), relay(relay) {}
+                                   IO::GPIO& relay, IO::CAN& can)
+        : bms(bms), display(display), relay(relay), can(can) {}
 
 void ChargeController::loop() {
+    log::LOGGER.log(log::Logger::LogLevel::INFO, "Charger Payload %hu", chargerStatusMessage.getPayload());
+
     switch (state) {
-    case ControllerStates::NO_BATTERY:
-        display.setChargeControllerStatus("No Battery");
-        noBatteryState();
-        break;
-    case ControllerStates::CONNECTED:
-        display.setChargeControllerStatus("Connected");
-        connectedState();
-        break;
-    case ControllerStates::CHARGING:
-        display.setChargeControllerStatus("Charging");
-        chargingState();
-        break;
-    case ControllerStates::STANDBY:
-        display.setChargeControllerStatus("Standby");
-        standbyState();
-        break;
-    case ControllerStates::FAULT:
-        display.setChargeControllerStatus("Fault");
-        faultState();
-        break;
+        case ControllerStates::NO_BATTERY:
+            display.setChargeControllerStatus("No Battery");
+            noBatteryState();
+            break;
+        case ControllerStates::CONNECTED:
+            display.setChargeControllerStatus("Connected");
+            connectedState();
+            break;
+        case ControllerStates::CHARGING:
+            display.setChargeControllerStatus("Charging");
+            chargingState();
+            break;
+        case ControllerStates::STANDBY:
+            display.setChargeControllerStatus("Standby");
+            standbyState();
+            break;
+        case ControllerStates::FAULT:
+            display.setChargeControllerStatus("Fault");
+            faultState();
+            break;
     }
 
     if (bms.numConnected() == 2) {
@@ -43,6 +45,13 @@ void ChargeController::loop() {
         display.setMaxTemps(bms.getBatteryMaxTemp(0), 0);
         display.display();
     }
+
+    // Display the recieved current and voltage from the charger.
+    uint16_t current = chargerStatusMessage.getPayload()[0] | chargerStatusMessage.getPayload()[1];
+    uint16_t voltage = chargerStatusMessage.getPayload()[2] | chargerStatusMessage.getPayload()[3];
+
+    display.setChargerCurrent(current);
+    display.setChargerVoltage(voltage);
 }
 
 uint8_t ChargeController::checkBMS() {
@@ -111,6 +120,7 @@ void ChargeController::chargingState() {
         relay.writePin(RELAY_ON);
         changedState = false;
     }
+
     if (bms.numConnected() == 0) {
         changedState = true;
         state = ControllerStates::NO_BATTERY;
@@ -166,5 +176,58 @@ void ChargeController::stopCharging() {
     if (state == ControllerStates::CHARGING) {
         state = ControllerStates::STANDBY;
         changedState = true;
+    }
+}
+
+void ChargeController::sendChargerMessage() {
+    uint16_t voltage = 0;
+    uint16_t current = 0;
+    uint8_t shouldCharge = 1;
+
+    if(state == ControllerStates::CHARGING) {
+        // Multiply by ten to get the right sized values
+        voltage = 48 * 10;
+        current = 60 * 10;
+        shouldCharge = 0;
+    }
+
+    uint8_t voltageMSB = voltage >> 8;
+    uint8_t voltageLSB = voltage;
+
+    uint8_t currentMSB = current >> 8;
+    uint8_t currentLSB = current;
+
+    uint8_t payload[8] = {
+            voltageMSB,
+            voltageLSB,
+            currentMSB,
+            currentLSB,
+            shouldCharge,
+            // Padding Bytes
+            0x00,
+            0x00,
+            0x00
+    };
+
+    log::LOGGER.log(log::Logger::LogLevel::INFO, "Requesting charging at %d volts with %d current.", voltage / 10, current / 10);
+    IO::CANMessage chargerMessage = IO::CANMessage(0x1806E5F4, 8, payload, true);
+    IO::CAN::CANStatus status = can.transmit(chargerMessage);
+
+    if (status == IO::CAN::CANStatus::ERROR) {
+        log::LOGGER.log(log::Logger::LogLevel::INFO, "Error transmitting request %d", status);
+    } else {
+        log::LOGGER.log(log::Logger::LogLevel::INFO, "Transmitted request to charge controller");
+    }
+}
+
+void ChargeController::receiveChargerStatus() {
+    IO::CAN::CANStatus status = can.receive(&chargerStatusMessage);
+
+    if (status == IO::CAN::CANStatus::ERROR) {
+        log::LOGGER.log(log::Logger::LogLevel::INFO, "Error receiving status %d", status);
+    } else if (status == IO::CAN::CANStatus::TIMEOUT) {
+        log::LOGGER.log(log::Logger::LogLevel::INFO, "Charger status timed out, data not in message queue");
+    } else {
+        log::LOGGER.log(log::Logger::LogLevel::INFO, "Status successfully received!");
     }
 }

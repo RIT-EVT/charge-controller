@@ -149,3 +149,11 @@ void LCDDisplay::setBatteryStatuses(BMSManager::BMSStatus batteryOneStatus, BMSM
             break;
     }
 }
+
+void LCDDisplay::setChargerVoltage(uint16_t voltage) {
+    chargeControllerVoltage = voltage;
+}
+
+void LCDDisplay::setChargerCurrent(uint16_t current) {
+    chargeControllerCurrent = current;
+}

@@ -35,6 +35,9 @@ public:
      */
     void setChargeControllerStatus(const char* str);
 
+    void setChargerVoltage(uint16_t voltage);
+    void setChargerCurrent(uint16_t current);
+
     /**
      *
      */
@@ -69,13 +72,13 @@ private:
     /** The current status of the charge controller */
     const char* chargeControllerStatus = "NULL";
     /** The current status for battery  */
-    char* batteryOneStatus = "NULL";
+    const char* batteryOneStatus = "NULL";
     /** The current charge controller status */
-    char* batteryTwoStatus = "NULL";
+    const char* batteryTwoStatus = "NULL";
     /** The voltage that is being supplied */
-    const uint8_t chargeControllerVoltage = 0;
+    uint16_t chargeControllerVoltage = 0;
     /** The current that is being supplied */
-    const uint8_t chargeControllerCurrent = 0;
+    uint16_t chargeControllerCurrent = 0;
     /** The current battery one voltage */
     int16_t batteryOneVoltage = 0;
     /** The current battery two voltage */
