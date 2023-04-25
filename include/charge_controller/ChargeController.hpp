@@ -51,6 +51,8 @@ public:
         FAULT
     };
 
+    static const uint32_t CHARGER_STATUS_CAN_ID = 0x18FF50E5;
+
     ChargeController(BMSManager bms, LCDDisplay& display, IO::GPIO& relay, IO::CAN& can);
     void init();
     void loop();
@@ -85,10 +87,7 @@ public:
      */
      void sendChargerMessage();
 
-     /**
-      *
-      */
-     void receiveChargerStatus();
+     void setChargerValues(uint16_t voltage, uint16_t current);
 private:
     void noBatteryState();
 
@@ -119,9 +118,6 @@ private:
 
     ControllerStates state = ControllerStates::NO_BATTERY;
     bool changedState = true;
-
-    uint8_t payload[8] = { };
-    IO::CANMessage chargerStatusMessage = IO::CANMessage(0x18FF50E5, 8, payload, true);
 
     static constexpr IO::GPIO::State RELAY_ON = IO::GPIO::State::HIGH;
     static constexpr IO::GPIO::State RELAY_OFF = IO::GPIO::State::LOW;

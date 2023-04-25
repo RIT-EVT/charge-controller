@@ -54,7 +54,7 @@ constexpr uint32_t SPI_SPEED = SPI_SPEED_500KHZ;
 
 struct CANInterruptParams {
     EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage>* queue;
-    BMSManager* bmsManager;
+    ChargeController* chargeController;
 };
 
 /**
@@ -71,6 +71,15 @@ void canInterrupt(IO::CANMessage& message, void* priv) {
     struct CANInterruptParams* params = (CANInterruptParams*) priv;
 
     EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage>* queue = params->queue;
+
+    if (message.getId() == ChargeController::CHARGER_STATUS_CAN_ID) {
+        // Display the recieved current and voltage from the charger.
+        uint16_t voltage = ((uint16_t) message.getPayload()[0] << 8) | message.getPayload()[1];
+        uint16_t current = ((uint16_t) message.getPayload()[2] << 8) | message.getPayload()[3];
+
+        params->chargeController->setChargerValues(voltage, current);
+    }
+
     if (queue != nullptr)
         queue->append(message);
 }
@@ -123,17 +132,12 @@ extern "C" void COTmrUnlock(void) {}
 
 extern "C" void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef *hcan) {
     log::LOGGER.log(log::Logger::LogLevel::DEBUG, "RX Full");
-
 }
 
 IO::GPIO* devices[1];
 
 int main() {
     platform::init();
-
-    // Will store CANopen messages that will be populated by the EVT-core CAN
-    // interrupt
-    EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage> canOpenQueue;
 
     // Pin initialization
     IO::UART& uart = IO::getUART<IO::Pin::UART_TX, IO::Pin::UART_RX>(9600);
@@ -168,7 +172,8 @@ int main() {
     spi.configureSPI(SPI_SPEED, SPI_MODE0, SPI_MSB_FIRST);
     uart.printf("Spi Init\n\r");
 
-    IO::CAN& can = IO::getCAN<CAN_TX_PIN, CAN_RX_PIN>();
+    // Initialize CAN, add an IRQ which will add messages to the queue above
+    IO::CAN& can = IO::getCAN<IO::Pin::PA_12, IO::Pin::PA_11>();
 
     // charge controller module instantiation
     BMSManager bms(can, bmsOK);
@@ -177,11 +182,6 @@ int main() {
 
     uart.printf("Modules Initialized\n\r");
 
-    struct CANInterruptParams canParams = {
-        .queue = &canOpenQueue,
-        .bmsManager = &bms,
-    };
-    can.addIRQHandler(canInterrupt, reinterpret_cast<void*>(&canParams));
     DEV::Timerf3xx timer(TIM2, 100);
 
     log::LOGGER.setLogLevel(log::Logger::LogLevel::DEBUG);
@@ -191,17 +191,40 @@ int main() {
     uint32_t lastHeartBeat = time::millis();
     uint8_t oldCount = 0;
 
-    uart.printf("Running!\r\n");
+    uart.printf("Finished Inits!\r\n");
 
     ///////////////////////////////////////////////////////////////////////////
     // Setup CAN configuration, this handles making drivers, applying settings.
     // And generally creating the CANopen stack node which is the interface
     // between the application (the code we write) and the physical CAN network
     ///////////////////////////////////////////////////////////////////////////
+    // Will store CANopen messages that will be populated by the EVT-core CAN interrupt
+    EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage> canOpenQueue;
+
+    struct CANInterruptParams canParams = {
+            .queue = &canOpenQueue,
+            .chargeController = &chargeController
+    };
+    can.addIRQHandler(canInterrupt, reinterpret_cast<void*>(&canParams));
+
     // Reserved memory for CANopen stack usage
     uint8_t sdoBuffer[1][CO_SDO_BUF_BYTE];
     CO_TMR_MEM appTmrMem[4];
 
+    // Attempt to join the CAN network
+    IO::CAN::CANStatus result = can.connect();
+
+    //test that the board is connected to the can network
+    if (result != IO::CAN::CANStatus::OK) {
+        uart.printf("Failed to connect to CAN network\r\n");
+        return 1;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Setup CAN configuration, this handles making drivers, applying settings.
+    // And generally creating the CANopen stack node which is the interface
+    // between the application (the code we write) and the physical CAN network
+    ///////////////////////////////////////////////////////////////////////////
     // Make drivers
     CO_IF_DRV canStackDriver;
 
@@ -226,7 +249,7 @@ int main() {
             .EmcyCode = NULL,
             .TmrMem = appTmrMem,
             .TmrNum = 16,
-            .TmrFreq = 1,
+            .TmrFreq = 100,
             .Drv = &canStackDriver,
             .SdoBuf = reinterpret_cast<uint8_t*>(&sdoBuffer[0]),
     };
@@ -236,6 +259,8 @@ int main() {
     CONodeInit(&canNode, &canSpec);
     CONodeStart(&canNode);
     CONmtSetMode(&canNode.Nmt, CO_OPERATIONAL);
+
+    time::wait(500);
 
     while (true) {
         chargeController.loop();
@@ -265,7 +290,7 @@ int main() {
 
             // Need to send heartbeat can message to the charger
             chargeController.sendChargerMessage();
-            chargeController.receiveChargerStatus();
+//            chargeController.receiveChargerStatus();
 
             lastHeartBeat = time::millis();
         }

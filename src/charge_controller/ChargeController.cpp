@@ -7,8 +7,6 @@ ChargeController::ChargeController(BMSManager bms, LCDDisplay& display,
         : bms(bms), display(display), relay(relay), can(can) {}
 
 void ChargeController::loop() {
-    log::LOGGER.log(log::Logger::LogLevel::INFO, "Charger Payload %hu", chargerStatusMessage.getPayload());
-
     switch (state) {
         case ControllerStates::NO_BATTERY:
             display.setChargeControllerStatus("No Battery");
@@ -47,11 +45,13 @@ void ChargeController::loop() {
     }
 
     // Display the recieved current and voltage from the charger.
-    uint16_t current = chargerStatusMessage.getPayload()[0] | chargerStatusMessage.getPayload()[1];
-    uint16_t voltage = chargerStatusMessage.getPayload()[2] | chargerStatusMessage.getPayload()[3];
-
-    display.setChargerCurrent(current);
-    display.setChargerVoltage(voltage);
+//    uint16_t voltage = ((uint16_t) payload[1] << 8) | payload[0];
+//    uint16_t current = ((uint16_t) payload[3] << 8) | payload[2];
+//
+//    log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Payload: 0x%x, Current: %d. Voltage: %d", payload,  current, voltage);
+//
+//    display.setChargerCurrent(current);
+//    display.setChargerVoltage(voltage);
 }
 
 uint8_t ChargeController::checkBMS() {
@@ -220,14 +220,19 @@ void ChargeController::sendChargerMessage() {
     }
 }
 
-void ChargeController::receiveChargerStatus() {
-    IO::CAN::CANStatus status = can.receive(&chargerStatusMessage);
-
-    if (status == IO::CAN::CANStatus::ERROR) {
-        log::LOGGER.log(log::Logger::LogLevel::INFO, "Error receiving status %d", status);
-    } else if (status == IO::CAN::CANStatus::TIMEOUT) {
-        log::LOGGER.log(log::Logger::LogLevel::INFO, "Charger status timed out, data not in message queue");
-    } else {
-        log::LOGGER.log(log::Logger::LogLevel::INFO, "Status successfully received!");
-    }
+void ChargeController::setChargerValues(uint16_t voltage, uint16_t current) {
+    display.setChargerVoltage(voltage);
+    display.setChargerCurrent(current);
 }
+
+//void ChargeController::receiveChargerStatus() {
+//    IO::CAN::CANStatus status = can.receive(&chargerStatusMessage);
+//
+//    if (status == IO::CAN::CANStatus::ERROR) {
+//        log::LOGGER.log(log::Logger::LogLevel::INFO, "Error receiving status %d", status);
+//    } else if (status == IO::CAN::CANStatus::TIMEOUT) {
+//        log::LOGGER.log(log::Logger::LogLevel::INFO, "Charger status timed out, data not in message queue");
+//    } else {
+//        log::LOGGER.log(log::Logger::LogLevel::INFO, "Status successfully received!");
+//    }
+//}

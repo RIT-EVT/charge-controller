@@ -10,9 +10,9 @@ void LCDDisplay::init() {
     lcd.setDefaultSections(SECTION_TITLES);
 
     // Splash Screen
-    lcd.setEntireScreenBitMap(evtBitMap);
-    EVT::core::time::wait(2000);
-    lcd.clearLCD();
+//    lcd.setEntireScreenBitMap(evtBitMap);
+//    EVT::core::time::wait(2000);
+//    lcd.clearLCD();
     lcd.displaySectionHeaders();
 }
 
