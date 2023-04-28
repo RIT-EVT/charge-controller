@@ -2,9 +2,7 @@
 #include <charge_controller/ChargeController.hpp>
 
 namespace log = EVT::core::log;
-ChargeController::ChargeController(BMSManager bms, LCDDisplay& display,
-                                   IO::GPIO& relay, IO::CAN& can)
-        : bms(bms), display(display), relay(relay), can(can) {}
+ChargeController::ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can) : bms(bms), display(display), can(can) {}
 
 void ChargeController::loop() {
     switch (state) {
@@ -30,21 +28,27 @@ void ChargeController::loop() {
             break;
     }
 
-    if (bms.numConnected() == 2) {
-        display.setBatteryStatuses(bms.getStatus(0), bms.getStatus(1));
-        display.setMinCellVoltages(bms.getMinCellVoltage(0), bms.getMinCellVoltage(1));
-        display.setMinTemps(bms.getBatteryMinTemp(0), bms.getBatteryMinTemp(1));
-        display.setMaxTemps(bms.getBatteryMaxTemp(0), bms.getBatteryMaxTemp(1));
-        display.display();
+    if (bms.isConnected(0)) {
+        display.setBatteryStatus(bms.getStatus(0), 0);
+        display.setMinCellVoltage(bms.getMinCellVoltage(0), 0);
+        display.setMinTemp(bms.getBatteryMinTemp(0), 0);
+        display.setMaxTemp(bms.getBatteryMaxTemp(0), 0);
     } else {
-        display.setBatteryStatuses(bms.getStatus(0), BMSManager::BMSStatus::NOT_CONNECTED);
-        display.setMinCellVoltages(bms.getMinCellVoltage(0), 0);
-        display.setMinTemps(bms.getBatteryMinTemp(0), 0);
-        display.setMaxTemps(bms.getBatteryMaxTemp(0), 0);
-        display.display();
+        display.setBatteryStatus(BMSManager::BMSStatus::NOT_CONNECTED, 0);
     }
 
-    // Display the recieved current and voltage from the charger.
+    if (bms.isConnected(1)) {
+        display.setBatteryStatus(bms.getStatus(0), 1);
+        display.setMinCellVoltage(bms.getMinCellVoltage(0), 1);
+        display.setMinTemp(bms.getBatteryMinTemp(0), 1);
+        display.setMaxTemp(bms.getBatteryMaxTemp(0), 1);
+    } else {
+        display.setBatteryStatus(BMSManager::BMSStatus::NOT_CONNECTED, 1);
+    }
+
+    display.display();
+
+// Display the recieved current and voltage from the charger.
 //    uint16_t voltage = ((uint16_t) payload[1] << 8) | payload[0];
 //    uint16_t current = ((uint16_t) payload[3] << 8) | payload[2];
 //
@@ -58,25 +62,30 @@ uint8_t ChargeController::checkBMS() {
     bool status = 0;
 
     for (int i = 0; i < BMSManager::MAX_BMS_PACKS; i++) {
-        if (!CHECK_IN_RANGE(bms.getBatteryVoltage(i), MAX_PACK_VOLTAGE, MIN_PACK_VOLTAGE)) {
-            status |= BAD_PACK_VOLTAGE;
-        }
-        if (!CHECK_IN_RANGE(bms.getMaxCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)) {
-            status |= BAD_MAX_CELL_VOLTAGE;
-        }
-        if (!CHECK_IN_RANGE(bms.getMinCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)) {
-            status |= BAD_MIN_CELL_VOLTAGE;
-        }
-        if (!CHECK_IN_RANGE(bms.getBatteryMaxTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)) {
-            status |= BAD_MAX_TEMP;
-        }
-        if (!CHECK_IN_RANGE(bms.getBatteryMinTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)) {
-            status |= BAD_MIN_TEMP;
-        }
-        if (bms.faultDetected(i)) {
-            status |= BAD_FAULT_STATE;
+        if (bms.isConnected(i)) {
+            if (!CHECK_IN_RANGE(bms.getBatteryVoltage(i), MAX_PACK_VOLTAGE, MIN_PACK_VOLTAGE)) {
+                status |= BAD_PACK_VOLTAGE;
+            }
+            if (!CHECK_IN_RANGE(bms.getMaxCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)) {
+                status |= BAD_MAX_CELL_VOLTAGE;
+            }
+            if (!CHECK_IN_RANGE(bms.getMinCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)) {
+                status |= BAD_MIN_CELL_VOLTAGE;
+            }
+            if (!CHECK_IN_RANGE(bms.getBatteryMaxTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)) {
+                status |= BAD_MAX_TEMP;
+            }
+            if (!CHECK_IN_RANGE(bms.getBatteryMinTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)) {
+                status |= BAD_MIN_TEMP;
+            }
+
+            if (bms.faultDetected(i)) {
+                log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Fault State, Pack (%d)", i);
+                status |= BAD_FAULT_STATE;
+            }
         }
     }
+
     return status;
 }
 
@@ -87,12 +96,13 @@ uint8_t ChargeController::checkBMS() {
 void ChargeController::noBatteryState() {
     if (changedState) {
         // Display no battery connected message on LCD
-        relay.writePin(RELAY_OFF);
+//        relay.writePin(RELAY_OFF);
         changedState = false;
     }
 
     // When battery gets connected change state to CONNECTED for setup and initial
     // check
+//    log::LOGGER.log(log::Logger::LogLevel::INFO, "Batt: %d", bms.numConnected());
     if (bms.numConnected()) {
         changedState = true;
         state = ControllerStates::CONNECTED;
@@ -117,7 +127,7 @@ void ChargeController::connectedState() {
 
 void ChargeController::chargingState() {
     if (changedState) {
-        relay.writePin(RELAY_ON);
+//        relay.writePin(RELAY_ON);
         changedState = false;
     }
 
@@ -132,7 +142,7 @@ void ChargeController::chargingState() {
 
 void ChargeController::standbyState() {
     if (changedState) {
-        relay.writePin(RELAY_OFF);
+//        relay.writePin(RELAY_OFF);
         changedState = false;
     }
 
@@ -147,7 +157,7 @@ void ChargeController::standbyState() {
 
 void ChargeController::faultState() {
     if (changedState) {
-        relay.writePin(RELAY_OFF);
+//        relay.writePin(RELAY_OFF);
         changedState = false;
     }
 
@@ -160,7 +170,9 @@ void ChargeController::faultState() {
     }
 }
 
-void ChargeController::init() { relay.writePin(RELAY_OFF); }
+void ChargeController::init() {
+//    relay.writePin(RELAY_OFF);
+}
 
 void ChargeController::startCharging() {
     if (state == ControllerStates::STANDBY) {

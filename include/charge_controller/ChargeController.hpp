@@ -53,7 +53,7 @@ public:
 
     static const uint32_t CHARGER_STATUS_CAN_ID = 0x18FF50E5;
 
-    ChargeController(BMSManager bms, LCDDisplay& display, IO::GPIO& relay, IO::CAN& can);
+    ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can);
     void init();
     void loop();
 
@@ -111,9 +111,8 @@ private:
      */
     void faultState();
 
-    BMSManager bms;
+    BMSManager& bms;
     LCDDisplay& display;
-    IO::GPIO& relay;
     IO::CAN& can;
 
     ControllerStates state = ControllerStates::NO_BATTERY;

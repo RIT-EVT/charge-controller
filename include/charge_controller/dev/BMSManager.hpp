@@ -345,18 +345,9 @@ public:
      */
     uint8_t getObjectDictionarySize();
 
-    /**
-     * Get the number of elements in the object dictionary.
-     *
-     * @return The number of elements in the object dictionary
-     */
-    uint8_t getNumElements();
+    static constexpr uint8_t MAX_BMS_PACKS = 2;
 
-    static constexpr uint8_t
-        MAX_BMS_PACKS = 2;
-
-    static constexpr uint8_t
-        NODE_ID = 0x16;
+    static constexpr uint8_t NODE_ID = 16;
 private:
     /**
      * State for representing the BMS is not in an OK state to charge/discharge

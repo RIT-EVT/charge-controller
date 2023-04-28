@@ -41,27 +41,27 @@ public:
     /**
      *
      */
-     void setBatteryStatuses(BMSManager::BMSStatus batteryOneStatus, BMSManager::BMSStatus batteryTwoStatus);
+     void setBatteryStatus(BMSManager::BMSStatus status, uint8_t index);
 
     /**
     *
     */
-    void setMinCellVoltages(int16_t batteryOneMinCellVoltage, int16_t batteryTwoMinCellVoltage);
+    void setMinCellVoltage(int16_t cellVoltage, uint8_t index);
 
     /**
     *
     */
-    void setMaxCellVoltages(int16_t batteryOneMaxCellVoltage, int16_t batteryTwoMaxCellVoltage);
+    void setMaxCellVoltage(int16_t cellVoltage, uint8_t index);
 
     /**
     *
     */
-    void setMinTemps(int16_t batteryOneTemp, int16_t batteryTwoTemp);
+    void setMinTemp(int16_t temp, uint8_t index);
 
     /**
     *
     */
-    void setMaxTemps(int16_t batteryOneTemp, int16_t batteryTwoTemp);
+    void setMaxTemp(int16_t temp, uint8_t index);
 
 private:
     /**
@@ -72,9 +72,9 @@ private:
     /** The current status of the charge controller */
     const char* chargeControllerStatus = "NULL";
     /** The current status for battery  */
-    const char* batteryOneStatus = "NULL";
+    const char* batteryOneStatus = "NO CONN";
     /** The current charge controller status */
-    const char* batteryTwoStatus = "NULL";
+    const char* batteryTwoStatus = "NO CONN";
     /** The voltage that is being supplied */
     uint16_t chargeControllerVoltage = 0;
     /** The current that is being supplied */

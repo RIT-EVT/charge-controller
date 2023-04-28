@@ -15,6 +15,7 @@
 #include <charge_controller/dev/BMSManager.hpp>
 #include <charge_controller/dev/Debounce.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
+#include "EVT/dev/button.hpp"
 
 namespace IO = EVT::core::IO;
 namespace DEV = EVT::core::DEV;
@@ -25,30 +26,18 @@ namespace platform = EVT::core::platform;
 #define HEARTBEAT_INTERVAL 1000
 
 // IO pins
-constexpr IO::Pin RELAY_CTL_PIN = IO::Pin::PB_0;
-//constexpr IO::Pin LED_PIN = IO::Pin::PA_10;
-//constexpr IO::Pin STANDBY_BUTTON_PIN = IO::Pin::PA_2;
-constexpr IO::Pin START_BUTTON_PIN = IO::Pin::PA_7;
-constexpr IO::Pin BATTERY_1_OK = IO::Pin::PA_9;
-constexpr IO::Pin BATTERY_2_OK = IO::Pin::PA_8;
+constexpr IO::Pin STANDBY_BUTTON_PIN = IO::Pin::PA_4;
+constexpr IO::Pin START_BUTTON_PIN = IO::Pin::PA_6;
+constexpr IO::Pin RESET_BUTTON_PIN = IO::Pin::PA_1;
 
-// LCD pins
-constexpr IO::Pin LCD_A0_PIN = IO::Pin::PA_6;
-constexpr IO::Pin LCD_RST_PIN = IO::Pin::PA_1;
-constexpr IO::Pin SPI_CS_PIN = IO::Pin::PA_3;
-constexpr IO::Pin SPI_MOSI_PIN = IO::Pin::PB_5;
-constexpr IO::Pin SPI_CLK_PIN = IO::Pin::PA_5;
+constexpr IO::Pin ENCODER_BUTTON_PIN = IO::Pin::PB_4;
+constexpr IO::Pin ENCODER_A = IO::Pin::PA_8;
+constexpr IO::Pin ENCODER_B = IO::Pin::PA_9;
 
-// UART pins
-constexpr IO::Pin UART_RX_PIN = IO::Pin::PB_7;
-constexpr IO::Pin UART_TX_PIN = IO::Pin::PB_6;
+constexpr IO::Pin BATTERY_1_OK = IO::Pin::PB_6;
+constexpr IO::Pin BATTERY_2_OK = IO::Pin::PB_5;
 
-// CAN pins
-constexpr IO::Pin CAN_RX_PIN = IO::Pin::PA_11;
-constexpr IO::Pin CAN_TX_PIN = IO::Pin::PA_12;
-
-constexpr IO::Pin LED_PIN = IO::Pin::PB_9;
-constexpr IO::Pin STANDBY_BUTTON_PIN = IO::Pin::PB_3;
+constexpr IO::Pin LED_PIN = IO::Pin::PA_10;
 
 constexpr uint32_t SPI_SPEED = SPI_SPEED_500KHZ;
 
@@ -71,6 +60,8 @@ void canInterrupt(IO::CANMessage& message, void* priv) {
     struct CANInterruptParams* params = (CANInterruptParams*) priv;
 
     EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage>* queue = params->queue;
+//    log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Received Message 0x%x", message.getId());
+
 
     if (message.getId() == ChargeController::CHARGER_STATUS_CAN_ID) {
         // Display the recieved current and voltage from the charger.
@@ -145,7 +136,6 @@ int main() {
     log::LOGGER.setUART(&uart);
 
     // GPIO pins
-    IO::GPIO& relayControl = IO::getGPIO<RELAY_CTL_PIN>(IO::GPIO::Direction::OUTPUT);
     IO::GPIO& statusLED = IO::getGPIO<LED_PIN>(IO::GPIO::Direction::OUTPUT);
     IO::GPIO* bmsOK[] = {
         &IO::getGPIO<BATTERY_1_OK>(IO::GPIO::Direction::INPUT),
@@ -154,8 +144,12 @@ int main() {
     uart.printf("GPIO Init\n\r");
 
     // Buttons
-    Debounce standbyButton(IO::getGPIO<STANDBY_BUTTON_PIN>(IO::GPIO::Direction::INPUT));
-    Debounce startButton(IO::getGPIO<START_BUTTON_PIN>(IO::GPIO::Direction::INPUT));
+    IO::GPIO& standbyButtonGPIO =  IO::getGPIO<STANDBY_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
+    IO::GPIO& startButtonGPIO =  IO::getGPIO<START_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
+
+    DEV::Button standbyButton = DEV::Button(standbyButtonGPIO);
+    DEV::Button startButton = DEV::Button(startButtonGPIO);
+
     uart.printf("Buttons Init\n\r");
 
     // LCD
@@ -178,7 +172,7 @@ int main() {
     // charge controller module instantiation
     BMSManager bms(can, bmsOK);
     LCDDisplay display(LCDRegisterSEL, LCDReset, spi);
-    ChargeController chargeController(bms, display, relayControl, can);
+    ChargeController chargeController(bms, display, can);
 
     uart.printf("Modules Initialized\n\r");
 
@@ -265,13 +259,16 @@ int main() {
     while (true) {
         chargeController.loop();
         bms.update();
-        if (standbyButton.read()) {
-            chargeController.stopCharging();
+
+        if (startButton.debounce(500)) {
+            log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Start Pressed");
+            if(chargeController.isCharging()) {
+                chargeController.stopCharging();
+            } else {
+                chargeController.startCharging();
+            }
         }
 
-        if (startButton.read()) {
-            chargeController.startCharging();
-        }
 
         if (bms.numConnected() != oldCount) {
             log::LOGGER.log(log::Logger::LogLevel::DEBUG, "%d batteries connected", bms.numConnected());
@@ -290,8 +287,6 @@ int main() {
 
             // Need to send heartbeat can message to the charger
             chargeController.sendChargerMessage();
-//            chargeController.receiveChargerStatus();
-
             lastHeartBeat = time::millis();
         }
 
