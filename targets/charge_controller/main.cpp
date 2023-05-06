@@ -64,11 +64,11 @@ void canInterrupt(IO::CANMessage& message, void* priv) {
 
 
     if (message.getId() == ChargeController::CHARGER_STATUS_CAN_ID) {
-        // Display the recieved current and voltage from the charger.
+        // Display the received current and voltage from the charger.
         uint16_t voltage = ((uint16_t) message.getPayload()[0] << 8) | message.getPayload()[1];
         uint16_t current = ((uint16_t) message.getPayload()[2] << 8) | message.getPayload()[3];
 
-        params->chargeController->setChargerValues(voltage, current);
+        params->chargeController->setDisplayChargerValues(voltage, current);
     }
 
     if (queue != nullptr)
@@ -147,7 +147,7 @@ int main() {
     IO::GPIO& standbyButtonGPIO =  IO::getGPIO<STANDBY_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
     IO::GPIO& startButtonGPIO =  IO::getGPIO<START_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
 
-    DEV::Button standbyButton = DEV::Button(standbyButtonGPIO);
+//    DEV::Button standbyButton = DEV::Button(standbyButtonGPIO);
     DEV::Button startButton = DEV::Button(startButtonGPIO);
 
     uart.printf("Buttons Init\n\r");
@@ -257,7 +257,7 @@ int main() {
     time::wait(500);
 
     while (true) {
-        chargeController.loop();
+        chargeController.process();
         bms.update();
 
         if (startButton.debounce(500)) {

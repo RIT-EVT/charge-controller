@@ -4,7 +4,7 @@
 namespace log = EVT::core::log;
 ChargeController::ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can) : bms(bms), display(display), can(can) {}
 
-void ChargeController::loop() {
+void ChargeController::process() {
     switch (state) {
         case ControllerStates::NO_BATTERY:
             display.setChargeControllerStatus("No Battery");
@@ -232,7 +232,7 @@ void ChargeController::sendChargerMessage() {
     }
 }
 
-void ChargeController::setChargerValues(uint16_t voltage, uint16_t current) {
+void ChargeController::setDisplayChargerValues(uint16_t voltage, uint16_t current) {
     display.setChargerVoltage(voltage);
     display.setChargerCurrent(current);
 }

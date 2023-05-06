@@ -54,8 +54,16 @@ public:
     static const uint32_t CHARGER_STATUS_CAN_ID = 0x18FF50E5;
 
     ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can);
+
+    /**
+     * Initialize the submodules of the Charge Controller
+     */
     void init();
-    void loop();
+
+    /**
+     * Process the Charge Controller state and update accordingly
+     */
+    void process();
 
     /**
      * Check the status of the BMS and if all the measurements are in spec
@@ -83,12 +91,20 @@ public:
     void stopCharging();
 
     /**
-     *
+     * Send the required message to the charger to tell it to keep charging.
      */
      void sendChargerMessage();
 
-     void setChargerValues(uint16_t voltage, uint16_t current);
+     /**
+      * Set's the charge controller voltages on the display
+      * @param voltage
+      * @param current
+      */
+     void setDisplayChargerValues(uint16_t voltage, uint16_t current);
 private:
+    /**
+     * Monitor the BMS when it is in a no battery state
+     */
     void noBatteryState();
 
     /**
