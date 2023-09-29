@@ -93,14 +93,15 @@ public:
     /**
      * Send the required message to the charger to tell it to keep charging.
      */
-     void sendChargerMessage();
+    void sendChargerMessage();
 
-     /**
+    /**
       * Set's the charge controller voltages on the display
       * @param voltage
       * @param current
       */
-     void setDisplayChargerValues(uint16_t voltage, uint16_t current);
+    void setDisplayChargerValues(uint16_t voltage, uint16_t current);
+
 private:
     /**
      * Monitor the BMS when it is in a no battery state

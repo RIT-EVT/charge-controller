@@ -7,15 +7,15 @@
 #include <EVT/dev/platform/f3xx/Timerf3xx.hpp> // TODO: clang will put this at the top causing compilation problem
 // clang-format on
 
-#include <EVT/io/CANopen.hpp>
 #include <Canopen/co_core.h>
 #include <Canopen/co_tmr.h>
+#include <EVT/io/CANopen.hpp>
 
+#include "EVT/dev/button.hpp"
 #include <charge_controller/ChargeController.hpp>
 #include <charge_controller/dev/BMSManager.hpp>
 #include <charge_controller/dev/Debounce.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
-#include "EVT/dev/button.hpp"
 
 namespace IO = EVT::core::IO;
 namespace DEV = EVT::core::DEV;
@@ -60,8 +60,7 @@ void canInterrupt(IO::CANMessage& message, void* priv) {
     struct CANInterruptParams* params = (CANInterruptParams*) priv;
 
     EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage>* queue = params->queue;
-//    log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Received Message 0x%x", message.getId());
-
+    //    log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Received Message 0x%x", message.getId());
 
     if (message.getId() == ChargeController::CHARGER_STATUS_CAN_ID) {
         // Display the received current and voltage from the charger.
@@ -74,7 +73,6 @@ void canInterrupt(IO::CANMessage& message, void* priv) {
     if (queue != nullptr)
         queue->append(message);
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // EVT-core CAN callback and CAN setup. This will include logic to set
@@ -121,7 +119,7 @@ extern "C" void COTmrLock(void) {}
 
 extern "C" void COTmrUnlock(void) {}
 
-extern "C" void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef *hcan) {
+extern "C" void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef* hcan) {
     log::LOGGER.log(log::Logger::LogLevel::DEBUG, "RX Full");
 }
 
@@ -139,15 +137,14 @@ int main() {
     IO::GPIO& statusLED = IO::getGPIO<LED_PIN>(IO::GPIO::Direction::OUTPUT);
     IO::GPIO* bmsOK[] = {
         &IO::getGPIO<BATTERY_1_OK>(IO::GPIO::Direction::INPUT),
-        &IO::getGPIO<BATTERY_2_OK>(IO::GPIO::Direction::INPUT)
-    };
+        &IO::getGPIO<BATTERY_2_OK>(IO::GPIO::Direction::INPUT)};
     uart.printf("GPIO Init\n\r");
 
     // Buttons
-    IO::GPIO& standbyButtonGPIO =  IO::getGPIO<STANDBY_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
-    IO::GPIO& startButtonGPIO =  IO::getGPIO<START_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
+    IO::GPIO& standbyButtonGPIO = IO::getGPIO<STANDBY_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
+    IO::GPIO& startButtonGPIO = IO::getGPIO<START_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
 
-//    DEV::Button standbyButton = DEV::Button(standbyButtonGPIO);
+    //    DEV::Button standbyButton = DEV::Button(standbyButtonGPIO);
     DEV::Button startButton = DEV::Button(startButtonGPIO);
 
     uart.printf("Buttons Init\n\r");
@@ -196,9 +193,8 @@ int main() {
     EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage> canOpenQueue;
 
     struct CANInterruptParams canParams = {
-            .queue = &canOpenQueue,
-            .chargeController = &chargeController
-    };
+        .queue = &canOpenQueue,
+        .chargeController = &chargeController};
     can.addIRQHandler(canInterrupt, reinterpret_cast<void*>(&canParams));
 
     // Reserved memory for CANopen stack usage
@@ -236,16 +232,16 @@ int main() {
 
     //setup CANopen Node
     CO_NODE_SPEC canSpec = {
-            .NodeId = BMSManager::NODE_ID,
-            .Baudrate = IO::CAN::DEFAULT_BAUD,
-            .Dict = bms.getObjectDictionary(),
-            .DictLen = bms.getObjectDictionarySize(),
-            .EmcyCode = NULL,
-            .TmrMem = appTmrMem,
-            .TmrNum = 16,
-            .TmrFreq = 100,
-            .Drv = &canStackDriver,
-            .SdoBuf = reinterpret_cast<uint8_t*>(&sdoBuffer[0]),
+        .NodeId = BMSManager::NODE_ID,
+        .Baudrate = IO::CAN::DEFAULT_BAUD,
+        .Dict = bms.getObjectDictionary(),
+        .DictLen = bms.getObjectDictionarySize(),
+        .EmcyCode = NULL,
+        .TmrMem = appTmrMem,
+        .TmrNum = 16,
+        .TmrFreq = 100,
+        .Drv = &canStackDriver,
+        .SdoBuf = reinterpret_cast<uint8_t*>(&sdoBuffer[0]),
     };
 
     CO_NODE canNode;
@@ -262,13 +258,12 @@ int main() {
 
         if (startButton.debounce(500)) {
             log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Start Pressed");
-            if(chargeController.isCharging()) {
+            if (chargeController.isCharging()) {
                 chargeController.stopCharging();
             } else {
                 chargeController.startCharging();
             }
         }
-
 
         if (bms.numConnected() != oldCount) {
             log::LOGGER.log(log::Logger::LogLevel::DEBUG, "%d batteries connected", bms.numConnected());

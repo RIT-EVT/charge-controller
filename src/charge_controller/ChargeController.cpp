@@ -6,26 +6,26 @@ ChargeController::ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN
 
 void ChargeController::process() {
     switch (state) {
-        case ControllerStates::NO_BATTERY:
-            display.setChargeControllerStatus("No Battery");
-            noBatteryState();
-            break;
-        case ControllerStates::CONNECTED:
-            display.setChargeControllerStatus("Connected");
-            connectedState();
-            break;
-        case ControllerStates::CHARGING:
-            display.setChargeControllerStatus("Charging");
-            chargingState();
-            break;
-        case ControllerStates::STANDBY:
-            display.setChargeControllerStatus("Standby");
-            standbyState();
-            break;
-        case ControllerStates::FAULT:
-            display.setChargeControllerStatus("Fault");
-            faultState();
-            break;
+    case ControllerStates::NO_BATTERY:
+        display.setChargeControllerStatus("No Battery");
+        noBatteryState();
+        break;
+    case ControllerStates::CONNECTED:
+        display.setChargeControllerStatus("Connected");
+        connectedState();
+        break;
+    case ControllerStates::CHARGING:
+        display.setChargeControllerStatus("Charging");
+        chargingState();
+        break;
+    case ControllerStates::STANDBY:
+        display.setChargeControllerStatus("Standby");
+        standbyState();
+        break;
+    case ControllerStates::FAULT:
+        display.setChargeControllerStatus("Fault");
+        faultState();
+        break;
     }
 
     if (bms.isConnected(0)) {
@@ -48,14 +48,14 @@ void ChargeController::process() {
 
     display.display();
 
-// Display the recieved current and voltage from the charger.
-//    uint16_t voltage = ((uint16_t) payload[1] << 8) | payload[0];
-//    uint16_t current = ((uint16_t) payload[3] << 8) | payload[2];
-//
-//    log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Payload: 0x%x, Current: %d. Voltage: %d", payload,  current, voltage);
-//
-//    display.setChargerCurrent(current);
-//    display.setChargerVoltage(voltage);
+    // Display the recieved current and voltage from the charger.
+    //    uint16_t voltage = ((uint16_t) payload[1] << 8) | payload[0];
+    //    uint16_t current = ((uint16_t) payload[3] << 8) | payload[2];
+    //
+    //    log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Payload: 0x%x, Current: %d. Voltage: %d", payload,  current, voltage);
+    //
+    //    display.setChargerCurrent(current);
+    //    display.setChargerVoltage(voltage);
 }
 
 uint8_t ChargeController::checkBMS() {
@@ -96,13 +96,13 @@ uint8_t ChargeController::checkBMS() {
 void ChargeController::noBatteryState() {
     if (changedState) {
         // Display no battery connected message on LCD
-//        relay.writePin(RELAY_OFF);
+        //        relay.writePin(RELAY_OFF);
         changedState = false;
     }
 
     // When battery gets connected change state to CONNECTED for setup and initial
     // check
-//    log::LOGGER.log(log::Logger::LogLevel::INFO, "Batt: %d", bms.numConnected());
+    //    log::LOGGER.log(log::Logger::LogLevel::INFO, "Batt: %d", bms.numConnected());
     if (bms.numConnected()) {
         changedState = true;
         state = ControllerStates::CONNECTED;
@@ -127,7 +127,7 @@ void ChargeController::connectedState() {
 
 void ChargeController::chargingState() {
     if (changedState) {
-//        relay.writePin(RELAY_ON);
+        //        relay.writePin(RELAY_ON);
         changedState = false;
     }
 
@@ -142,7 +142,7 @@ void ChargeController::chargingState() {
 
 void ChargeController::standbyState() {
     if (changedState) {
-//        relay.writePin(RELAY_OFF);
+        //        relay.writePin(RELAY_OFF);
         changedState = false;
     }
 
@@ -157,7 +157,7 @@ void ChargeController::standbyState() {
 
 void ChargeController::faultState() {
     if (changedState) {
-//        relay.writePin(RELAY_OFF);
+        //        relay.writePin(RELAY_OFF);
         changedState = false;
     }
 
@@ -171,7 +171,7 @@ void ChargeController::faultState() {
 }
 
 void ChargeController::init() {
-//    relay.writePin(RELAY_OFF);
+    //    relay.writePin(RELAY_OFF);
 }
 
 void ChargeController::startCharging() {
@@ -196,7 +196,7 @@ void ChargeController::sendChargerMessage() {
     uint16_t current = 0;
     uint8_t shouldCharge = 1;
 
-    if(state == ControllerStates::CHARGING) {
+    if (state == ControllerStates::CHARGING) {
         // Multiply by ten to get the right sized values
         voltage = 48 * 10;
         current = 60 * 10;
@@ -210,16 +210,15 @@ void ChargeController::sendChargerMessage() {
     uint8_t currentLSB = current;
 
     uint8_t payload[8] = {
-            voltageMSB,
-            voltageLSB,
-            currentMSB,
-            currentLSB,
-            shouldCharge,
-            // Padding Bytes
-            0x00,
-            0x00,
-            0x00
-    };
+        voltageMSB,
+        voltageLSB,
+        currentMSB,
+        currentLSB,
+        shouldCharge,
+        // Padding Bytes
+        0x00,
+        0x00,
+        0x00};
 
     log::LOGGER.log(log::Logger::LogLevel::INFO, "Requesting charging at %d volts with %d current.", voltage / 10, current / 10);
     IO::CANMessage chargerMessage = IO::CANMessage(0x1806E5F4, 8, payload, true);

@@ -348,6 +348,7 @@ public:
     static constexpr uint8_t MAX_BMS_PACKS = 2;
 
     static constexpr uint8_t NODE_ID = 16;
+
 private:
     /**
      * State for representing the BMS is not in an OK state to charge/discharge

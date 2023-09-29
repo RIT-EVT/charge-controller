@@ -23,9 +23,7 @@ bool BMSManager::isConnected(uint8_t packNum) {
 }
 
 bool BMSManager::faultDetected(uint8_t packNum) {
-    return bmsOK[packNum]->readPin() == BMS_NOT_OK ||
-    packs[packNum].data.status == BMSStatus::UNSAFE_CONDITIONS_ERROR ||
-    packs[packNum].data.status == BMSStatus::INITIALIZATION_ERROR;
+    return bmsOK[packNum]->readPin() == BMS_NOT_OK || packs[packNum].data.status == BMSStatus::UNSAFE_CONDITIONS_ERROR || packs[packNum].data.status == BMSStatus::INITIALIZATION_ERROR;
 }
 
 bool BMSManager::isCharging(uint8_t packNum) {

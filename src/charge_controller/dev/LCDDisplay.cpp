@@ -71,69 +71,69 @@ void LCDDisplay::setChargerCurrent(uint16_t current) {
 void LCDDisplay::setBatteryStatus(BMSManager::BMSStatus status, uint8_t index) {
     if (index == 0) {
         switch (status) {
-            case BMSManager::BMSStatus::START:
-                this->batteryOneStatus = "Start";
-                break;
-            case BMSManager::BMSStatus::INITIALIZATION_ERROR:
-                this->batteryOneStatus = "Init Error";
-                break;
-            case BMSManager::BMSStatus::FACTORY_INIT:
-                this->batteryOneStatus = "Fact Init";
-                break;
-            case BMSManager::BMSStatus::TRANSFER_SETTINGS:
-                this->batteryOneStatus = "Transf Sett";
-                break;
-            case BMSManager::BMSStatus::SYSTEM_READY:
-                this->batteryOneStatus = "Sys Ready";
-                break;
-            case BMSManager::BMSStatus::DEEP_SLEEP:
-                this->batteryOneStatus = "Deep Sleep";
-                break;
-            case BMSManager::BMSStatus::UNSAFE_CONDITIONS_ERROR:
-                this->batteryOneStatus = "UC Error";
-                break;
-            case BMSManager::BMSStatus::POWER_DELIVERY:
-                this->batteryOneStatus = "Pow Deli";
-                break;
-            case BMSManager::BMSStatus::CHARGING:
-                this->batteryOneStatus = "Charging";
-                break;
-            case BMSManager::BMSStatus::NOT_CONNECTED:
-                this->batteryOneStatus = "No Conn";
-                break;
+        case BMSManager::BMSStatus::START:
+            this->batteryOneStatus = "Start";
+            break;
+        case BMSManager::BMSStatus::INITIALIZATION_ERROR:
+            this->batteryOneStatus = "Init Error";
+            break;
+        case BMSManager::BMSStatus::FACTORY_INIT:
+            this->batteryOneStatus = "Fact Init";
+            break;
+        case BMSManager::BMSStatus::TRANSFER_SETTINGS:
+            this->batteryOneStatus = "Transf Sett";
+            break;
+        case BMSManager::BMSStatus::SYSTEM_READY:
+            this->batteryOneStatus = "Sys Ready";
+            break;
+        case BMSManager::BMSStatus::DEEP_SLEEP:
+            this->batteryOneStatus = "Deep Sleep";
+            break;
+        case BMSManager::BMSStatus::UNSAFE_CONDITIONS_ERROR:
+            this->batteryOneStatus = "UC Error";
+            break;
+        case BMSManager::BMSStatus::POWER_DELIVERY:
+            this->batteryOneStatus = "Pow Deli";
+            break;
+        case BMSManager::BMSStatus::CHARGING:
+            this->batteryOneStatus = "Charging";
+            break;
+        case BMSManager::BMSStatus::NOT_CONNECTED:
+            this->batteryOneStatus = "No Conn";
+            break;
         }
     } else if (index == 1) {
         switch (status) {
-            case BMSManager::BMSStatus::START:
-                this->batteryTwoStatus = "Start";
-                break;
-            case BMSManager::BMSStatus::INITIALIZATION_ERROR:
-                this->batteryTwoStatus = "Init Error";
-                break;
-            case BMSManager::BMSStatus::FACTORY_INIT:
-                this->batteryTwoStatus = "Fact Init";
-                break;
-            case BMSManager::BMSStatus::TRANSFER_SETTINGS:
-                this->batteryTwoStatus = "Transf Sett";
-                break;
-            case BMSManager::BMSStatus::SYSTEM_READY:
-                this->batteryTwoStatus = "Sys Ready";
-                break;
-            case BMSManager::BMSStatus::DEEP_SLEEP:
-                this->batteryTwoStatus = "Deep Sleep";
-                break;
-            case BMSManager::BMSStatus::UNSAFE_CONDITIONS_ERROR:
-                this->batteryTwoStatus = "UC Error";
-                break;
-            case BMSManager::BMSStatus::POWER_DELIVERY:
-                this->batteryTwoStatus = "Pow Deli";
-                break;
-            case BMSManager::BMSStatus::CHARGING:
-                this->batteryTwoStatus = "Charging";
-                break;
-            case BMSManager::BMSStatus::NOT_CONNECTED:
-                this->batteryTwoStatus = "No Conn";
-                break;
+        case BMSManager::BMSStatus::START:
+            this->batteryTwoStatus = "Start";
+            break;
+        case BMSManager::BMSStatus::INITIALIZATION_ERROR:
+            this->batteryTwoStatus = "Init Error";
+            break;
+        case BMSManager::BMSStatus::FACTORY_INIT:
+            this->batteryTwoStatus = "Fact Init";
+            break;
+        case BMSManager::BMSStatus::TRANSFER_SETTINGS:
+            this->batteryTwoStatus = "Transf Sett";
+            break;
+        case BMSManager::BMSStatus::SYSTEM_READY:
+            this->batteryTwoStatus = "Sys Ready";
+            break;
+        case BMSManager::BMSStatus::DEEP_SLEEP:
+            this->batteryTwoStatus = "Deep Sleep";
+            break;
+        case BMSManager::BMSStatus::UNSAFE_CONDITIONS_ERROR:
+            this->batteryTwoStatus = "UC Error";
+            break;
+        case BMSManager::BMSStatus::POWER_DELIVERY:
+            this->batteryTwoStatus = "Pow Deli";
+            break;
+        case BMSManager::BMSStatus::CHARGING:
+            this->batteryTwoStatus = "Charging";
+            break;
+        case BMSManager::BMSStatus::NOT_CONNECTED:
+            this->batteryTwoStatus = "No Conn";
+            break;
         }
     }
 }

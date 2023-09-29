@@ -23,6 +23,7 @@ public:
     bool read();
 
     bool isPressed = false;
+
 private:
     uint32_t debounceTime = DEFAULT_TIME;
     uint32_t lastPressed = time::millis();

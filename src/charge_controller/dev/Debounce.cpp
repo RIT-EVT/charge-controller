@@ -1,5 +1,5 @@
-#include <charge_controller/dev/Debounce.hpp>
 #include <EVT/utils/log.hpp>
+#include <charge_controller/dev/Debounce.hpp>
 
 namespace log = EVT::core::log;
 
