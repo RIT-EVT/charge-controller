@@ -99,18 +99,18 @@ private:
      * The 9 section headers to be displayed.
      */
     static constexpr char* SECTION_TITLES[12]{
-        "B1 Status",
-        "CC Status",
-        "B2 Status",
-        "B1 Voltage",
-        "Charge %",
-        "B2 Voltage",
-        "B1 Min T",
-        "C Voltage",
-        "B2 Min T",
-        "B1 Max T",
-        "C Current",
-        "B2 Max T",
+        (char*) "B1 Status",
+        (char*) "CC Status",
+        (char*) "B2 Status",
+        (char*) "B1 Voltage",
+        (char*) "Charge %",
+        (char*) "B2 Voltage",
+        (char*) "B1 Min T",
+        (char*) "C Voltage",
+        (char*) "B2 Min T",
+        (char*) "B1 Max T",
+        (char*) "C Current",
+        (char*) "B2 Max T",
     };
 
     /**
