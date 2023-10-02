@@ -72,7 +72,7 @@ void canInterrupt(IO::CANMessage& message, void* priv) {
     EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage>* queue = params->queue;
     //    log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Received Message 0x%x", message.getId());
 
-    if (message.getId() == ChargeController::CHARGER_STATUS_CAN_ID) {
+    if (message.getId() == CHARGER_STATUS_CAN_ID) {
         // Display the received current and voltage from the charger.
         uint16_t voltage = ((uint16_t) message.getPayload()[0] << 8) | message.getPayload()[1];
         uint16_t current = ((uint16_t) message.getPayload()[2] << 8) | message.getPayload()[3];
