@@ -37,6 +37,16 @@ constexpr IO::Pin ENCODER_B_PIN = IO::Pin::PA_9;
 constexpr IO::Pin BATTERY_1_OK_PIN = IO::Pin::PB_6;
 constexpr IO::Pin BATTERY_2_OK_PIN = IO::Pin::PB_5;
 
+constexpr IO::Pin LCD_REGISTER_SELECT_PIN = IO::Pin::PB_0;
+constexpr IO::Pin LCD_RESET_PINT = IO::Pin::PA_1;
+constexpr IO::Pin LCD_SPI_DEVICE_0_PIN = IO::Pin::PA_0;
+
+constexpr IO::Pin LCD_SPI_SCK = IO::Pin::PA_5;
+constexpr IO::Pin LCD_SPI_MOSI = IO::Pin::PA_7;
+
+constexpr IO::Pin CAN_TX = IO::Pin::PA_12;
+constexpr IO::Pin CAN_RX = IO::Pin::PA_11;
+
 constexpr IO::Pin LED_PIN = IO::Pin::PA_10;
 
 constexpr uint32_t SPI_SPEED = SPI_SPEED_500KHZ;
@@ -145,26 +155,26 @@ int main() {
     IO::GPIO& startButtonGPIO = IO::getGPIO<START_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
 
     //    DEV::Button standbyButton = DEV::Button(standbyButtonGPIO);
-    DEV::Button startButton = DEV::Button(startButtonGPIO);
+    DEV::Button startButton(startButtonGPIO);
 
     uart.printf("Buttons Init\n\r");
 
     // LCD
-    IO::GPIO& LCDRegisterSEL = IO::getGPIO<IO::Pin::PB_0>(IO::GPIO::Direction::OUTPUT);
-    IO::GPIO& LCDReset = IO::getGPIO<IO::Pin::PA_1>(IO::GPIO::Direction::OUTPUT);
+    IO::GPIO& LCDRegisterSEL = IO::getGPIO<LCD_REGISTER_SELECT_PIN>(IO::GPIO::Direction::OUTPUT);
+    IO::GPIO& LCDReset = IO::getGPIO<LCD_RESET_PINT>(IO::GPIO::Direction::OUTPUT);
 
-    devices[0] = &IO::getGPIO<IO::Pin::PA_0>(EVT::core::IO::GPIO::Direction::OUTPUT);
+    devices[0] = &IO::getGPIO<LCD_SPI_DEVICE_0_PIN>(EVT::core::IO::GPIO::Direction::OUTPUT);
     devices[0]->writePin(IO::GPIO::State::HIGH);
 
     uart.printf("LCD Init\n\r");
 
     // Spi
-    IO::SPI& spi = IO::getSPI<IO::Pin::PA_5, IO::Pin::PA_7>(devices, 1);
+    IO::SPI& spi = IO::getSPI<LCD_SPI_SCK, LCD_SPI_MOSI>(devices, 1);
     spi.configureSPI(SPI_SPEED, SPI_MODE0, SPI_MSB_FIRST);
     uart.printf("Spi Init\n\r");
 
     // Initialize CAN, add an IRQ which will add messages to the queue above
-    IO::CAN& can = IO::getCAN<IO::Pin::PA_12, IO::Pin::PA_11>();
+    IO::CAN& can = IO::getCAN<CAN_TX, CAN_RX>();
 
     // charge controller module instantiation
     BMSManager bms(can, bmsOK);

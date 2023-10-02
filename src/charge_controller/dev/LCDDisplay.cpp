@@ -24,38 +24,39 @@ void LCDDisplay::display() {
 
     lcd.setTextForSection(2, batteryTwoStatus);
 
-    char batteryOneVolt[16];
+    char batteryOneVolt[16] = { 0 };
     std::sprintf(batteryOneVolt, "%d V", batteryMinVoltages[0]);
     lcd.setTextForSection(3, batteryOneVolt);
-    char percentage[16];
+    
+    char percentage[16] = { 0 };
     std::sprintf(percentage, "%d.%02d", chargePercentage / 100, chargePercentage % 100);
     lcd.setTextForSection(4, percentage);
 
-    char batteryTwoVolt[16];
+    char batteryTwoVolt[16] = { 0 };
     std::sprintf(batteryTwoVolt, "%d V", batteryMinVoltages[1]);
     lcd.setTextForSection(5, batteryTwoVolt);
 
-    char bat1MinTemp[16];
+    char bat1MinTemp[16] = { 0 };
     std::sprintf(bat1MinTemp, "%d C", batteryMinTemps[0]);
     lcd.setTextForSection(6, bat1MinTemp);
 
-    char chargerVoltage[16];
+    char chargerVoltage[16] = { 0 };
     std::sprintf(chargerVoltage, "%d.%d V", chargeControllerVoltage / 10, chargeControllerVoltage % 10);
     lcd.setTextForSection(7, chargerVoltage);
 
-    char bat2MinTemp[16];
+    char bat2MinTemp[16] = { 0 };
     std::sprintf(bat2MinTemp, "%d C", batteryMinTemps[1]);
     lcd.setTextForSection(8, bat2MinTemp);
 
-    char bat1MaxTemp[16];
+    char bat1MaxTemp[16] = { 0 };
     std::sprintf(bat1MaxTemp, "%d C", batteryMaxTemps[0]);
     lcd.setTextForSection(9, bat1MaxTemp);
 
-    char currentDisplay[16];
+    char currentDisplay[16] = { 0 };
     std::sprintf(currentDisplay, "%d.%d A", chargeControllerCurrent / 10, chargeControllerCurrent % 10);
     lcd.setTextForSection(10, currentDisplay);
 
-    char bat2MaxTemp[16];
+    char bat2MaxTemp[16] = { 0 };
     std::sprintf(bat2MaxTemp, "%d C", batteryMaxTemps[1]);
     lcd.setTextForSection(11, bat2MaxTemp);
 }
