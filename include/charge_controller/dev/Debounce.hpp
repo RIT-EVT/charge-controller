@@ -33,7 +33,6 @@ private:
     IO::GPIO::State pressedState = IO::GPIO::State::HIGH;
     IO::GPIO::State lastState;
     IO::GPIO::State state;
-
 };
 
 #endif// DEBOUNCE_HPP

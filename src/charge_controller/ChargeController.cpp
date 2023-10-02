@@ -199,13 +199,13 @@ void ChargeController::sendChargerMessage() {
      */
     uint16_t voltage = 0;
     uint16_t current = 0;
-    uint8_t stopCharging = 1; // Stop Charging
+    uint8_t stopCharging = 1;// Stop Charging
 
     if (state == ControllerStates::CHARGING) {
         // Multiply by ten to get the right sized values
         voltage = 48 * 10;
         current = 60 * 10;
-        stopCharging = 0; // Start Charging
+        stopCharging = 0;// Start Charging
     }
 
     uint8_t voltageMSB = voltage >> 8;

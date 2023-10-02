@@ -27,7 +27,6 @@
 
 #define CHARGER_STATUS_CAN_ID 0x18FF50E5
 
-
 /**
  * https://elconchargers.com/?page_id=98
  * https://www.diyelectriccar.com/threads/setting-up-can-bus-for-elcon-charger.202419/
