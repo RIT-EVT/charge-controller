@@ -192,15 +192,20 @@ void ChargeController::stopCharging() {
 }
 
 void ChargeController::sendChargerMessage() {
+    /*
+     * The following function may be confusing because it requires the use of
+     * raw CAN messages. This is because of how the Elcon CAN specification
+     * operates. The specification is documented in `datasheets/Elcon CAN Specification.pdf`
+     */
     uint16_t voltage = 0;
     uint16_t current = 0;
-    uint8_t shouldCharge = 1;
+    uint8_t shouldCharge = 1; // Stop Charging
 
     if (state == ControllerStates::CHARGING) {
         // Multiply by ten to get the right sized values
         voltage = 48 * 10;
         current = 60 * 10;
-        shouldCharge = 0;
+        shouldCharge = 0; // Start Charging
     }
 
     uint8_t voltageMSB = voltage >> 8;

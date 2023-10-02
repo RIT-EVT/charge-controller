@@ -29,6 +29,10 @@
 
 
 /**
+ * https://elconchargers.com/?page_id=98
+ * https://www.diyelectriccar.com/threads/setting-up-can-bus-for-elcon-charger.202419/
+ *
+ * The page this information came from is no longer available...
  * MANUFACTURER MESSAGE ABOUT CAN
  *
  * 1.8KW and 3.3KW chargers use 250Kbps baud rate and 29-bit extended frame CAN ID.  6.6KW chargers use 500Kbps.
