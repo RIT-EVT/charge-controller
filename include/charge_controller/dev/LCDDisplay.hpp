@@ -79,19 +79,13 @@ private:
     uint16_t chargeControllerVoltage = 0;
     /** The current that is being supplied */
     uint16_t chargeControllerCurrent = 0;
-    /** The current battery one voltage */
-    int16_t batteryOneVoltage = 0;
-    /** The current battery two voltage */
-    int16_t batteryTwoVoltage = 0;
 
-    /** The minimum temperature for battery one */
-    int16_t batteryOneMinTemp = 0;
-    /** The maximum temperature for battery one */
-    int16_t batteryOneMaxTemp = 0;
-    /** The minimum temperature for battery two */
-    int16_t batteryTwoMinTemp = 0;
-    /** The maximum temperature for battery two */
-    int16_t batteryTwoMaxTemp = 0;
+    int16_t batteryMinVoltages[2] = {};
+    int16_t batteryMaxVoltages[2] = {};
+
+    int16_t batteryMinTemps[2] = {};
+    int16_t batteryMaxTemps[2] = {};
+
     /** How charged the batteries currently are. */
     const uint8_t chargePercentage = 0;
 

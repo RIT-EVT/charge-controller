@@ -25,18 +25,18 @@ void LCDDisplay::display() {
     lcd.setTextForSection(2, batteryTwoStatus);
 
     char batteryOneVolt[16];
-    std::sprintf(batteryOneVolt, "%d V", batteryOneVoltage);
+    std::sprintf(batteryOneVolt, "%d V", batteryMinVoltages[0]);
     lcd.setTextForSection(3, batteryOneVolt);
     char percentage[16];
     std::sprintf(percentage, "%d.%02d", chargePercentage / 100, chargePercentage % 100);
     lcd.setTextForSection(4, percentage);
 
     char batteryTwoVolt[16];
-    std::sprintf(batteryTwoVolt, "%d V", batteryTwoVoltage);
+    std::sprintf(batteryTwoVolt, "%d V", batteryMinVoltages[1]);
     lcd.setTextForSection(5, batteryTwoVolt);
 
     char bat1MinTemp[16];
-    std::sprintf(bat1MinTemp, "%d C", batteryOneMinTemp);
+    std::sprintf(bat1MinTemp, "%d C", batteryMinTemps[0]);
     lcd.setTextForSection(6, bat1MinTemp);
 
     char chargerVoltage[16];
@@ -44,11 +44,11 @@ void LCDDisplay::display() {
     lcd.setTextForSection(7, chargerVoltage);
 
     char bat2MinTemp[16];
-    std::sprintf(bat2MinTemp, "%d C", batteryTwoMinTemp);
+    std::sprintf(bat2MinTemp, "%d C", batteryMinTemps[1]);
     lcd.setTextForSection(8, bat2MinTemp);
 
     char bat1MaxTemp[16];
-    std::sprintf(bat1MaxTemp, "%d C", batteryOneMaxTemp);
+    std::sprintf(bat1MaxTemp, "%d C", batteryMaxTemps[0]);
     lcd.setTextForSection(9, bat1MaxTemp);
 
     char currentDisplay[16];
@@ -56,7 +56,7 @@ void LCDDisplay::display() {
     lcd.setTextForSection(10, currentDisplay);
 
     char bat2MaxTemp[16];
-    std::sprintf(bat2MaxTemp, "%d C", batteryTwoMaxTemp);
+    std::sprintf(bat2MaxTemp, "%d C", batteryMaxTemps[1]);
     lcd.setTextForSection(11, bat2MaxTemp);
 }
 
@@ -140,32 +140,32 @@ void LCDDisplay::setBatteryStatus(BMSManager::BMSStatus status, uint8_t index) {
 
 void LCDDisplay::setMinCellVoltage(int16_t cellVoltage, uint8_t index) {
     if (index == 0) {
-        batteryOneVoltage = cellVoltage;
+        batteryMinVoltages[0] = cellVoltage;
     } else if (index == 1) {
-        batteryTwoVoltage = cellVoltage;
+        batteryMinVoltages[1] = cellVoltage;
     }
 }
 
 void LCDDisplay::setMaxCellVoltage(int16_t cellVoltage, uint8_t index) {
     if (index == 0) {
-        batteryOneVoltage = cellVoltage;
+        batteryMaxVoltages[0] = cellVoltage;
     } else if (index == 1) {
-        batteryTwoVoltage = cellVoltage;
+        batteryMaxVoltages[1] = cellVoltage;
     }
 }
 
 void LCDDisplay::setMinTemp(int16_t temp, uint8_t index) {
     if (index == 0) {
-        batteryOneMinTemp = temp;
+        batteryMinTemps[0] = temp;
     } else if (index == 1) {
-        batteryTwoMinTemp = temp;
+        batteryMinTemps[1] = temp;
     }
 }
 
 void LCDDisplay::setMaxTemp(int16_t temp, uint8_t index) {
     if (index == 0) {
-        batteryOneMaxTemp = temp;
+        batteryMaxTemps[0] = temp;
     } else if (index == 1) {
-        batteryTwoMaxTemp = temp;
+        batteryMaxTemps[1] = temp;
     }
 }

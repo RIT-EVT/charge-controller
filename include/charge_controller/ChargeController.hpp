@@ -25,9 +25,12 @@
 #define BAD_MIN_TEMP 0x10
 #define BAD_FAULT_STATE 0x20
 
+#define CHARGER_STATUS_CAN_ID 0x18FF50E5
+
+
 /**
  * MANUFACTURER MESSAGE ABOUT CAN
- * The Elcon CAN bus specification is attached.  It complies with CAN 2.0B and J1939 protocols.
+ *
  * 1.8KW and 3.3KW chargers use 250Kbps baud rate and 29-bit extended frame CAN ID.  6.6KW chargers use 500Kbps.
  * The charger expects every second to receive a CAN message from the BMS with CAN ID 1806E5F4 and
  * 8 data bytes with voltage and current required.  For example 98V and 16A would be 980 = 03D4 hex and 0160 = 00A0 hex
@@ -50,8 +53,6 @@ public:
         STANDBY,
         FAULT
     };
-
-    static const uint32_t CHARGER_STATUS_CAN_ID = 0x18FF50E5;
 
     ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can);
 
