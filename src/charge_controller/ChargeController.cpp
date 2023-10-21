@@ -2,7 +2,7 @@
 #include <charge_controller/ChargeController.hpp>
 
 namespace log = EVT::core::log;
-ChargeController::ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can) : bms(bms), display(display), can(can) {}
+ChargeController::ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can, DEV::Button& startButton, IO::GPIO* statusLED, IO::UART* uart) : bms(bms), display(display), can(can), startButton(startButton), statusLED(statusLED), uart(uart) {}
 
 void ChargeController::process() {
     switch (state) {
@@ -48,6 +48,40 @@ void ChargeController::process() {
 
     display.display();
 
+    bms.update();
+
+    if (startButton.debounce(500)) {
+        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Start Pressed");
+        if (isCharging()) {
+            stopCharging();
+        } else {
+            startCharging();
+        }
+    }
+
+    if (bms.numConnected() != oldCount) {
+        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "%d batteries connected", bms.numConnected());
+        oldCount = bms.numConnected();
+    }
+
+    log::LOGGER.log(log::Logger::LogLevel::DEBUG, "works part1 ?");
+
+    if (time::millis() - lastHeartBeat > HEARBEAT_INTERVAL) {
+        switch (statusLED->readPin()) {
+        case IO::GPIO::State::LOW:
+            statusLED->writePin(IO::GPIO::State::HIGH);
+            break;
+        case IO::GPIO::State::HIGH:
+            statusLED->writePin(IO::GPIO::State::LOW);
+            break;
+        }
+
+        // Need to send heartbeat can message to the charger
+        sendChargerMessage();
+        lastHeartBeat = time::millis();
+        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "works part2 ?");
+    }
+
     // Display the recieved current and voltage from the charger.
     //    uint16_t voltage = ((uint16_t) payload[1] << 8) | payload[0];
     //    uint16_t current = ((uint16_t) payload[3] << 8) | payload[2];
@@ -59,32 +93,49 @@ void ChargeController::process() {
 }
 
 uint8_t ChargeController::checkBMS() {
-    bool status = 0;
+    uint8_t status = 0;
 
-    for (int i = 0; i < BMSManager::MAX_BMS_PACKS; i++) {
-        if (bms.isConnected(i)) {
-            if (!CHECK_IN_RANGE(bms.getBatteryVoltage(i), MAX_PACK_VOLTAGE, MIN_PACK_VOLTAGE)) {
-                status |= BAD_PACK_VOLTAGE;
-            }
-            if (!CHECK_IN_RANGE(bms.getMaxCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)) {
-                status |= BAD_MAX_CELL_VOLTAGE;
-            }
-            if (!CHECK_IN_RANGE(bms.getMinCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)) {
-                status |= BAD_MIN_CELL_VOLTAGE;
-            }
-            if (!CHECK_IN_RANGE(bms.getBatteryMaxTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)) {
-                status |= BAD_MAX_TEMP;
-            }
-            if (!CHECK_IN_RANGE(bms.getBatteryMinTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)) {
-                status |= BAD_MIN_TEMP;
-            }
+    /*
+    TODO: was faulting on bms.getMaxCellVoltage(i)
+     max voltage is 12000
+     bms.getMaxCellVoltage(i) returned 25871
+     */
 
-            if (bms.faultDetected(i)) {
-                log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Fault State, Pack (%d)", i);
-                status |= BAD_FAULT_STATE;
-            }
-        }
-    }
+//    for (int i = 0; i < BMSManager::MAX_BMS_PACKS; i++) {
+//        if (bms.isConnected(i)) {
+//            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery %d", i);
+//            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery Voltage: %d", bms.getBatteryVoltage(i));
+//            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery MaxCellVoltage: %d", bms.getMaxCellVoltage(i));
+//            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery MinCellVoltage: %d", bms.getMinCellVoltage(i));
+//            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery BatteryMaxTemp: %d", bms.getBatteryMaxTemp(i));
+//            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery BatteryMinTemp: %d", bms.getBatteryMinTemp(i));
+//
+//            if (!CHECK_IN_RANGE(bms.getBatteryVoltage(i), MAX_PACK_VOLTAGE, MIN_PACK_VOLTAGE)) {
+//                //log::LOGGER.log(log::Logger::LogLevel::ERROR, "Pack Voltage %d: %d", i, bms.getBatteryVoltage(i));
+//
+//                status |= BAD_PACK_VOLTAGE;
+//            }
+//            if (!CHECK_IN_RANGE(bms.getMaxCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)) {
+//                //log::LOGGER.log(log::Logger::LogLevel::ERROR, "Max Cell Voltage %d: %d", i, bms.getMaxCellVoltage(i));
+//
+//                status |= BAD_MAX_CELL_VOLTAGE;
+//            }
+//            if (!CHECK_IN_RANGE(bms.getMinCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)) {
+//                status |= BAD_MIN_CELL_VOLTAGE;
+//            }
+//            if (!CHECK_IN_RANGE(bms.getBatteryMaxTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)) {
+//                status |= BAD_MAX_TEMP;
+//            }
+//            if (!CHECK_IN_RANGE(bms.getBatteryMinTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)) {
+//                status |= BAD_MIN_TEMP;
+//            }
+//
+//            if (bms.faultDetected(i)) {
+//                log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Fault State, Pack (%d)", i);
+//                status |= BAD_FAULT_STATE;
+//            }
+//        }
+//    }
 
     return status;
 }
@@ -107,6 +158,7 @@ void ChargeController::noBatteryState() {
         changedState = true;
         state = ControllerStates::CONNECTED;
     }
+//    uart->printf("noBatteryState: %d", state);
 }
 
 void ChargeController::connectedState() {
@@ -123,6 +175,7 @@ void ChargeController::connectedState() {
         changedState = true;
         state = ControllerStates::FAULT;
     }
+//    uart->printf("connectedState: %d\n", state);
 }
 
 void ChargeController::chargingState() {
@@ -138,6 +191,7 @@ void ChargeController::chargingState() {
         changedState = true;
         state = ControllerStates::FAULT;
     }
+//    uart->printf("chargingState: %d\n", state);
 }
 
 void ChargeController::standbyState() {
@@ -151,6 +205,7 @@ void ChargeController::standbyState() {
         state = ControllerStates::NO_BATTERY;
     } else if (checkBMS() != 0) {
         changedState = true;
+        log::LOGGER.log(log::Logger::LogLevel::ERROR, "checkBMS: %d", checkBMS());
         state = ControllerStates::FAULT;
     }
 }
@@ -203,7 +258,7 @@ void ChargeController::sendChargerMessage() {
 
     if (state == ControllerStates::CHARGING) {
         // Multiply by ten to get the right sized values
-        voltage = 48 * 10;
+        voltage = 96 * 10; // This is for charging in a series
         current = 60 * 10;
         stopCharging = 0;// Start Charging
     }
@@ -234,6 +289,7 @@ void ChargeController::sendChargerMessage() {
     } else {
         log::LOGGER.log(log::Logger::LogLevel::INFO, "Transmitted request to charge controller");
     }
+    log::LOGGER.log(log::Logger::LogLevel::INFO, "Current status: %d", status);
 }
 
 void ChargeController::setDisplayChargerValues(uint16_t voltage, uint16_t current) {

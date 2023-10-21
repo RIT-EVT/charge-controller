@@ -465,7 +465,7 @@ private:
         GEN_PACK_DATA(0, packs[0].data)
 
         // Pack 2 Data
-        GEN_PACK_DATA(0, packs[1].data)
+        GEN_PACK_DATA(1, packs[1].data)
 
         // End of dictionary marker
         CO_OBJ_DIR_ENDMARK,
