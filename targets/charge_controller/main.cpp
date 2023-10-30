@@ -68,7 +68,6 @@ void canInterrupt(IO::CANMessage& message, void* priv) {
     struct CANInterruptParams* params = (CANInterruptParams*) priv;
 
     EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage>* queue = params->queue;
-    //    log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Received Message 0x%x", message.getId());
 
     if (message.getId() == CHARGER_STATUS_CAN_ID) {
         // Display the received current and voltage from the charger.
@@ -149,7 +148,6 @@ int main() {
     uart.printf("GPIO Init\n\r");
 
     // Buttons
-    //    IO::GPIO& standbyButtonGPIO =  IO::getGPIO<STANDBY_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
     IO::GPIO& startButtonGPIO = IO::getGPIO<START_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
 
     //    DEV::Button standbyButton = DEV::Button(standbyButtonGPIO);
@@ -187,7 +185,6 @@ int main() {
 
     display.init();
     chargeController.init();
-//    uint32_t lastHeartBeat = time::millis();
 
     uart.printf("Finished Inits!\r\n");
 

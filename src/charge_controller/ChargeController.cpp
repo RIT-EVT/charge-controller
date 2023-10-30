@@ -81,15 +81,6 @@ void ChargeController::process() {
         lastHeartBeat = time::millis();
         log::LOGGER.log(log::Logger::LogLevel::DEBUG, "works part2 ?");
     }
-
-    // Display the recieved current and voltage from the charger.
-    //    uint16_t voltage = ((uint16_t) payload[1] << 8) | payload[0];
-    //    uint16_t current = ((uint16_t) payload[3] << 8) | payload[2];
-    //
-    //    log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Payload: 0x%x, Current: %d. Voltage: %d", payload,  current, voltage);
-    //
-    //    display.setChargerCurrent(current);
-    //    display.setChargerVoltage(voltage);
 }
 
 uint8_t ChargeController::checkBMS() {
@@ -100,6 +91,8 @@ uint8_t ChargeController::checkBMS() {
      max voltage is 12000
      bms.getMaxCellVoltage(i) returned 25871
      */
+
+
 
 //    for (int i = 0; i < BMSManager::MAX_BMS_PACKS; i++) {
 //        if (bms.isConnected(i)) {
@@ -158,7 +151,6 @@ void ChargeController::noBatteryState() {
         changedState = true;
         state = ControllerStates::CONNECTED;
     }
-//    uart->printf("noBatteryState: %d", state);
 }
 
 void ChargeController::connectedState() {
@@ -175,7 +167,6 @@ void ChargeController::connectedState() {
         changedState = true;
         state = ControllerStates::FAULT;
     }
-//    uart->printf("connectedState: %d\n", state);
 }
 
 void ChargeController::chargingState() {
@@ -191,7 +182,6 @@ void ChargeController::chargingState() {
         changedState = true;
         state = ControllerStates::FAULT;
     }
-//    uart->printf("chargingState: %d\n", state);
 }
 
 void ChargeController::standbyState() {
@@ -296,15 +286,3 @@ void ChargeController::setDisplayChargerValues(uint16_t voltage, uint16_t curren
     display.setChargerVoltage(voltage);
     display.setChargerCurrent(current);
 }
-
-//void ChargeController::receiveChargerStatus() {
-//    IO::CAN::CANStatus status = can.receive(&chargerStatusMessage);
-//
-//    if (status == IO::CAN::CANStatus::ERROR) {
-//        log::LOGGER.log(log::Logger::LogLevel::INFO, "Error receiving status %d", status);
-//    } else if (status == IO::CAN::CANStatus::TIMEOUT) {
-//        log::LOGGER.log(log::Logger::LogLevel::INFO, "Charger status timed out, data not in message queue");
-//    } else {
-//        log::LOGGER.log(log::Logger::LogLevel::INFO, "Status successfully received!");
-//    }
-//}
