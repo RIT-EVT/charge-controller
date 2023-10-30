@@ -92,43 +92,41 @@ uint8_t ChargeController::checkBMS() {
      bms.getMaxCellVoltage(i) returned 25871
      */
 
-
-
-//    for (int i = 0; i < BMSManager::MAX_BMS_PACKS; i++) {
-//        if (bms.isConnected(i)) {
-//            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery %d", i);
-//            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery Voltage: %d", bms.getBatteryVoltage(i));
-//            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery MaxCellVoltage: %d", bms.getMaxCellVoltage(i));
-//            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery MinCellVoltage: %d", bms.getMinCellVoltage(i));
-//            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery BatteryMaxTemp: %d", bms.getBatteryMaxTemp(i));
-//            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery BatteryMinTemp: %d", bms.getBatteryMinTemp(i));
-//
-//            if (!CHECK_IN_RANGE(bms.getBatteryVoltage(i), MAX_PACK_VOLTAGE, MIN_PACK_VOLTAGE)) {
-//                //log::LOGGER.log(log::Logger::LogLevel::ERROR, "Pack Voltage %d: %d", i, bms.getBatteryVoltage(i));
-//
-//                status |= BAD_PACK_VOLTAGE;
-//            }
-//            if (!CHECK_IN_RANGE(bms.getMaxCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)) {
-//                //log::LOGGER.log(log::Logger::LogLevel::ERROR, "Max Cell Voltage %d: %d", i, bms.getMaxCellVoltage(i));
-//
-//                status |= BAD_MAX_CELL_VOLTAGE;
-//            }
-//            if (!CHECK_IN_RANGE(bms.getMinCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)) {
-//                status |= BAD_MIN_CELL_VOLTAGE;
-//            }
-//            if (!CHECK_IN_RANGE(bms.getBatteryMaxTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)) {
-//                status |= BAD_MAX_TEMP;
-//            }
-//            if (!CHECK_IN_RANGE(bms.getBatteryMinTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)) {
-//                status |= BAD_MIN_TEMP;
-//            }
-//
-//            if (bms.faultDetected(i)) {
-//                log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Fault State, Pack (%d)", i);
-//                status |= BAD_FAULT_STATE;
-//            }
-//        }
-//    }
+    //    for (int i = 0; i < BMSManager::MAX_BMS_PACKS; i++) {
+    //        if (bms.isConnected(i)) {
+    //            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery %d", i);
+    //            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery Voltage: %d", bms.getBatteryVoltage(i));
+    //            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery MaxCellVoltage: %d", bms.getMaxCellVoltage(i));
+    //            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery MinCellVoltage: %d", bms.getMinCellVoltage(i));
+    //            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery BatteryMaxTemp: %d", bms.getBatteryMaxTemp(i));
+    //            log::LOGGER.log(log::Logger::LogLevel::INFO, "Battery BatteryMinTemp: %d", bms.getBatteryMinTemp(i));
+    //
+    //            if (!CHECK_IN_RANGE(bms.getBatteryVoltage(i), MAX_PACK_VOLTAGE, MIN_PACK_VOLTAGE)) {
+    //                //log::LOGGER.log(log::Logger::LogLevel::ERROR, "Pack Voltage %d: %d", i, bms.getBatteryVoltage(i));
+    //
+    //                status |= BAD_PACK_VOLTAGE;
+    //            }
+    //            if (!CHECK_IN_RANGE(bms.getMaxCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)) {
+    //                //log::LOGGER.log(log::Logger::LogLevel::ERROR, "Max Cell Voltage %d: %d", i, bms.getMaxCellVoltage(i));
+    //
+    //                status |= BAD_MAX_CELL_VOLTAGE;
+    //            }
+    //            if (!CHECK_IN_RANGE(bms.getMinCellVoltage(i), MAX_CELL_VOLTAGE, MIN_CELL_VOLTAGE)) {
+    //                status |= BAD_MIN_CELL_VOLTAGE;
+    //            }
+    //            if (!CHECK_IN_RANGE(bms.getBatteryMaxTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)) {
+    //                status |= BAD_MAX_TEMP;
+    //            }
+    //            if (!CHECK_IN_RANGE(bms.getBatteryMinTemp(i), MAX_TEMPERATURE, MIN_TEMPERATURE)) {
+    //                status |= BAD_MIN_TEMP;
+    //            }
+    //
+    //            if (bms.faultDetected(i)) {
+    //                log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Fault State, Pack (%d)", i);
+    //                status |= BAD_FAULT_STATE;
+    //            }
+    //        }
+    //    }
 
     return status;
 }
@@ -248,7 +246,7 @@ void ChargeController::sendChargerMessage() {
 
     if (state == ControllerStates::CHARGING) {
         // Multiply by ten to get the right sized values
-        voltage = 96 * 10; // This is for charging in a series
+        voltage = 96 * 10;// This is for charging in a series
         current = 60 * 10;
         stopCharging = 0;// Start Charging
     }

@@ -4,10 +4,10 @@
 #include <EVT/io/CAN.hpp>
 #include <EVT/io/CANopen.hpp>
 
+#include "EVT/dev/button.hpp"
 #include <EVT/io/GPIO.hpp>
 #include <charge_controller/dev/BMSManager.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
-#include "EVT/dev/button.hpp"
 
 namespace time = EVT::core::time;
 namespace DEV = EVT::core::DEV;
