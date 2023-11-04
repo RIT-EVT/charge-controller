@@ -246,7 +246,7 @@ void ChargeController::sendChargerMessage() {
 
     if (state == ControllerStates::CHARGING) {
         // Multiply by ten to get the right sized values
-        voltage = 96 * 10;// This is for charging in a series
+        voltage = 96 * 10;// This is for charging in series
         current = 60 * 10;
         stopCharging = 0;// Start Charging
     }
