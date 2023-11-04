@@ -67,12 +67,12 @@ void ChargeController::process() {
     log::LOGGER.log(log::Logger::LogLevel::DEBUG, "works part1 ?");
 
     if (time::millis() - lastHeartBeat > HEARBEAT_INTERVAL) {
-        switch (statusLED->readPin()) {
+        switch (statusLED.readPin()) {
         case IO::GPIO::State::LOW:
-            statusLED->writePin(IO::GPIO::State::HIGH);
+            statusLED.writePin(IO::GPIO::State::HIGH);
             break;
         case IO::GPIO::State::HIGH:
-            statusLED->writePin(IO::GPIO::State::LOW);
+            statusLED.writePin(IO::GPIO::State::LOW);
             break;
         }
 
