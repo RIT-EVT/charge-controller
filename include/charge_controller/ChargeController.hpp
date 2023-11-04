@@ -63,7 +63,7 @@ public:
         FAULT
     };
 
-    ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can, DEV::Button& startButton, IO::GPIO* statusLED, IO::UART* uart);
+    ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can, DEV::Button& startButton, IO::GPIO* statusLED);
 
     /**
      * Initialize the submodules of the Charge Controller
@@ -143,7 +143,6 @@ private:
     IO::CAN& can;
     DEV::Button& startButton;
     IO::GPIO* statusLED;
-    IO::UART* uart;
 
     uint32_t lastHeartBeat = time::millis();
     uint8_t oldCount = 0;
