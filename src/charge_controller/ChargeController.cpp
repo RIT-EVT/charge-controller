@@ -2,7 +2,7 @@
 #include <charge_controller/ChargeController.hpp>
 
 namespace log = EVT::core::log;
-ChargeController::ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can, DEV::Button& startButton, IO::GPIO* statusLED) : bms(bms), display(display), can(can), startButton(startButton), statusLED(statusLED) {}
+ChargeController::ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can, DEV::Button& startButton, IO::GPIO& statusLED) : bms(bms), display(display), can(can), startButton(startButton), statusLED(statusLED) {}
 
 void ChargeController::process() {
     switch (state) {
