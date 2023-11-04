@@ -175,7 +175,7 @@ int main() {
     // charge controller module instantiation
     BMSManager bms(can, bmsOK);
     LCDDisplay display(LCDRegisterSEL, LCDReset, spi);
-    ChargeController chargeController(bms, display, can, startButton, &statusLED, &uart);
+    ChargeController chargeController(bms, display, can, startButton, statusLED);
 
     uart.printf("Modules Initialized\n\r");
 
