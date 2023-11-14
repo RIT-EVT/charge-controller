@@ -64,8 +64,6 @@ void ChargeController::process() {
         oldCount = bms.numConnected();
     }
 
-    log::LOGGER.log(log::Logger::LogLevel::DEBUG, "works part1 ?");
-
     if (time::millis() - lastHeartBeat > HEARBEAT_INTERVAL) {
         switch (statusLED.readPin()) {
         case IO::GPIO::State::LOW:
@@ -79,7 +77,6 @@ void ChargeController::process() {
         // Need to send heartbeat can message to the charger
         sendChargerMessage();
         lastHeartBeat = time::millis();
-        log::LOGGER.log(log::Logger::LogLevel::DEBUG, "works part2 ?");
     }
 }
 
