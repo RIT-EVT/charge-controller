@@ -23,8 +23,6 @@ namespace time = EVT::core::time;
 namespace log = EVT::core::log;
 namespace platform = EVT::core::platform;
 
-#define HEARTBEAT_INTERVAL 1000
-
 // IO pins
 constexpr IO::Pin STANDBY_BUTTON_PIN = IO::Pin::PA_4;
 constexpr IO::Pin START_BUTTON_PIN = IO::Pin::PA_6;
@@ -70,7 +68,6 @@ void canInterrupt(IO::CANMessage& message, void* priv) {
     struct CANInterruptParams* params = (CANInterruptParams*) priv;
 
     EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage>* queue = params->queue;
-    //    log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Received Message 0x%x", message.getId());
 
     if (message.getId() == CHARGER_STATUS_CAN_ID) {
         // Display the received current and voltage from the charger.
@@ -139,7 +136,7 @@ int main() {
     platform::init();
 
     // Pin initialization
-    IO::UART& uart = IO::getUART<IO::Pin::UART_TX, IO::Pin::UART_RX>(9600);
+    IO::UART& uart = IO::getUART<IO::Pin::UART_TX, IO::Pin::UART_RX>(9600, true);
     uart.printf("Uart Init\n\r");
     log::LOGGER.setUART(&uart);
 
@@ -151,7 +148,6 @@ int main() {
     uart.printf("GPIO Init\n\r");
 
     // Buttons
-    //    IO::GPIO& standbyButtonGPIO =  IO::getGPIO<STANDBY_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
     IO::GPIO& startButtonGPIO = IO::getGPIO<START_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
 
     //    DEV::Button standbyButton = DEV::Button(standbyButtonGPIO);
@@ -179,7 +175,7 @@ int main() {
     // charge controller module instantiation
     BMSManager bms(can, bmsOK);
     LCDDisplay display(LCDRegisterSEL, LCDReset, spi);
-    ChargeController chargeController(bms, display, can);
+    ChargeController chargeController(bms, display, can, startButton, statusLED);
 
     uart.printf("Modules Initialized\n\r");
 
@@ -189,8 +185,6 @@ int main() {
 
     display.init();
     chargeController.init();
-    uint32_t lastHeartBeat = time::millis();
-    uint8_t oldCount = 0;
 
     uart.printf("Finished Inits!\r\n");
 
@@ -264,36 +258,6 @@ int main() {
 
     while (true) {
         chargeController.process();
-        bms.update();
-
-        if (startButton.debounce(500)) {
-            log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Start Pressed");
-            if (chargeController.isCharging()) {
-                chargeController.stopCharging();
-            } else {
-                chargeController.startCharging();
-            }
-        }
-
-        if (bms.numConnected() != oldCount) {
-            log::LOGGER.log(log::Logger::LogLevel::DEBUG, "%d batteries connected", bms.numConnected());
-            oldCount = bms.numConnected();
-        }
-
-        if (time::millis() - lastHeartBeat > HEARTBEAT_INTERVAL) {
-            switch (statusLED.readPin()) {
-            case IO::GPIO::State::LOW:
-                statusLED.writePin(IO::GPIO::State::HIGH);
-                break;
-            case IO::GPIO::State::HIGH:
-                statusLED.writePin(IO::GPIO::State::LOW);
-                break;
-            }
-
-            // Need to send heartbeat can message to the charger
-            chargeController.sendChargerMessage();
-            lastHeartBeat = time::millis();
-        }
 
         // Process the BMS RPDOs
         CONodeProcess(&canNode);

@@ -4,9 +4,13 @@
 #include <EVT/io/CAN.hpp>
 #include <EVT/io/CANopen.hpp>
 
+#include <EVT/dev/button.hpp>
 #include <EVT/io/GPIO.hpp>
 #include <charge_controller/dev/BMSManager.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
+
+namespace time = EVT::core::time;
+namespace DEV = EVT::core::DEV;
 
 //Temp
 #define MAX_PACK_VOLTAGE 12000//in millivolts
@@ -26,6 +30,8 @@
 #define BAD_FAULT_STATE 0x20
 
 #define CHARGER_STATUS_CAN_ID 0x18FF50E5
+
+#define HEARBEAT_INTERVAL 1000
 
 /**
  * https://elconchargers.com/?page_id=98
@@ -57,7 +63,7 @@ public:
         FAULT
     };
 
-    ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can);
+    ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can, DEV::Button& startButton, IO::GPIO& statusLED);
 
     /**
      * Initialize the submodules of the Charge Controller
@@ -135,6 +141,11 @@ private:
     BMSManager& bms;
     LCDDisplay& display;
     IO::CAN& can;
+    DEV::Button& startButton;
+    IO::GPIO& statusLED;
+
+    uint32_t lastHeartBeat = time::millis();
+    uint8_t oldCount = 0;
 
     ControllerStates state = ControllerStates::NO_BATTERY;
     bool changedState = true;
