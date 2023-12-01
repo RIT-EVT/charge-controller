@@ -12,6 +12,13 @@ namespace DEV = EVT::core::DEV;
 class LCDDisplay {
 public:
     /**
+     * Enum for the different pages that the LCDDisplay can display
+     */
+    enum PAGE {
+        MAINSCREEN,
+        SETTINGSCREEN
+    };
+    /**
      * Initializer for the LCD Display class.
      *
      * @param[in] regSelect Register select pin
@@ -28,7 +35,7 @@ public:
     /**
      * The display loop that updates the section headers.
      */
-    void display();
+    void display(PAGE newPage);
 
     /**
      * Set the charge controller status section.
@@ -109,6 +116,8 @@ private:
     uint16_t chargeControllerVoltage = 0;
     /** The current that is being supplied */
     uint16_t chargeControllerCurrent = 0;
+    /** The current page that the display is on */
+    PAGE page = MAINSCREEN;
 
     int16_t batteryMinVoltages[2] = {};
     int16_t batteryMaxVoltages[2] = {};
@@ -135,6 +144,26 @@ private:
         (char*) "B1 Max T",
         (char*) "C Current",
         (char*) "B2 Max T",
+    };
+
+    static constexpr char* MAIN_SCREEN_SECTION_TITLES[8] {
+        (char*) "B1 Status",
+        (char*) "B2 Status",
+        (char*) "B1 Voltage",
+        (char*) "B2 Voltage",
+        (char*) "B1 Min T",
+        (char*) "B2 Min T",
+        (char*) "B1 Max T",
+        (char*) "B2 Max T",
+    };
+
+    static constexpr char* SETTING_SCREEN_SECTION_TITLES[8] {
+        (char*) "CC Status",
+        (char*) "Charge %",
+        (char*) "C Voltage",
+        (char*) "C Current",
+        (char*) "Save",
+        (char*) "Quit"
     };
 };
 

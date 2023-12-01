@@ -17,48 +17,79 @@ void LCDDisplay::setChargeControllerStatus(const char* str) {
     chargeControllerStatus = str;
 }
 
-void LCDDisplay::display() {
-    lcd.setTextForSection(0, batteryOneStatus);
+void LCDDisplay::display(PAGE newPage) {
+    switch(newPage) {
+        case MAINSCREEN:
+        {
+            if (page != MAINSCREEN) {
+                lcd.clearLCD();
+                lcd.setSections(8, 4, MAIN_SCREEN_SECTION_TITLES);
+                lcd.displaySectionHeaders();
+                page = MAINSCREEN;
+            }
+            //B1 Status
+            lcd.setTextForSection(0, batteryOneStatus);
+            //B2 Status
+            lcd.setTextForSection(1, batteryTwoStatus);
+            //B1 Voltage
+            char batteryOneVolt[16] = {0};
+            std::sprintf(batteryOneVolt, "%d V", batteryMinVoltages[0]);
+            lcd.setTextForSection(2, batteryOneVolt);
+            //B2 Voltage
+            char batteryTwoVolt[16] = {0};
+            std::sprintf(batteryTwoVolt, "%d V", batteryMinVoltages[1]);
+            lcd.setTextForSection(3, batteryTwoVolt);
+            //B1 Min T
+            char bat1MinTemp[16] = {0};
+            std::sprintf(bat1MinTemp, "%d C", batteryMinTemps[0]);
+            lcd.setTextForSection(4, bat1MinTemp);
+            //B2 Min T
+            char bat2MinTemp[16] = {0};
+            std::sprintf(bat2MinTemp, "%d C", batteryMinTemps[1]);
+            lcd.setTextForSection(5, bat2MinTemp);
+            //B1 Max T
+            char bat1MaxTemp[16] = {0};
+            std::sprintf(bat1MaxTemp, "%d C", batteryMaxTemps[0]);
+            lcd.setTextForSection(6, bat1MaxTemp);
+            //B2 Max T
+            char bat2MaxTemp[16] = {0};
+            std::sprintf(bat2MaxTemp, "%d C", batteryMaxTemps[1]);
+            lcd.setTextForSection(7, bat2MaxTemp);
+            break;
+        }
+        case SETTINGSCREEN:
+        {
+            if (page != SETTINGSCREEN) {
+                lcd.clearLCD();
+                lcd.setSections(6, 3, SETTING_SCREEN_SECTION_TITLES);
+                lcd.displaySectionHeaders();
+                page = SETTINGSCREEN;
+            }
+            //CC Status
+            lcd.setTextForSection(0, chargeControllerStatus);
+            //Charge %
+            char percentage[16] = {0};
+            std::sprintf(percentage, "%d.%02d", chargePercentage / 100, chargePercentage % 100);
+            lcd.setTextForSection(1, percentage);
+            //C Voltage
+            char chargerVoltage[16] = {0};
+            std::sprintf(chargerVoltage, "%d.%d V", chargeControllerVoltage / 10, chargeControllerVoltage % 10);
+            lcd.setTextForSection(2, chargerVoltage);
+            //C Current
+            char currentDisplay[16] = {0};
+            std::sprintf(currentDisplay, "%d.%d A", chargeControllerCurrent / 10, chargeControllerCurrent % 10);
+            lcd.setTextForSection(3, currentDisplay);
+            //Save
+            //Quit
+            break;
+        }
+    }
 
-    lcd.setTextForSection(1, chargeControllerStatus);
 
-    lcd.setTextForSection(2, batteryTwoStatus);
 
-    char batteryOneVolt[16] = {0};
-    std::sprintf(batteryOneVolt, "%d V", batteryMinVoltages[0]);
-    lcd.setTextForSection(3, batteryOneVolt);
 
-    char percentage[16] = {0};
-    std::sprintf(percentage, "%d.%02d", chargePercentage / 100, chargePercentage % 100);
-    lcd.setTextForSection(4, percentage);
 
-    char batteryTwoVolt[16] = {0};
-    std::sprintf(batteryTwoVolt, "%d V", batteryMinVoltages[1]);
-    lcd.setTextForSection(5, batteryTwoVolt);
 
-    char bat1MinTemp[16] = {0};
-    std::sprintf(bat1MinTemp, "%d C", batteryMinTemps[0]);
-    lcd.setTextForSection(6, bat1MinTemp);
-
-    char chargerVoltage[16] = {0};
-    std::sprintf(chargerVoltage, "%d.%d V", chargeControllerVoltage / 10, chargeControllerVoltage % 10);
-    lcd.setTextForSection(7, chargerVoltage);
-
-    char bat2MinTemp[16] = {0};
-    std::sprintf(bat2MinTemp, "%d C", batteryMinTemps[1]);
-    lcd.setTextForSection(8, bat2MinTemp);
-
-    char bat1MaxTemp[16] = {0};
-    std::sprintf(bat1MaxTemp, "%d C", batteryMaxTemps[0]);
-    lcd.setTextForSection(9, bat1MaxTemp);
-
-    char currentDisplay[16] = {0};
-    std::sprintf(currentDisplay, "%d.%d A", chargeControllerCurrent / 10, chargeControllerCurrent % 10);
-    lcd.setTextForSection(10, currentDisplay);
-
-    char bat2MaxTemp[16] = {0};
-    std::sprintf(bat2MaxTemp, "%d C", batteryMaxTemps[1]);
-    lcd.setTextForSection(11, bat2MaxTemp);
 }
 
 void LCDDisplay::setChargerVoltage(uint16_t voltage) {

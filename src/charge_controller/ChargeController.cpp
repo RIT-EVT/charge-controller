@@ -46,7 +46,7 @@ void ChargeController::process() {
         display.setBatteryStatus(BMSManager::BMSStatus::NOT_CONNECTED, 1);
     }
 
-    display.display();
+    display.display(LCDDisplay::PAGE::MAINSCREEN);
 
     bms.update();
 
