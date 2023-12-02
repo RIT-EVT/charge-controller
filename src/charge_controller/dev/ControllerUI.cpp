@@ -11,17 +11,17 @@ void ControllerUI::process() {
         if (encoderButton.debounce(DEBOUNCE_TIME)) {
             switch(encoder.getPosition()) {
             case Settings::VOLTAGE:
-                currentState = VOLTAGESELECT;
+                setState(VOLTAGESELECT);
                 break;
             case Settings::CURRENT:
-                currentState = CURRENTSELECT;
+                setState(CURRENTSELECT);
                 break;
             case Settings::SAVE:
                 savedCurrent = unsavedCurrent;
                 savedVoltage = unsavedVoltage;
                 break;
             case Settings::QUIT:
-                currentState = PAGESELECT;
+                setState(PAGESELECT);
                 break;
             }
         }
@@ -29,10 +29,16 @@ void ControllerUI::process() {
     case VOLTAGESELECT:
         display.display(LCDDisplay::Page::SETTINGSCREEN);
         unsavedVoltage = encoder.getPosition();
+        if (encoderButton.debounce(DEBOUNCE_TIME)) {
+            setState(SETTINGSELECT);
+        }
         break;
     case CURRENTSELECT:
         display.display(LCDDisplay::Page::SETTINGSCREEN);
         unsavedCurrent = encoder.getPosition();
+        if (encoderButton.debounce(DEBOUNCE_TIME)) {
+            setState(SETTINGSELECT);
+        }
         break;
     }
 }
@@ -40,6 +46,12 @@ void ControllerUI::process() {
 void ControllerUI::setState(State newState) {
     if (currentState != newState) {
         currentState = newState;
-        encoder.setRangeAndPosition(currentState, 0);
+        if (currentState == VOLTAGESELECT) {
+            encoder.setRangeAndPosition(currentState, VOLTAGESELECT);
+        } else if (currentState == CURRENTSELECT) {
+            encoder.setRangeAndPosition(currentState, CURRENTSELECT);
+        } else {
+            encoder.setRangeAndPosition(currentState, 0);
+        }
     }
 }
