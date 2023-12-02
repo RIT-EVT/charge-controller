@@ -54,6 +54,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         src/charge_controller/dev/BMSManager.cpp
         src/charge_controller/dev/Debounce.cpp
         src/charge_controller/dev/LCDDisplay.cpp
+        src/charge_controller/dev/ControllerUI.cpp
         )
 
 ###############################################################################
@@ -61,7 +62,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 ###############################################################################
 
 # TODO: This should be set by the user of this library
-#add_compile_definitions(STM32F302x8)
+add_compile_definitions(STM32F302x8)
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC EVT

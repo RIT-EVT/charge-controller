@@ -17,7 +17,8 @@ void LCDDisplay::setChargeControllerStatus(const char* str) {
     chargeControllerStatus = str;
 }
 
-void LCDDisplay::display(PAGE newPage) {
+void LCDDisplay::display(Page newPage) {
+
     switch(newPage) {
         case MAINSCREEN:
         {
@@ -84,11 +85,6 @@ void LCDDisplay::display(PAGE newPage) {
             break;
         }
     }
-
-
-
-
-
 
 }
 

@@ -14,9 +14,9 @@ public:
     /**
      * Enum for the different pages that the LCDDisplay can display
      */
-    enum PAGE {
-        MAINSCREEN,
-        SETTINGSCREEN
+    enum Page {
+        MAINSCREEN = 0,
+        SETTINGSCREEN = 1
     };
     /**
      * Initializer for the LCD Display class.
@@ -35,7 +35,7 @@ public:
     /**
      * The display loop that updates the section headers.
      */
-    void display(PAGE newPage);
+    void display(Page newPage);
 
     /**
      * Set the charge controller status section.
@@ -117,7 +117,7 @@ private:
     /** The current that is being supplied */
     uint16_t chargeControllerCurrent = 0;
     /** The current page that the display is on */
-    PAGE page = MAINSCREEN;
+    Page page = MAINSCREEN;
 
     int16_t batteryMinVoltages[2] = {};
     int16_t batteryMaxVoltages[2] = {};
