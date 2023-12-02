@@ -24,7 +24,7 @@ void LCDDisplay::display(Page newPage) {
         {
             if (page != MAINSCREEN) {
                 lcd.clearLCD();
-                lcd.setSections(8, 4, MAIN_SCREEN_SECTION_TITLES);
+                //lcd.setSections(8, 4, MAIN_SCREEN_SECTION_TITLES); //TODO figure out how to fix this, either pull rq or find a way to do it in without changing lcd
                 lcd.displaySectionHeaders();
                 page = MAINSCREEN;
             }
@@ -62,7 +62,7 @@ void LCDDisplay::display(Page newPage) {
         {
             if (page != SETTINGSCREEN) {
                 lcd.clearLCD();
-                lcd.setSections(6, 3, SETTING_SCREEN_SECTION_TITLES);
+                //lcd.setSections(6, 3, SETTING_SCREEN_SECTION_TITLES); //TODO figure out how to fix this, either pull rq or find a way to do it in without changing lcd
                 lcd.displaySectionHeaders();
                 page = SETTINGSCREEN;
             }
@@ -196,4 +196,8 @@ void LCDDisplay::setMaxTemp(int16_t temp, uint8_t index) {
     } else if (index == 1) {
         batteryMaxTemps[1] = temp;
     }
+}
+
+LCDDisplay::Page LCDDisplay::getPage() {
+    return page;
 }

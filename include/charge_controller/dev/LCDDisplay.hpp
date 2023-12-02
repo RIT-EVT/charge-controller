@@ -38,6 +38,13 @@ public:
     void display(Page newPage);
 
     /**
+     * Get the current page.
+     *
+     * @return the current page
+     */
+    Page getPage();
+
+    /**
      * Set the charge controller status section.
      *
      * @param str the status string to display.
