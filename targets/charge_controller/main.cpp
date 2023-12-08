@@ -174,8 +174,21 @@ int main() {
 
     // charge controller module instantiation
     BMSManager bms(can, bmsOK);
+
+    //LCD display initialization
     LCDDisplay display(LCDRegisterSEL, LCDReset, spi);
-    ChargeController chargeController(bms, display, can, startButton, statusLED);
+
+    //Encoder GPIO pin initialization
+    IO::GPIO& encoderGPIOpinA = IO::getGPIO<ENCODER_A_PIN>(IO::GPIO::Direction::INPUT);
+    IO::GPIO& encoderGPIOpinB = IO::getGPIO<ENCODER_B_PIN>(IO::GPIO::Direction::INPUT);
+    IO::GPIO& encoderButtonGPIO = IO::getGPIO<ENCODER_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
+
+
+    DEV::Encoder encoder(encoderGPIOpinA, encoderGPIOpinB, 1, 0, true);
+    DEV::Button encoderButton(encoderButtonGPIO);
+
+    ControllerUI controllerUI(encoder, encoderButton, display);
+    ChargeController chargeController(bms, display, can, startButton, statusLED, controllerUI);
 
     uart.printf("Modules Initialized\n\r");
 

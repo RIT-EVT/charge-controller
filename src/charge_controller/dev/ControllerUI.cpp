@@ -1,57 +1,62 @@
 #include <charge_controller/dev/ControllerUI.hpp>
-ControllerUI::ControllerUI(DEV::Encoder& encoder, DEV::Button& encoderButton, LCDDisplay& display) : encoder(encoder), encoderButton(encoderButton), display(display) {}
+ControllerUI::ControllerUI(DEV::Encoder& encoder, DEV::Button& encoderButton, LCDDisplay& display, ControllerModel& model) : encoder(encoder), encoderButton(encoderButton), display(display), model(model) {
+    encoder.setRangeAndPosition(ControllerModel::State::PAGESELECT, 0);
+}
 
 void ControllerUI::process() {
-    switch(currentState) {
-    case PAGESELECT:
-        display.display(static_cast<LCDDisplay::Page>(encoder.getPosition()));
+    switch(model.getState()) {
+    case ControllerModel::State::PAGESELECT:
+        model.setPage(static_cast<ControllerModel::Page>(encoder.getPosition()));
+        if (encoderButton.debounce(DEBOUNCE_TIME) && model.getPage() == ControllerModel::Page::SETTINGSCREEN) {
+            setModelState(ControllerModel::State::SETTINGSELECT);
+        }
         break;
-    case SETTINGSELECT:
-        display.display(LCDDisplay::Page::SETTINGSCREEN);
+    case ControllerModel::State::SETTINGSELECT:
+        model.setSetting(static_cast<ControllerModel::Setting>(encoder.getPosition()));
         if (encoderButton.debounce(DEBOUNCE_TIME)) {
             switch(encoder.getPosition()) {
-            case Settings::VOLTAGE:
-                setState(VOLTAGESELECT);
+            case ControllerModel::Setting::VOLTAGE:
+                setModelState(ControllerModel::State::VOLTAGESELECT);
                 break;
-            case Settings::CURRENT:
-                setState(CURRENTSELECT);
+            case ControllerModel::Setting::CURRENT:
+                setModelState(ControllerModel::State::CURRENTSELECT);
                 break;
-            case Settings::SAVE:
-                savedCurrent = unsavedCurrent;
-                savedVoltage = unsavedVoltage;
+            case ControllerModel::Setting::SAVE:
+                model.saveVoltageAndCurrent();
                 break;
-            case Settings::QUIT:
-                setState(PAGESELECT);
+            case ControllerModel::Setting::QUIT:
+                setModelState(ControllerModel::State::PAGESELECT);
                 break;
             }
         }
         break;
-    case VOLTAGESELECT:
-        display.display(LCDDisplay::Page::SETTINGSCREEN);
-        unsavedVoltage = encoder.getPosition();
+    case ControllerModel::State::VOLTAGESELECT:
+        model.setUnsavedVoltage(encoder.getPosition());
         if (encoderButton.debounce(DEBOUNCE_TIME)) {
-            setState(SETTINGSELECT);
+            setModelState(ControllerModel::State::SETTINGSELECT);
         }
         break;
-    case CURRENTSELECT:
-        display.display(LCDDisplay::Page::SETTINGSCREEN);
-        unsavedCurrent = encoder.getPosition();
+    case ControllerModel::State::CURRENTSELECT:
+        model.setUnsavedVoltage(encoder.getPosition());
         if (encoderButton.debounce(DEBOUNCE_TIME)) {
-            setState(SETTINGSELECT);
+            setModelState(ControllerModel::State::SETTINGSELECT);
         }
         break;
     }
+    display.display();
 }
 
-void ControllerUI::setState(State newState) {
-    if (currentState != newState) {
-        currentState = newState;
-        if (currentState == VOLTAGESELECT) {
-            encoder.setRangeAndPosition(currentState, VOLTAGESELECT);
-        } else if (currentState == CURRENTSELECT) {
-            encoder.setRangeAndPosition(currentState, CURRENTSELECT);
+void ControllerUI::setModelState(ControllerModel::State newState) {
+    if (model.getState() != newState) {
+        if (newState == ControllerModel::State::SETTINGSELECT && model.getState() != ControllerModel::State::PAGESELECT) {
+            encoder.setRangeAndPosition(newState, encoder.getPosition());
+        } else if (newState == ControllerModel::State::VOLTAGESELECT) {
+            encoder.setRangeAndPosition(newState, model.getUnsavedVoltage());
+        } else if (newState == ControllerModel::State::CURRENTSELECT) {
+            encoder.setRangeAndPosition(newState, model.getUnsavedCurrent());
         } else {
-            encoder.setRangeAndPosition(currentState, 0);
+            encoder.setRangeAndPosition(newState, 0);
         }
+        model.setState(newState);
     }
 }

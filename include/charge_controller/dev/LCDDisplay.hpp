@@ -4,6 +4,8 @@
 #include <EVT/dev/LCD.hpp>
 #include <EVT/io/SPI.hpp>
 #include <charge_controller/dev/BMSManager.hpp>
+#include <charge_controller/dev/ControllerUI.hpp>
+#include <charge_controller/dev/ControllerModel.hpp>
 #include <cstdint>
 
 namespace IO = EVT::core::IO;
@@ -12,20 +14,13 @@ namespace DEV = EVT::core::DEV;
 class LCDDisplay {
 public:
     /**
-     * Enum for the different pages that the LCDDisplay can display
-     */
-    enum Page {
-        MAINSCREEN = 0,
-        SETTINGSCREEN = 1
-    };
-    /**
      * Initializer for the LCD Display class.
      *
      * @param[in] regSelect Register select pin
      * @param[in] reset Reset pin
      * @param[in] spi SPI class for communication
      */
-    LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi);
+    LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi, ControllerModel& model);
 
     /**
      * Initializes the LCD driver and displays the splash image.
@@ -35,14 +30,7 @@ public:
     /**
      * The display loop that updates the section headers.
      */
-    void display(Page newPage);
-
-    /**
-     * Get the current page.
-     *
-     * @return the current page
-     */
-    Page getPage();
+    void display();
 
     /**
      * Set the charge controller status section.
@@ -113,6 +101,11 @@ private:
      */
     DEV::LCD lcd;
 
+    /**
+     * The model reference
+     */
+     ControllerModel& model;
+
     /** The current status of the charge controller */
     const char* chargeControllerStatus = "NULL";
     /** The current status for battery  */
@@ -124,7 +117,7 @@ private:
     /** The current that is being supplied */
     uint16_t chargeControllerCurrent = 0;
     /** The current page that the display is on */
-    Page page = MAINSCREEN;
+    ControllerModel::Page page = ControllerModel::Page::MAINSCREEN;
 
     int16_t batteryMinVoltages[2] = {};
     int16_t batteryMaxVoltages[2] = {};
@@ -169,8 +162,8 @@ private:
         (char*) "Charge %",
         (char*) "C Voltage",
         (char*) "C Current",
-        (char*) "Save",
-        (char*) "Quit"
+        (char*) "", //Save
+        (char*) "" //Quit
     };
 };
 

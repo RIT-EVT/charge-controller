@@ -1,10 +1,12 @@
 
+#include <charge_controller/dev/ControllerUI.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
 #include <cstdio>
 
-LCDDisplay::LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi) : lcd(DEV::LCD(reg_select, reset, spi, 12, 3)) {}
+LCDDisplay::LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi, ControllerModel& model) : lcd(DEV::LCD(reg_select, reset, spi, 12, 3)), model(model) {}
 
 void LCDDisplay::init() {
+    //TODO change this init method to display the correct things
     lcd.initLCD();
     lcd.clearLCD();
     lcd.setDefaultSections(SECTION_TITLES);
@@ -17,16 +19,16 @@ void LCDDisplay::setChargeControllerStatus(const char* str) {
     chargeControllerStatus = str;
 }
 
-void LCDDisplay::display(Page newPage) {
-
+void LCDDisplay::display() {
+    ControllerModel::Page newPage = model.getPage();
     switch(newPage) {
-        case MAINSCREEN:
+    case ControllerModel::Page::MAINSCREEN:
         {
-            if (page != MAINSCREEN) {
+            if (page != ControllerModel::Page::MAINSCREEN) {
                 lcd.clearLCD();
                 //lcd.setSections(8, 4, MAIN_SCREEN_SECTION_TITLES); //TODO figure out how to fix this, either pull rq or find a way to do it in without changing lcd
                 lcd.displaySectionHeaders();
-                page = MAINSCREEN;
+                page = ControllerModel::Page::MAINSCREEN;
             }
             //B1 Status
             lcd.setTextForSection(0, batteryOneStatus);
@@ -58,13 +60,14 @@ void LCDDisplay::display(Page newPage) {
             lcd.setTextForSection(7, bat2MaxTemp);
             break;
         }
-        case SETTINGSCREEN:
+        case ControllerModel::Page::SETTINGSCREEN:
         {
-            if (page != SETTINGSCREEN) {
+            //TODO indicate what option is currently selected
+            if (page != ControllerModel::Page::SETTINGSCREEN) {
                 lcd.clearLCD();
                 //lcd.setSections(6, 3, SETTING_SCREEN_SECTION_TITLES); //TODO figure out how to fix this, either pull rq or find a way to do it in without changing lcd
                 lcd.displaySectionHeaders();
-                page = SETTINGSCREEN;
+                page = ControllerModel::Page::SETTINGSCREEN;
             }
             //CC Status
             lcd.setTextForSection(0, chargeControllerStatus);
@@ -81,7 +84,23 @@ void LCDDisplay::display(Page newPage) {
             std::sprintf(currentDisplay, "%d.%d A", chargeControllerCurrent / 10, chargeControllerCurrent % 10);
             lcd.setTextForSection(3, currentDisplay);
             //Save
+            lcd.setTextForSection(4,"Save");
             //Quit
+            lcd.setTextForSection(5, "Quit");
+            if (model.getState() == ControllerModel::SETTINGSELECT) {
+                switch(model.getSetting()) {
+                    case ControllerModel::VOLTAGE:
+                        break;
+                    case ControllerModel::CURRENT:
+                        break;
+                    case ControllerModel::SAVE:
+                        lcd.setTextForSection(4,">Save");
+                        break;
+                    case ControllerModel::QUIT:
+                        lcd.setTextForSection(5, ">Quit");
+                        break;
+                }
+            }
             break;
         }
     }

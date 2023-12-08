@@ -1,9 +1,11 @@
-#ifndef CHARGE_CONTROLLER_H
-#define CHARGE_CONTROLLER_H
+#ifndef CHARGE_CONTROLLER_HPP
+#define CHARGE_CONTROLLER_HPP
 
 #include <EVT/io/CAN.hpp>
 #include <EVT/io/CANopen.hpp>
 
+#include <charge_controller/dev/ControllerUI.hpp>
+#include <charge_controller/dev/ControllerModel.hpp>
 #include <EVT/dev/button.hpp>
 #include <EVT/io/GPIO.hpp>
 #include <charge_controller/dev/BMSManager.hpp>
@@ -63,7 +65,7 @@ public:
         FAULT
     };
 
-    ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can, DEV::Button& startButton, IO::GPIO& statusLED);
+    ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can, DEV::Button& startButton, IO::GPIO& statusLED, ControllerUI& controllerUI, ControllerModel& controllerModel);
 
     /**
      * Initialize the submodules of the Charge Controller
@@ -139,10 +141,13 @@ private:
     void faultState();
 
     BMSManager& bms;
-    LCDDisplay& display;
     IO::CAN& can;
     DEV::Button& startButton;
     IO::GPIO& statusLED;
+    LCDDisplay& display;
+    ControllerUI& controllerUI;
+    ControllerModel& controllerModel;
+
 
     uint32_t lastHeartBeat = time::millis();
     uint8_t oldCount = 0;
@@ -154,4 +159,4 @@ private:
     static constexpr IO::GPIO::State RELAY_OFF = IO::GPIO::State::LOW;
 };
 
-#endif// CHARGE_CONTROLLER_H
+#endif// CHARGE_CONTROLLER_HPP

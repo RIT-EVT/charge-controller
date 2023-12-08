@@ -55,6 +55,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         src/charge_controller/dev/Debounce.cpp
         src/charge_controller/dev/LCDDisplay.cpp
         src/charge_controller/dev/ControllerUI.cpp
+        src/charge_controller/dev/ControllerModel.cpp
         )
 
 ###############################################################################

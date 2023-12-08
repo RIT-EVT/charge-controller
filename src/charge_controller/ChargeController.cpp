@@ -2,7 +2,7 @@
 #include <charge_controller/ChargeController.hpp>
 
 namespace log = EVT::core::log;
-ChargeController::ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can, DEV::Button& startButton, IO::GPIO& statusLED) : bms(bms), display(display), can(can), startButton(startButton), statusLED(statusLED) {}
+ChargeController::ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can, DEV::Button& startButton, IO::GPIO& statusLED, ControllerUI& controllerUI, ControllerModel& controllerModel) : bms(bms), display(display), can(can), startButton(startButton), statusLED(statusLED), controllerUI(controllerUI), controllerModel(controllerModel) {}
 
 void ChargeController::process() {
     switch (state) {
@@ -46,8 +46,6 @@ void ChargeController::process() {
         display.setBatteryStatus(BMSManager::BMSStatus::NOT_CONNECTED, 1);
     }
 
-    display.display(LCDDisplay::Page::MAINSCREEN);
-
     bms.update();
 
     if (startButton.debounce(500)) {
@@ -63,6 +61,8 @@ void ChargeController::process() {
         log::LOGGER.log(log::Logger::LogLevel::DEBUG, "%d batteries connected", bms.numConnected());
         oldCount = bms.numConnected();
     }
+
+    controllerUI.process();
 
     if (time::millis() - lastHeartBeat > HEARBEAT_INTERVAL) {
         switch (statusLED.readPin()) {
@@ -242,9 +242,9 @@ void ChargeController::sendChargerMessage() {
     uint8_t stopCharging = 1;// Stop Charging
 
     if (state == ControllerStates::CHARGING) {
-        // Multiply by ten to get the right sized values
-        voltage = 96 * 10;// This is for charging in series
-        current = 60 * 10;
+        // Multiply values by ten to get the right sized values
+        voltage = controllerModel.getSavedVoltage() * 10;
+        current = controllerModel.getSavedCurrent() * 10;
         stopCharging = 0;// Start Charging
     }
 
