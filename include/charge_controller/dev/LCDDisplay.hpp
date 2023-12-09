@@ -162,6 +162,8 @@ private:
         (char*) "Charge %",
         (char*) "C Voltage",
         (char*) "C Current",
+        (char*) "S Voltage",
+        (char*) "S Current",
         (char*) "", //Save
         (char*) "" //Quit
     };

@@ -62,10 +62,9 @@ void LCDDisplay::display() {
         }
         case ControllerModel::Page::SETTINGSCREEN:
         {
-            //TODO indicate what option is currently selected
             if (page != ControllerModel::Page::SETTINGSCREEN) {
                 lcd.clearLCD();
-                //lcd.setSections(6, 3, SETTING_SCREEN_SECTION_TITLES); //TODO figure out how to fix this, either pull rq or find a way to do it in without changing lcd
+                //lcd.setSections(8, 4, SETTING_SCREEN_SECTION_TITLES); //TODO figure out how to fix this, either pull rq or find a way to do it in without changing lcd
                 lcd.displaySectionHeaders();
                 page = ControllerModel::Page::SETTINGSCREEN;
             }
@@ -75,32 +74,53 @@ void LCDDisplay::display() {
             char percentage[16] = {0};
             std::sprintf(percentage, "%d.%02d", chargePercentage / 100, chargePercentage % 100);
             lcd.setTextForSection(1, percentage);
-            //C Voltage
+
+            //C Voltage -> The voltage the charge controller is returning
             char chargerVoltage[16] = {0};
             std::sprintf(chargerVoltage, "%d.%d V", chargeControllerVoltage / 10, chargeControllerVoltage % 10);
             lcd.setTextForSection(2, chargerVoltage);
-            //C Current
-            char currentDisplay[16] = {0};
-            std::sprintf(currentDisplay, "%d.%d A", chargeControllerCurrent / 10, chargeControllerCurrent % 10);
-            lcd.setTextForSection(3, currentDisplay);
-            //Save
-            lcd.setTextForSection(4,"Save");
-            //Quit
-            lcd.setTextForSection(5, "Quit");
+
+            //C Current -> The current the charge controller is returning
+            char chargerCurrent[16] = {0};
+            std::sprintf(chargerCurrent, "%d.%d A", chargeControllerCurrent / 10, chargeControllerCurrent % 10);
+            lcd.setTextForSection(3, chargerCurrent);
+
+            char voltageSetting[16] = {0};
+            std::sprintf(voltageSetting, " %d V", model.getUnsavedVoltage());
+
+            char currentSetting[16] = {0};
+            std::sprintf(currentSetting, " %d A", model.getUnsavedCurrent());
+
+            char save[16] = " Save";
+
+            char quit[16] = " Quit";
+
+            //Determining which option is selected
+            //The current selected setting will have a '>' in the first character of the string instead of a ' '
             if (model.getState() == ControllerModel::SETTINGSELECT) {
                 switch(model.getSetting()) {
-                    case ControllerModel::VOLTAGE:
-                        break;
-                    case ControllerModel::CURRENT:
-                        break;
-                    case ControllerModel::SAVE:
-                        lcd.setTextForSection(4,">Save");
-                        break;
-                    case ControllerModel::QUIT:
-                        lcd.setTextForSection(5, ">Quit");
-                        break;
+                case ControllerModel::VOLTAGE:
+                    voltageSetting[0] = '>';
+                    break;
+                case ControllerModel::CURRENT:
+                    currentSetting[0] = '>';
+                    break;
+                case ControllerModel::SAVE:
+                    save[0] = '>';
+                    break;
+                case ControllerModel::QUIT:
+                    quit[0] = '>';
+                    break;
                 }
             }
+            //S Voltage -> The voltage that the charge controller is being commanded to run at
+            lcd.setTextForSection(4, voltageSetting);
+            //S Current -> The current that the charge controller is being commanded to run at
+            lcd.setTextForSection(5, currentSetting);
+            //Save
+            lcd.setTextForSection(6,save);
+            //Quit
+            lcd.setTextForSection(7, quit);
             break;
         }
     }
@@ -215,8 +235,4 @@ void LCDDisplay::setMaxTemp(int16_t temp, uint8_t index) {
     } else if (index == 1) {
         batteryMaxTemps[1] = temp;
     }
-}
-
-LCDDisplay::Page LCDDisplay::getPage() {
-    return page;
 }
