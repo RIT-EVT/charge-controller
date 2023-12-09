@@ -22,13 +22,13 @@ void LCDDisplay::setChargeControllerStatus(const char* str) {
 void LCDDisplay::display() {
     ControllerModel::Page newPage = model.getPage();
     switch(newPage) {
-    case ControllerModel::Page::MAINSCREEN:
+    case ControllerModel::Page::MAINPAGE:
         {
-            if (page != ControllerModel::Page::MAINSCREEN) {
+            if (page != ControllerModel::Page::MAINPAGE) {
                 lcd.clearLCD();
                 lcd.setNewSections(8, 4, MAIN_SCREEN_SECTION_TITLES);
                 lcd.displaySectionHeaders();
-                page = ControllerModel::Page::MAINSCREEN;
+                page = ControllerModel::Page::MAINPAGE;
             }
             //B1 Status
             lcd.setTextForSection(0, batteryOneStatus);
@@ -60,13 +60,13 @@ void LCDDisplay::display() {
             lcd.setTextForSection(7, bat2MaxTemp);
             break;
         }
-        case ControllerModel::Page::SETTINGSCREEN:
+        case ControllerModel::Page::SETTINGSPAGE:
         {
-            if (page != ControllerModel::Page::SETTINGSCREEN) {
+            if (page != ControllerModel::Page::SETTINGSPAGE) {
                 lcd.clearLCD();
                 lcd.setNewSections(8, 4, SETTING_SCREEN_SECTION_TITLES);
                 lcd.displaySectionHeaders();
-                page = ControllerModel::Page::SETTINGSCREEN;
+                page = ControllerModel::Page::SETTINGSPAGE;
             }
             //CC Status
             lcd.setTextForSection(0, chargeControllerStatus);
@@ -98,7 +98,7 @@ void LCDDisplay::display() {
             //Determining which option is selected
             //The current selected setting will have a '>' in the first character of the string instead of a ' '
             if (model.getState() == ControllerModel::SETTINGSELECT) {
-                switch(model.getSetting()) {
+                switch(model.getSelectedSetting()) {
                 case ControllerModel::VOLTAGE:
                     voltageSetting[0] = '>';
                     break;

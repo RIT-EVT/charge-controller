@@ -11,6 +11,14 @@
 namespace IO = EVT::core::IO;
 namespace DEV = EVT::core::DEV;
 
+/**
+ * Outputs all the values from the ChargeController class to the LCD display
+ * Acts as the view in a Model-View-Controller (MVC) Structure where
+ * ControllerModel is the model,
+ * LCDDisplay is the display, and
+ * ControllerUI is the controller,
+ */
+
 class LCDDisplay {
 public:
     /**
@@ -64,7 +72,7 @@ public:
     void setBatteryStatus(BMSManager::BMSStatus status, uint8_t index);
 
     /**
-     * Set's the display for the BMS at the given index's minimum cell voltage.
+     * Sets the display for the BMS at the given index's minimum cell voltage.
      *
      * @param cellVoltage the cell voltage to display.
      * @param index the index of the bms.
@@ -72,7 +80,7 @@ public:
     void setMinCellVoltage(int16_t cellVoltage, uint8_t index);
 
     /**
-     * Set's the display for the BMS at the given index's maximum cell voltage.
+     * Sets the display for the BMS at the given index's maximum cell voltage.
      *
      * @param cellVoltage the cell voltage to display.
      * @param index the index of the bms.
@@ -80,7 +88,7 @@ public:
     void setMaxCellVoltage(int16_t cellVoltage, uint8_t index);
 
     /**
-     * Set's the display for the BMS at the given index's minimum temperature.
+     * Sets the display for the BMS at the given index's minimum temperature.
      *
      * @param temp the temperature to display.
      * @param index the index of the bms.
@@ -88,7 +96,7 @@ public:
     void setMinTemp(int16_t temp, uint8_t index);
 
     /**
-     * Set's the display for the BMS at the given index's maximum temperature.
+     * Sets the display for the BMS at the given index's maximum temperature.
      *
      * @param temp the temperature to display.
      * @param index the index of the bms.
@@ -117,7 +125,7 @@ private:
     /** The current that is being supplied */
     uint16_t chargeControllerCurrent = 0;
     /** The current page that the display is on */
-    ControllerModel::Page page = ControllerModel::Page::MAINSCREEN;
+    ControllerModel::Page page = ControllerModel::Page::MAINPAGE;
 
     int16_t batteryMinVoltages[2] = {};
     int16_t batteryMaxVoltages[2] = {};
@@ -129,7 +137,7 @@ private:
     const uint8_t chargePercentage = 0;
 
     /**
-     * The 9 section headers to be displayed.
+     * The 9 section headers to be displayed. (DEPRECATED)
      */
     static constexpr char* SECTION_TITLES[12]{
         (char*) "B1 Status",
@@ -146,6 +154,9 @@ private:
         (char*) "B2 Max T",
     };
 
+    /**
+     * The 8 section headers for the main screen
+     */
     static constexpr char* MAIN_SCREEN_SECTION_TITLES[8] {
         (char*) "B1 Status",
         (char*) "B2 Status",
@@ -157,6 +168,9 @@ private:
         (char*) "B2 Max T",
     };
 
+    /**
+     * The 8 section headers for the setting screen
+     */
     static constexpr char* SETTING_SCREEN_SECTION_TITLES[8] {
         (char*) "CC Status",
         (char*) "Charge %",

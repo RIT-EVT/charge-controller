@@ -47,10 +47,10 @@ uint16_t ControllerModel::getUnsavedCurrent() {
     return unsavedCurrent;
 }
 
-ControllerModel::Setting ControllerModel::getSetting() {
+ControllerModel::SelectedSetting ControllerModel::getSelectedSetting() {
     return setting;
 }
 
-void ControllerModel::setSetting(ControllerModel::Setting newSetting) {
+void ControllerModel::setSelectedSetting(SelectedSetting newSetting) {
     setting = newSetting;
 }

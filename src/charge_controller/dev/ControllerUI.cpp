@@ -1,5 +1,5 @@
 #include <charge_controller/dev/ControllerUI.hpp>
-ControllerUI::ControllerUI(DEV::Encoder& encoder, DEV::Button& encoderButton, LCDDisplay& display, ControllerModel& model) : encoder(encoder), encoderButton(encoderButton), display(display), model(model) {
+ControllerUI::ControllerUI(DEV::Encoder& encoder, DEV::Button& encoderButton, LCDDisplay& display, ControllerModel& model) : model(model), encoder(encoder), encoderButton(encoderButton), display(display) {
     encoder.setRangeAndPosition(ControllerModel::State::PAGESELECT, 0);
 }
 
@@ -7,24 +7,24 @@ void ControllerUI::process() {
     switch(model.getState()) {
     case ControllerModel::State::PAGESELECT:
         model.setPage(static_cast<ControllerModel::Page>(encoder.getPosition()));
-        if (encoderButton.debounce(DEBOUNCE_TIME) && model.getPage() == ControllerModel::Page::SETTINGSCREEN) {
+        if (encoderButton.debounce(DEBOUNCE_TIME) && model.getPage() == ControllerModel::Page::SETTINGSPAGE) {
             setModelState(ControllerModel::State::SETTINGSELECT);
         }
         break;
     case ControllerModel::State::SETTINGSELECT:
-        model.setSetting(static_cast<ControllerModel::Setting>(encoder.getPosition()));
+        model.setSelectedSetting(static_cast<ControllerModel::SelectedSetting>(encoder.getPosition()));
         if (encoderButton.debounce(DEBOUNCE_TIME)) {
             switch(encoder.getPosition()) {
-            case ControllerModel::Setting::VOLTAGE:
+            case ControllerModel::SelectedSetting::VOLTAGE:
                 setModelState(ControllerModel::State::VOLTAGESELECT);
                 break;
-            case ControllerModel::Setting::CURRENT:
+            case ControllerModel::SelectedSetting::CURRENT:
                 setModelState(ControllerModel::State::CURRENTSELECT);
                 break;
-            case ControllerModel::Setting::SAVE:
+            case ControllerModel::SelectedSetting::SAVE:
                 model.saveVoltageAndCurrent();
                 break;
-            case ControllerModel::Setting::QUIT:
+            case ControllerModel::SelectedSetting::QUIT:
                 setModelState(ControllerModel::State::PAGESELECT);
                 break;
             }

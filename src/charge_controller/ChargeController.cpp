@@ -62,7 +62,7 @@ void ChargeController::process() {
         oldCount = bms.numConnected();
     }
 
-    controllerUI.process();
+    controllerUI.process(); //calls the LCDDisplay display() method internally
 
     if (time::millis() - lastHeartBeat > HEARBEAT_INTERVAL) {
         switch (statusLED.readPin()) {
