@@ -9,7 +9,7 @@ void LCDDisplay::init() {
     //TODO change this init method to display the correct things
     lcd.initLCD();
     lcd.clearLCD();
-    lcd.setDefaultSections(SECTION_TITLES);
+    lcd.setDefaultSections(MAIN_SCREEN_SECTION_TITLES);
 
     // Splash Screen
     lcd.displaySectionHeaders();
@@ -26,7 +26,7 @@ void LCDDisplay::display() {
         {
             if (page != ControllerModel::Page::MAINSCREEN) {
                 lcd.clearLCD();
-                //lcd.setSections(8, 4, MAIN_SCREEN_SECTION_TITLES); //TODO figure out how to fix this, either pull rq or find a way to do it in without changing lcd
+                lcd.setNewSections(8, 4, MAIN_SCREEN_SECTION_TITLES);
                 lcd.displaySectionHeaders();
                 page = ControllerModel::Page::MAINSCREEN;
             }
@@ -64,7 +64,7 @@ void LCDDisplay::display() {
         {
             if (page != ControllerModel::Page::SETTINGSCREEN) {
                 lcd.clearLCD();
-                //lcd.setSections(8, 4, SETTING_SCREEN_SECTION_TITLES); //TODO figure out how to fix this, either pull rq or find a way to do it in without changing lcd
+                lcd.setNewSections(8, 4, SETTING_SCREEN_SECTION_TITLES);
                 lcd.displaySectionHeaders();
                 page = ControllerModel::Page::SETTINGSCREEN;
             }

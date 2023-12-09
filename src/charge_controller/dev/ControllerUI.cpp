@@ -37,7 +37,7 @@ void ControllerUI::process() {
         }
         break;
     case ControllerModel::State::CURRENTSELECT:
-        model.setUnsavedVoltage(encoder.getPosition());
+        model.setUnsavedCurrent(encoder.getPosition());
         if (encoderButton.debounce(DEBOUNCE_TIME)) {
             setModelState(ControllerModel::State::SETTINGSELECT);
         }
