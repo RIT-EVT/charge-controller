@@ -1,9 +1,6 @@
-
-#include <charge_controller/dev/ControllerUI.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
-#include <cstdio>
 
-LCDDisplay::LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi, ControllerModel& model) : lcd(DEV::LCD(reg_select, reset, spi, 12, 3)), model(model) {}
+LCDDisplay::LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi, ControllerModel& model) : lcd(DEV::LCD(reg_select, reset, spi, 8, 4)), model(model) {}
 
 void LCDDisplay::init() {
     //TODO change this init method to display the correct things
@@ -24,7 +21,7 @@ void LCDDisplay::display() {
     switch(newPage) {
     case ControllerModel::Page::MAINPAGE:
         {
-            if (page != ControllerModel::Page::MAINPAGE) {
+            if (page != newPage) {
                 lcd.clearLCD();
                 lcd.setNewSections(8, 4, MAIN_SCREEN_SECTION_TITLES);
                 lcd.displaySectionHeaders();
@@ -62,7 +59,7 @@ void LCDDisplay::display() {
         }
         case ControllerModel::Page::SETTINGSPAGE:
         {
-            if (page != ControllerModel::Page::SETTINGSPAGE) {
+            if (page != newPage) {
                 lcd.clearLCD();
                 lcd.setNewSections(8, 4, SETTING_SCREEN_SECTION_TITLES);
                 lcd.displaySectionHeaders();

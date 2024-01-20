@@ -15,7 +15,7 @@ namespace DEV = EVT::core::DEV;
  * Acts as the controller in a Model-View-Controller (MVC) Structure where
  * ControllerModel is the model,
  * LCDDisplay is the display, and
- * ControllerUI is the controller,
+ * ControllerUI is the controller
  */
 
 class ControllerUI {

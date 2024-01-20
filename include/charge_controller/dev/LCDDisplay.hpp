@@ -7,6 +7,8 @@
 #include <charge_controller/dev/ControllerUI.hpp>
 #include <charge_controller/dev/ControllerModel.hpp>
 #include <cstdint>
+#include <charge_controller/dev/ControllerUI.hpp>
+#include <cstdio>
 
 namespace IO = EVT::core::IO;
 namespace DEV = EVT::core::DEV;
@@ -16,9 +18,8 @@ namespace DEV = EVT::core::DEV;
  * Acts as the view in a Model-View-Controller (MVC) Structure where
  * ControllerModel is the model,
  * LCDDisplay is the display, and
- * ControllerUI is the controller,
+ * ControllerUI is the controller
  */
-
 class LCDDisplay {
 public:
     /**

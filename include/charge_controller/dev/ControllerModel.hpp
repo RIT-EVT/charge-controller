@@ -4,17 +4,17 @@
 #include <cstdint>
 
 
-#define MAXVOLTAGE 400 //TODO these are placeholder values, talk to the EEs about the actual values
-#define MAXCURRENT 6
-#define DEFAULTVOLTAGE 96
-#define DEFAULTCURRENT 60
+#define MAX_VOLTAGE 400 //TODO these are placeholder values, talk to the EEs about the actual values
+#define MAX_CURRENT 6
+#define DEFAULT_VOLTAGE 96
+#define DEFAULT_CURRENT 60
 
 /**
  * Stores values that both the LCDDisplay and the ControllerUI need to access.
  * Acts as the model in a Model-View-Controller (MVC) Structure where
  * ControllerModel is the model,
  * LCDDisplay is the display, and
- * ControllerUI is the controller,
+ * ControllerUI is the controller
  */
 
 class ControllerModel {
@@ -41,12 +41,13 @@ public:
     enum State {
         PAGESELECT = 1,
         SETTINGSELECT = 3,
-        VOLTAGESELECT = MAXVOLTAGE,
-        CURRENTSELECT = MAXCURRENT,
+        VOLTAGESELECT = MAX_VOLTAGE,
+        CURRENTSELECT = MAX_CURRENT,
     };
 
     /**
      * enum that represents which setting is selected
+     * Only updated when state = SETTINGSELECT
      */
     enum SelectedSetting {
         VOLTAGE = 0,
@@ -149,11 +150,11 @@ private:
     /** The most recent selected setting that is selected (only really relevant if state = SETTINGSELECT */
     SelectedSetting setting = QUIT;
 
-    uint16_t savedVoltage = DEFAULTVOLTAGE; //TODO see about saving values between boot sequences
-    uint16_t savedCurrent = DEFAULTCURRENT;
+    uint16_t savedVoltage = DEFAULT_VOLTAGE; //TODO see about saving values between boot sequences
+    uint16_t savedCurrent = DEFAULT_CURRENT;
 
-    uint16_t unsavedVoltage = DEFAULTVOLTAGE;
-    uint16_t unsavedCurrent = DEFAULTCURRENT;
+    uint16_t unsavedVoltage = DEFAULT_VOLTAGE;
+    uint16_t unsavedCurrent = DEFAULT_CURRENT;
 
 };
 
