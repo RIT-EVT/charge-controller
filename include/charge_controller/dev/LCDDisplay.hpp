@@ -4,10 +4,8 @@
 #include <EVT/dev/LCD.hpp>
 #include <EVT/io/SPI.hpp>
 #include <charge_controller/dev/BMSManager.hpp>
-#include <charge_controller/dev/ControllerUI.hpp>
 #include <charge_controller/dev/ControllerModel.hpp>
 #include <cstdint>
-#include <charge_controller/dev/ControllerUI.hpp>
 #include <cstdio>
 
 namespace IO = EVT::core::IO;
@@ -126,7 +124,7 @@ private:
     /** The current that is being supplied */
     uint16_t chargeControllerCurrent = 0;
     /** The current page that the display is on */
-    ControllerModel::Page page = ControllerModel::Page::MAINPAGE;
+    ControllerModel::Page page = ControllerModel::Page::MAIN;
 
     int16_t batteryMinVoltages[2] = {};
     int16_t batteryMaxVoltages[2] = {};

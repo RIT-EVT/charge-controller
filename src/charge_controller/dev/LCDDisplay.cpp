@@ -3,7 +3,6 @@
 LCDDisplay::LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi, ControllerModel& model) : lcd(DEV::LCD(reg_select, reset, spi, 8, 4)), model(model) {}
 
 void LCDDisplay::init() {
-    //TODO change this init method to display the correct things
     lcd.initLCD();
     lcd.clearLCD();
     lcd.setDefaultSections(MAIN_SCREEN_SECTION_TITLES);
@@ -19,13 +18,13 @@ void LCDDisplay::setChargeControllerStatus(const char* str) {
 void LCDDisplay::display() {
     ControllerModel::Page newPage = model.getPage();
     switch(newPage) {
-    case ControllerModel::Page::MAINPAGE:
+    case ControllerModel::Page::MAIN:
         {
             if (page != newPage) {
                 lcd.clearLCD();
                 lcd.setNewSections(8, 4, MAIN_SCREEN_SECTION_TITLES);
                 lcd.displaySectionHeaders();
-                page = ControllerModel::Page::MAINPAGE;
+                page = ControllerModel::Page::MAIN;
             }
             //B1 Status
             lcd.setTextForSection(0, batteryOneStatus);
@@ -57,13 +56,13 @@ void LCDDisplay::display() {
             lcd.setTextForSection(7, bat2MaxTemp);
             break;
         }
-        case ControllerModel::Page::SETTINGSPAGE:
+        case ControllerModel::Page::SETTINGS:
         {
             if (page != newPage) {
                 lcd.clearLCD();
                 lcd.setNewSections(8, 4, SETTING_SCREEN_SECTION_TITLES);
                 lcd.displaySectionHeaders();
-                page = ControllerModel::Page::SETTINGSPAGE;
+                page = ControllerModel::Page::SETTINGS;
             }
             //CC Status
             lcd.setTextForSection(0, chargeControllerStatus);
@@ -94,7 +93,7 @@ void LCDDisplay::display() {
 
             //Determining which option is selected
             //The current selected setting will have a '>' in the first character of the string instead of a ' '
-            if (model.getState() == ControllerModel::SETTINGSELECT) {
+            if (model.getState() == ControllerModel::SETTING_SELECT) {
                 switch(model.getSelectedSetting()) {
                 case ControllerModel::VOLTAGE:
                     voltageSetting[0] = '>';

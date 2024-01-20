@@ -30,8 +30,8 @@ public:
      * enum for the different pages that the LCDDisplay can display.
      */
     enum Page {
-        MAINPAGE = 0,
-        SETTINGSPAGE = 1
+        MAIN = 0,
+        SETTINGS = 1
     };
 
     /**
@@ -39,10 +39,10 @@ public:
      * The value of each entry is equal to the range of the encoder
      */
     enum State {
-        PAGESELECT = 1,
-        SETTINGSELECT = 3,
-        VOLTAGESELECT = MAX_VOLTAGE,
-        CURRENTSELECT = MAX_CURRENT,
+        PAGE_SELECT = 1,
+        SETTING_SELECT = 3,
+        VOLTAGE_SELECT = MAX_VOLTAGE,
+        CURRENT_SELECT = MAX_CURRENT,
     };
 
     /**
@@ -144,9 +144,9 @@ public:
 
 private:
     /** The current state the model is in */
-    State state = PAGESELECT;
+    State state = PAGE_SELECT;
     /** The current page the lcd is displaying */
-    Page page = MAINPAGE;
+    Page page = MAIN;
     /** The most recent selected setting that is selected (only really relevant if state = SETTINGSELECT */
     SelectedSetting setting = QUIT;
 

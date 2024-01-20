@@ -7,8 +7,6 @@
 #include <EVT/dev/platform/f3xx/Timerf3xx.hpp> // TODO: clang will put this at the top causing compilation problem
 // clang-format on
 
-#include <Canopen/co_core.h>
-#include <Canopen/co_tmr.h>
 #include <EVT/io/CANopen.hpp>
 
 #include "EVT/dev/button.hpp"
@@ -100,31 +98,6 @@ void canInterrupt(IO::CANMessage& message, void* priv) {
 ///////////////////////////////////////////////////////////////////////////////
 // CANopen specific Callbacks. Need to be defined in some location
 ///////////////////////////////////////////////////////////////////////////////
-extern "C" void CONodeFatalError(void) {}
-
-extern "C" void COIfCanReceive(CO_IF_FRM* frm) {}
-
-extern "C" int16_t COLssStore(uint32_t baudrate, uint8_t nodeId) { return 0; }
-
-extern "C" int16_t COLssLoad(uint32_t* baudrate, uint8_t* nodeId) { return 0; }
-
-extern "C" void CONmtModeChange(CO_NMT* nmt, CO_MODE mode) {}
-
-extern "C" void CONmtHbConsEvent(CO_NMT* nmt, uint8_t nodeId) {}
-
-extern "C" void CONmtHbConsChange(CO_NMT* nmt, uint8_t nodeId, CO_MODE mode) {}
-
-extern "C" int16_t COParaDefault(CO_PARA* pg) { return 0; }
-
-extern "C" void COPdoTransmit(CO_IF_FRM* frm) {}
-
-extern "C" int16_t COPdoReceive(CO_IF_FRM* frm) { return 0; }
-
-extern "C" void COPdoSyncUpdate(CO_RPDO* pdo) {}
-
-extern "C" void COTmrLock(void) {}
-
-extern "C" void COTmrUnlock(void) {}
 
 extern "C" void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef* hcan) {
     log::LOGGER.log(log::Logger::LogLevel::DEBUG, "RX Full");
