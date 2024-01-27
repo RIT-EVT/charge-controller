@@ -69,11 +69,11 @@ BMSManager::BMSStatus BMSManager::getStatus(uint8_t packNum) {
 uint8_t BMSManager::getObjectDictionarySize() {
     return OBJECT_DICTIONARY_SIZE;
 }
-/*
+
 CO_OBJ_T* BMSManager::getObjectDictionary() {
     return objectDictionaryBMS;
 }
-*/
+
 void BMSManager::printDebug() {
     for (int i = 0; i < MAX_BMS_PACKS; i++) {
         if (packs[i].data.batteryVoltage != lastValues[i].batteryVoltage) {

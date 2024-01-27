@@ -39,10 +39,10 @@ public:
      * The value of each entry is equal to the range of the encoder
      */
     enum State {
-        PAGE_SELECT = 1,
-        SETTING_SELECT = 3,
-        VOLTAGE_SELECT = MAX_VOLTAGE,
-        CURRENT_SELECT = MAX_CURRENT,
+        PAGE_SELECT = 0u,
+        SETTING_SELECT = 1u,
+        VOLTAGE_SELECT = 2u,
+        CURRENT_SELECT = 3u,
     };
 
     /**
@@ -50,10 +50,10 @@ public:
      * Only updated when state = SETTINGSELECT
      */
     enum SelectedSetting {
-        VOLTAGE = 0,
-        CURRENT = 1,
-        SAVE = 3,
-        QUIT = 4
+        VOLTAGE = 0u,
+        CURRENT = 1u,
+        SAVE = 2u,
+        QUIT = 3u
     };
 
     /**
@@ -141,6 +141,13 @@ public:
      * @return the unsaved current in the model.
      */
     uint16_t getUnsavedCurrent();
+
+    /**
+     * Returns the valid encoder range for the given state
+     * @param state the state that the encoder range can take
+     * @return the encoder range for that state
+     */
+    uint32_t getEncoderRange(State state);
 
 private:
     /** The current state the model is in */

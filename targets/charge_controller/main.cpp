@@ -9,10 +9,10 @@
 
 #include <EVT/io/CANopen.hpp>
 
-#include "EVT/dev/button.hpp"
+#include <EVT/dev/button.hpp>
 #include <charge_controller/ChargeController.hpp>
 #include <charge_controller/dev/BMSManager.hpp>
-#include <charge_controller/dev/Debounce.hpp>
+#include <charge_controller/dev/EncoderButton.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
 
 namespace IO = EVT::core::IO;
@@ -47,6 +47,12 @@ constexpr IO::Pin LED_PIN = IO::Pin::PA_10;
 
 constexpr uint32_t SPI_SPEED = SPI_SPEED_500KHZ;
 
+///////////////////////////////////////////////////////////////////////////////
+// EVT-core CAN callback and CAN setup. This will include logic to set
+// aside CANopen messages into a specific queue
+///////////////////////////////////////////////////////////////////////////////
+
+
 struct CANInterruptParams {
     EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage>* queue;
     ChargeController* chargeController;
@@ -80,22 +86,6 @@ void canInterrupt(IO::CANMessage& message, void* priv) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// EVT-core CAN callback and CAN setup. This will include logic to set
-// aside CANopen messages into a specific queue
-///////////////////////////////////////////////////////////////////////////////
-
-/**
- * Interrupt handler to get CAN messages. A function pointer to this function
- * will be passed to the EVT-core CAN interface which will in turn call this
- * function each time a new CAN message comes in.
- *
- * NOTE: For this sample, every non-extended (so 11 bit CAN IDs) will be
- * assumed to be intended to be passed as a CANopen message.
- *
- * @param message[in] The passed in CAN message that was read.
- */
-
-///////////////////////////////////////////////////////////////////////////////
 // CANopen specific Callbacks. Need to be defined in some location
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -123,7 +113,7 @@ int main() {
     // Buttons
     IO::GPIO& startButtonGPIO = IO::getGPIO<START_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
 
-    //    DEV::Button standbyButton = DEV::Button(standbyButtonGPIO);
+    //DEV::Button standbyButton = DEV::Button(standbyButtonGPIO);
     DEV::Button startButton(startButtonGPIO);
 
     uart.printf("Buttons Init\n\r");
@@ -157,9 +147,10 @@ int main() {
     //Encoder GPIO pin initialization
     IO::GPIO& encoderGPIOpinA = IO::getGPIO<ENCODER_A_PIN>(IO::GPIO::Direction::INPUT);
     IO::GPIO& encoderGPIOpinB = IO::getGPIO<ENCODER_B_PIN>(IO::GPIO::Direction::INPUT);
-    IO::GPIO& encoderButtonGPIO = IO::getGPIO<ENCODER_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
     DEV::Encoder encoder(encoderGPIOpinA, encoderGPIOpinB, 1, 0, true);
-    DEV::Button encoderButton(encoderButtonGPIO);
+    //Encoder button
+    IO::GPIO& encoderButtonGPIO = IO::getGPIO<ENCODER_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
+    DEV::Button encoderButton(encoderButtonGPIO, IO::GPIO::State::LOW);
 
     //UI Controller initialization
     ControllerUI controllerUI(encoder, encoderButton, display, model);

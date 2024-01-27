@@ -1,13 +1,12 @@
 #ifndef EXAMPLE_BMSMANAGER_HPP
 #define EXAMPLE_BMSMANAGER_HPP
 
-//TODO fix canopen stuff when taylor adds the macros in
-//#include <Canopen/co_obj.h>
+#include <co_obj.h>
 #include <EVT/io/CAN.hpp>
 #include <EVT/io/GPIO.hpp>
 #include <stdint.h>
 
-//#include <Canopen/co_pdo.h>
+#include <co_pdo.h>
 #include <EVT/utils/log.hpp>
 
 //RPDO-NUM settings
@@ -337,7 +336,7 @@ public:
      *
      * @return Pointer to the start of the object dictionary
      */
-//    CO_OBJ_T* getObjectDictionary();
+    CO_OBJ_T* getObjectDictionary();
 
     /**
      * Get the size of the object dictionary
@@ -395,8 +394,10 @@ private:
 
     static constexpr uint16_t
         OBJECT_DICTIONARY_SIZE = 69;
-/*
+
     CO_OBJ_T objectDictionaryBMS[OBJECT_DICTIONARY_SIZE + 1] = {
+        ///COMMENTED OUT UNTIL WE FIX CANOPEN
+        /*
         // Sync ID, defaults to 0x80
         {
             .Key = CO_KEY(0x1005, 0, CO_UNSIGNED32 | CO_OBJ_D__R_),
@@ -468,10 +469,10 @@ private:
         // Pack 2 Data
         GEN_PACK_DATA(1, packs[1].data)
 
+         */
         // End of dictionary marker
-        CO_OBJ_DIR_ENDMARK,
+        CO_OBJ_DICT_ENDMARK,
     };
-*/
 };
 
 #endif// EXAMPLE_BMSMANAGER_HPP

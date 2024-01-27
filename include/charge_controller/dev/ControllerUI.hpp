@@ -1,12 +1,15 @@
 #ifndef CONTROLLERUI_HPP
 #define CONTROLLERUI_HPP
 
-#include <charge_controller/dev/ControllerModel.hpp>
-#include <EVT/dev/button.hpp>
 #include <EVT/dev/Encoder.hpp>
+#include <EVT/dev/button.hpp>
+#include <EVT/utils/log.hpp>
+#include <charge_controller/dev/ControllerModel.hpp>
+#include <charge_controller/dev/EncoderButton.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
 
-#define DEBOUNCE_TIME 500 //TODO check the encoder documentation for the debounce time
+//TODO check the encoder documentation for the debounce time
+#define DEBOUNCE_TIME 500
 
 namespace DEV = EVT::core::DEV;
 

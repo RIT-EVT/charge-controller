@@ -1,6 +1,6 @@
 #include <charge_controller/dev/LCDDisplay.hpp>
 
-LCDDisplay::LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi, ControllerModel& model) : lcd(DEV::LCD(reg_select, reset, spi, 8, 4)), model(model) {}
+LCDDisplay::LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi, ControllerModel& model) : lcd(DEV::LCD(reg_select, reset, spi, 8, 3)), model(model) {}
 
 void LCDDisplay::init() {
     lcd.initLCD();
@@ -18,49 +18,50 @@ void LCDDisplay::setChargeControllerStatus(const char* str) {
 void LCDDisplay::display() {
     ControllerModel::Page newPage = model.getPage();
     switch(newPage) {
-    case ControllerModel::Page::MAIN:
-        {
-            if (page != newPage) {
-                lcd.clearLCD();
-                lcd.setNewSections(8, 4, MAIN_SCREEN_SECTION_TITLES);
-                lcd.displaySectionHeaders();
-                page = ControllerModel::Page::MAIN;
+        case ControllerModel::Page::MAIN:
+            {
+                if (page != newPage) {
+                    lcd.clearLCD();
+                    lcd.setNewSections(8, 3, MAIN_SCREEN_SECTION_TITLES);
+                    lcd.displaySectionHeaders();
+                    page = ControllerModel::Page::MAIN;
+                }
+                //B1 Status
+                lcd.setTextForSection(0, batteryOneStatus);
+                //B2 Status
+                lcd.setTextForSection(1, batteryTwoStatus);
+                //B1 Voltage
+                char batteryOneVolt[16] = {0};
+                std::sprintf(batteryOneVolt, "%d V", batteryMinVoltages[0]);
+                lcd.setTextForSection(2, batteryOneVolt);
+                //B2 Voltage
+                char batteryTwoVolt[16] = {0};
+                std::sprintf(batteryTwoVolt, "%d V", batteryMinVoltages[1]);
+                lcd.setTextForSection(3, batteryTwoVolt);
+                //B1 Min T
+                char bat1MinTemp[16] = {0};
+                std::sprintf(bat1MinTemp, "%d C", batteryMinTemps[0]);
+                lcd.setTextForSection(4, bat1MinTemp);
+                //B2 Min T
+                char bat2MinTemp[16] = {0};
+                std::sprintf(bat2MinTemp, "%d C", batteryMinTemps[1]);
+                lcd.setTextForSection(5, bat2MinTemp);
+                //B1 Max T
+                char bat1MaxTemp[16] = {0};
+                std::sprintf(bat1MaxTemp, "%d C", batteryMaxTemps[0]);
+                lcd.setTextForSection(6, bat1MaxTemp);
+                //B2 Max T
+                char bat2MaxTemp[16] = {0};
+                std::sprintf(bat2MaxTemp, "%d C", batteryMaxTemps[1]);
+                lcd.setTextForSection(7, bat2MaxTemp);
+
+                break;
             }
-            //B1 Status
-            lcd.setTextForSection(0, batteryOneStatus);
-            //B2 Status
-            lcd.setTextForSection(1, batteryTwoStatus);
-            //B1 Voltage
-            char batteryOneVolt[16] = {0};
-            std::sprintf(batteryOneVolt, "%d V", batteryMinVoltages[0]);
-            lcd.setTextForSection(2, batteryOneVolt);
-            //B2 Voltage
-            char batteryTwoVolt[16] = {0};
-            std::sprintf(batteryTwoVolt, "%d V", batteryMinVoltages[1]);
-            lcd.setTextForSection(3, batteryTwoVolt);
-            //B1 Min T
-            char bat1MinTemp[16] = {0};
-            std::sprintf(bat1MinTemp, "%d C", batteryMinTemps[0]);
-            lcd.setTextForSection(4, bat1MinTemp);
-            //B2 Min T
-            char bat2MinTemp[16] = {0};
-            std::sprintf(bat2MinTemp, "%d C", batteryMinTemps[1]);
-            lcd.setTextForSection(5, bat2MinTemp);
-            //B1 Max T
-            char bat1MaxTemp[16] = {0};
-            std::sprintf(bat1MaxTemp, "%d C", batteryMaxTemps[0]);
-            lcd.setTextForSection(6, bat1MaxTemp);
-            //B2 Max T
-            char bat2MaxTemp[16] = {0};
-            std::sprintf(bat2MaxTemp, "%d C", batteryMaxTemps[1]);
-            lcd.setTextForSection(7, bat2MaxTemp);
-            break;
-        }
         case ControllerModel::Page::SETTINGS:
         {
             if (page != newPage) {
                 lcd.clearLCD();
-                lcd.setNewSections(8, 4, SETTING_SCREEN_SECTION_TITLES);
+                lcd.setNewSections(8, 3, SETTING_SCREEN_SECTION_TITLES);
                 lcd.displaySectionHeaders();
                 page = ControllerModel::Page::SETTINGS;
             }
@@ -91,21 +92,35 @@ void LCDDisplay::display() {
 
             char quit[16] = " Quit";
 
+            //If there is an unsaved current or voltage, it will be represented by a * next to that setting.
+            if (model.getUnsavedCurrent() != model.getSavedCurrent()) {
+                currentSetting[0] = UNSAVED_PREFIX_CHAR;
+            }
+            if (model.getUnsavedVoltage() != model.getSavedVoltage()) {
+                voltageSetting[0] = UNSAVED_PREFIX_CHAR;
+            }
+
+            //When the current or voltage is being modified, it will be represented by a < next to that setting
+            if (model.getState() == ControllerModel::CURRENT_SELECT) {
+                currentSetting[0] = EDITING_PREFIX_CHAR;
+            } else if (model.getState() == ControllerModel::VOLTAGE_SELECT) {
+                voltageSetting[0] = EDITING_PREFIX_CHAR;
+            }
             //Determining which option is selected
             //The current selected setting will have a '>' in the first character of the string instead of a ' '
             if (model.getState() == ControllerModel::SETTING_SELECT) {
                 switch(model.getSelectedSetting()) {
                 case ControllerModel::VOLTAGE:
-                    voltageSetting[0] = '>';
+                    voltageSetting[0] = SELECTED_PREFIX_CHAR;
                     break;
                 case ControllerModel::CURRENT:
-                    currentSetting[0] = '>';
+                    currentSetting[0] = SELECTED_PREFIX_CHAR;
                     break;
                 case ControllerModel::SAVE:
-                    save[0] = '>';
+                    save[0] = SELECTED_PREFIX_CHAR;
                     break;
                 case ControllerModel::QUIT:
-                    quit[0] = '>';
+                    quit[0] = SELECTED_PREFIX_CHAR;
                     break;
                 }
             }

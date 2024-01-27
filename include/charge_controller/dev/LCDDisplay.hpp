@@ -8,6 +8,10 @@
 #include <cstdint>
 #include <cstdio>
 
+#define UNSAVED_PREFIX_CHAR '*'
+#define EDITING_PREFIX_CHAR '<'
+#define SELECTED_PREFIX_CHAR '>'
+
 namespace IO = EVT::core::IO;
 namespace DEV = EVT::core::DEV;
 
