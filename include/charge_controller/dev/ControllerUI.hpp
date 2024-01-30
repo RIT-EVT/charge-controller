@@ -5,7 +5,6 @@
 #include <EVT/dev/button.hpp>
 #include <EVT/utils/log.hpp>
 #include <charge_controller/dev/ControllerModel.hpp>
-#include <charge_controller/dev/EncoderButton.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
 
 //TODO check the encoder documentation for the debounce time

@@ -12,7 +12,6 @@
 #include <EVT/dev/button.hpp>
 #include <charge_controller/ChargeController.hpp>
 #include <charge_controller/dev/BMSManager.hpp>
-#include <charge_controller/dev/EncoderButton.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
 
 namespace IO = EVT::core::IO;
