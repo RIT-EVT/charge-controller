@@ -5,7 +5,6 @@ ControllerUI::ControllerUI(DEV::Encoder& encoder, DEV::Button& encoderButton, LC
 }
 
 void ControllerUI::process() {
-    EVT::core::log::LOGGER.log(EVT::core::log::Logger::LogLevel::DEBUG, "ENCODER: %ld\n\r", encoder.getPosition());
     switch(model.getState()) {
     case ControllerModel::State::PAGE_SELECT:
         switch(encoder.getPosition()) {
@@ -37,6 +36,8 @@ void ControllerUI::process() {
             case ControllerModel::SelectedSetting::QUIT:
                 model.setSelectedSetting(ControllerModel::SelectedSetting::QUIT);
                 break;
+            case ControllerModel::SelectedSetting::RESET:
+                model.setSelectedSetting(ControllerModel::SelectedSetting::RESET);
             default:
                 //THIS SHOULD NEVER HAPPEN!!!!
                 break;
@@ -54,6 +55,12 @@ void ControllerUI::process() {
                     break;
                 case ControllerModel::SelectedSetting::QUIT:
                     setModelState(ControllerModel::State::PAGE_SELECT);
+                    model.setUnsavedVoltage(model.getSavedVoltage());
+                    model.setUnsavedCurrent(model.getSavedCurrent());
+                    break;
+                case ControllerModel::SelectedSetting::RESET:
+                    model.setUnsavedVoltage(DEFAULT_VOLTAGE);
+                    model.setUnsavedCurrent(DEFAULT_CURRENT);
                     break;
             }
         }
@@ -75,7 +82,6 @@ void ControllerUI::process() {
 }
 
 void ControllerUI::setModelState(ControllerModel::State newState) {
-    EVT::core::log::LOGGER.log(EVT::core::log::Logger::LogLevel::DEBUG, "Setting State to: %d\n", newState);
     if (model.getState() != newState) {
         switch(newState) {
             case ControllerModel::State::SETTING_SELECT:

@@ -4,8 +4,9 @@
 #include <cstdint>
 
 
-#define MAX_VOLTAGE 400 //TODO these are placeholder values, talk to the EEs about the actual values
-#define MAX_CURRENT 6
+#define MAX_VOLTAGE 100
+#define MAX_CURRENT 60
+
 #define DEFAULT_VOLTAGE 96
 #define DEFAULT_CURRENT 60
 
@@ -53,7 +54,8 @@ public:
         VOLTAGE = 0u,
         CURRENT = 1u,
         SAVE = 2u,
-        QUIT = 3u
+        QUIT = 3u,
+        RESET = 4u
     };
 
     /**

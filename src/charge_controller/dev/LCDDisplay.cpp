@@ -1,6 +1,6 @@
 #include <charge_controller/dev/LCDDisplay.hpp>
 
-LCDDisplay::LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi, ControllerModel& model) : lcd(DEV::LCD(reg_select, reset, spi, 8, 3)), model(model) {}
+LCDDisplay::LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi, ControllerModel& model) : lcd(DEV::LCD(reg_select, reset, spi, 9, 3)), model(model) {}
 
 void LCDDisplay::init() {
     lcd.initLCD();
@@ -22,7 +22,7 @@ void LCDDisplay::display() {
             {
                 if (page != newPage) {
                     lcd.clearLCD();
-                    lcd.setNewSections(8, 3, MAIN_SCREEN_SECTION_TITLES);
+                    lcd.setNewSections(9, 3, MAIN_SCREEN_SECTION_TITLES);
                     lcd.displaySectionHeaders();
                     page = ControllerModel::Page::MAIN;
                 }
@@ -61,7 +61,7 @@ void LCDDisplay::display() {
         {
             if (page != newPage) {
                 lcd.clearLCD();
-                lcd.setNewSections(8, 3, SETTING_SCREEN_SECTION_TITLES);
+                lcd.setNewSections(9, 3, SETTING_SCREEN_SECTION_TITLES);
                 lcd.displaySectionHeaders();
                 page = ControllerModel::Page::SETTINGS;
             }
@@ -91,6 +91,8 @@ void LCDDisplay::display() {
             char save[16] = " Save";
 
             char quit[16] = " Quit";
+
+            char reset[16] = " Reset";
 
             //If there is an unsaved current or voltage, it will be represented by a * next to that setting.
             if (model.getUnsavedCurrent() != model.getSavedCurrent()) {
@@ -122,16 +124,31 @@ void LCDDisplay::display() {
                 case ControllerModel::QUIT:
                     quit[0] = SELECTED_PREFIX_CHAR;
                     break;
+                case ControllerModel::RESET:
+                    reset[0] = SELECTED_PREFIX_CHAR;
+                    break;
                 }
             }
             //S Voltage -> The voltage that the charge controller is being commanded to run at
             lcd.setTextForSection(4, voltageSetting);
             //S Current -> The current that the charge controller is being commanded to run at
             lcd.setTextForSection(5, currentSetting);
-            //Save
-            lcd.setTextForSection(6,save);
-            //Quit
-            lcd.setTextForSection(7, quit);
+
+            //Blanks out the save, quit, and reset options unless you are clicked into the screen
+            //Suggested by Luke (Integration) to avoid people being able to mess with the settings as easily
+            //Also provides visual feedback that the user has the settings screen selected
+            if (model.getState() != ControllerModel::State::PAGE_SELECT) {
+                //Save
+                lcd.setTextForSection(6,save);
+                //Quit
+                lcd.setTextForSection(7, quit);
+                //Reset
+                lcd.setTextForSection(8, reset);
+            } else {
+                lcd.setTextForSection(6, "");
+                lcd.setTextForSection(7, "");
+                lcd.setTextForSection(8, "");
+            }
             break;
         }
     }

@@ -50,7 +50,7 @@ uint16_t ControllerModel::getUnsavedCurrent() {
 uint32_t ControllerModel::getEncoderRange(State state) {
     switch (state) {
         case PAGE_SELECT: return 1;
-        case SETTING_SELECT: return 3;
+        case SETTING_SELECT: return 4;
         case VOLTAGE_SELECT: return MAX_VOLTAGE;
         case CURRENT_SELECT: return MAX_CURRENT;
     }

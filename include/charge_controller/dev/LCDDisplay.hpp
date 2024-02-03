@@ -160,7 +160,7 @@ private:
     /**
      * The 8 section headers for the main screen
      */
-    static constexpr char* MAIN_SCREEN_SECTION_TITLES[8] {
+    static constexpr char* MAIN_SCREEN_SECTION_TITLES[9] {
         (char*) "B1 Status",
         (char*) "B2 Status",
         (char*) "B1 Voltage",
@@ -169,12 +169,13 @@ private:
         (char*) "B2 Min T",
         (char*) "B1 Max T",
         (char*) "B2 Max T",
+        (char*) "Page 1/2"
     };
 
     /**
      * The 8 section headers for the setting screen
      */
-    static constexpr char* SETTING_SCREEN_SECTION_TITLES[8] {
+    static constexpr char* SETTING_SCREEN_SECTION_TITLES[9] {
         (char*) "CC Status",
         (char*) "Charge %",
         (char*) "C Voltage",
@@ -182,7 +183,8 @@ private:
         (char*) "S Voltage",
         (char*) "S Current",
         (char*) "", //Save
-        (char*) "" //Quit
+        (char*) "", //Quit
+        (char*) "" //Reset
     };
 };
 
