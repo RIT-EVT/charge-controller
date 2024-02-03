@@ -4,11 +4,11 @@
 #include <EVT/io/CAN.hpp>
 #include <EVT/io/CANopen.hpp>
 
-#include <charge_controller/dev/ControllerUI.hpp>
-#include <charge_controller/dev/ControllerModel.hpp>
 #include <EVT/dev/button.hpp>
 #include <EVT/io/GPIO.hpp>
 #include <charge_controller/dev/BMSManager.hpp>
+#include <charge_controller/dev/ControllerModel.hpp>
+#include <charge_controller/dev/ControllerUI.hpp>
 #include <charge_controller/dev/LCDDisplay.hpp>
 
 namespace time = EVT::core::time;
@@ -147,7 +147,6 @@ private:
     LCDDisplay& display;
     ControllerUI& controllerUI;
     ControllerModel& controllerModel;
-
 
     uint32_t lastHeartBeat = time::millis();
     uint8_t oldCount = 0;

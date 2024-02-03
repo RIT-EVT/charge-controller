@@ -3,7 +3,6 @@
 
 #include <cstdint>
 
-
 #define MAX_VOLTAGE 100
 #define MAX_CURRENT 60
 
@@ -21,7 +20,6 @@
 class ControllerModel {
 
 public:
-
     /**
      * default (and only) initializer for the ControllerModel class.
      */
@@ -159,12 +157,11 @@ private:
     /** The most recent selected setting that is selected (only really relevant if state = SETTINGSELECT */
     SelectedSetting setting = QUIT;
 
-    uint16_t savedVoltage = DEFAULT_VOLTAGE; //TODO see about saving values between boot sequences
+    uint16_t savedVoltage = DEFAULT_VOLTAGE;//TODO see about saving values between boot sequences
     uint16_t savedCurrent = DEFAULT_CURRENT;
 
     uint16_t unsavedVoltage = DEFAULT_VOLTAGE;
     uint16_t unsavedCurrent = DEFAULT_CURRENT;
-
 };
 
 #endif//CHARGE_CONTROLLER_CONTROLLERMODEL_HPP

@@ -22,7 +22,6 @@ namespace DEV = EVT::core::DEV;
 
 class ControllerUI {
 public:
-
     /**
      * Constructor for the ControllerUI class
      *
@@ -37,7 +36,6 @@ public:
      * Processes user input, updates appropriate values, and calls display.display() to update the view
      */
     void process();
-
 
 private:
     /** Reference to the model object */

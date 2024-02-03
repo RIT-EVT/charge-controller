@@ -51,7 +51,6 @@ constexpr uint32_t SPI_SPEED = SPI_SPEED_500KHZ;
 // aside CANopen messages into a specific queue
 ///////////////////////////////////////////////////////////////////////////////
 
-
 struct CANInterruptParams {
     EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage>* queue;
     ChargeController* chargeController;
