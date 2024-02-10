@@ -174,6 +174,6 @@ private:
     };
 };
 
-} //namespace CC
+}//namespace CC
 
 #endif// LCDDISPLAY_H

@@ -81,6 +81,6 @@ private:
      void handleButtonPressSettingSelect(UIModel::SelectedSetting setting);
 };
 
-} //namespace CC
+}//namespace CC
 
 #endif//CONTROLLERUI_HPP
