@@ -61,7 +61,7 @@ private:
      *
      * @param[in] page which page the user is selecting.
      */
-     void switchSelectedPage(UIModel::Page page);
+    void switchSelectedPage(UIModel::Page page);
 
     /**
      * Internal helper method for process.
@@ -69,16 +69,16 @@ private:
      *
      * @param[in] setting which setting the user is selecting.
      */
-     void switchSelectedSetting(UIModel::SelectedSetting setting);
+    void switchSelectedSetting(UIModel::SelectedSetting setting);
 
-     /**
+    /**
      * Internal helper method for process.
      * Handles logic when the UIModel is in SETTINGSELECT mode
       * and the encoder button has been pressed.
      *
      * @param[in] setting which setting the user has selected.
      */
-     void handleButtonPressSettingSelect(UIModel::SelectedSetting setting);
+    void handleButtonPressSettingSelect(UIModel::SelectedSetting setting);
 };
 
 }//namespace CC
