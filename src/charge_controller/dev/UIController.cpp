@@ -67,7 +67,6 @@ void CC::UIController::process() {
             default:
                 log::LOGGER.log(log::Logger::LogLevel::ERROR, "Encoder position out of range of Controller::Model::SelectedSetting options");
                 break;
-
             }
         }
         break;

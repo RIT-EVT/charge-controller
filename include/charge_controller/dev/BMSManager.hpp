@@ -477,6 +477,6 @@ private:
     };
 };
 
-} //namespace CC
+}//namespace CC
 
 #endif// EXAMPLE_BMSMANAGER_HPP

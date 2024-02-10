@@ -56,6 +56,6 @@ private:
     void setModelState(UIModel::State newState);
 };
 
-} //namespace CC
+}//namespace CC
 
 #endif//CONTROLLERUI_HPP

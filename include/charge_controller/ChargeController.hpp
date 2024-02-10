@@ -159,6 +159,6 @@ private:
     static constexpr IO::GPIO::State RELAY_OFF = IO::GPIO::State::LOW;
 };
 
-} //namespace CC
+}//namespace CC
 
 #endif// CHARGE_CONTROLLER_HPP
