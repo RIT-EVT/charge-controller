@@ -18,6 +18,10 @@ void CC::LCDView::setChargeControllerStatus(const char* str) {
 void CC::LCDView::display() {
     UIModel::Page newPage = model.getPage();
     switch (newPage) {
+    /**
+     * Each of these cases must be scoped (enclosed in {}) because there are variable declarations inside them.
+     * If they are not scoped, these variables could possibly be accessed undeclared, which would be BAD.
+     */
     case UIModel::Page::MAIN: {
         if (page != newPage) {
             lcd.clearLCD();
