@@ -8,6 +8,8 @@
 
 #include <EVT/utils/log.hpp>
 #include <co_pdo.h>
+#include <EVT/io/CANDevice.hpp>
+#include <EVT/io/CANOpenMacros.hpp>
 
 //RPDO-NUM settings
 // 0: RPDO number in index and total number of sub indexes.
@@ -182,7 +184,7 @@ namespace IO = EVT::core::IO;
 
 namespace CC {
 
-class BMSManager {
+class BMSManager : public CANDevice {
     static constexpr uint32_t TOTAL_VOLTAGE_ID = 0x2101;
     static constexpr uint32_t STATE_ID = 0x2102;
     static constexpr uintptr_t BMS_PACK_ONE_ID = 0x20;
@@ -338,14 +340,21 @@ public:
      *
      * @return Pointer to the start of the object dictionary
      */
-    CO_OBJ_T* getObjectDictionary();
+    CO_OBJ_T* getObjectDictionary() override;
 
     /**
-     * Get the size of the object dictionary
+     * Get the number of elements in the object dictionary.
      *
-     * @return Size of the object dictionary
+     * @return The number of elements in the object dictionary
      */
-    uint8_t getObjectDictionarySize();
+    uint8_t getNumElements() override;
+
+    /**
+    * Get the device's node ID
+    *
+    * @return The node ID of the can device.
+     */
+    uint8_t getNodeID() override;
 
     static constexpr uint8_t MAX_BMS_PACKS = 2;
 

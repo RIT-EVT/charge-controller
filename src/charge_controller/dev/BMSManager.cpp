@@ -66,12 +66,16 @@ CC::BMSManager::BMSStatus CC::BMSManager::getStatus(uint8_t packNum) {
     return packs[packNum].data.status;
 }
 
-uint8_t CC::BMSManager::getObjectDictionarySize() {
+uint8_t CC::BMSManager::getNumElements() {
     return OBJECT_DICTIONARY_SIZE;
 }
 
 CO_OBJ_T* CC::BMSManager::getObjectDictionary() {
     return objectDictionaryBMS;
+}
+
+uint8_t CC::BMSManager::getNodeID() {
+    return NODE_ID;
 }
 
 void CC::BMSManager::printDebug() {
