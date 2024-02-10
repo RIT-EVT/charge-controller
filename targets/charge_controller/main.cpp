@@ -205,7 +205,6 @@ int main() {
 
     CO_NODE canNode;
 
-
     // Initialize all the CANOpen drivers.
     IO::initializeCANopenDriver(&canOpenQueue, &can, &timer, &canStackDriver, &nvmDriver, &timerDriver, &canDriver);
 
@@ -213,7 +212,6 @@ int main() {
     IO::initializeCANopenNode(&canNode, &bms, &canStackDriver, sdoBuffer, appTmrMem);
 
     CONmtSetMode(&canNode.Nmt, CO_OPERATIONAL);
-
 
     time::wait(500);
 

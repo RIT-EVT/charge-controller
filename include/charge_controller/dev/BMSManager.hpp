@@ -6,10 +6,10 @@
 #include <co_obj.h>
 #include <stdint.h>
 
-#include <EVT/utils/log.hpp>
-#include <co_pdo.h>
 #include <EVT/io/CANDevice.hpp>
 #include <EVT/io/CANOpenMacros.hpp>
+#include <EVT/utils/log.hpp>
+#include <co_pdo.h>
 
 //RPDO-NUM settings
 // 0: RPDO number in index and total number of sub indexes.
