@@ -3,7 +3,8 @@
 
 #include <EVT/io/GPIO.hpp>
 
-namespace charge_controller::DEV {
+namespace CC {
+
 class LED {
 public:
     /**
@@ -38,6 +39,6 @@ private:
     /// If the LED is active high or active low
     ActiveState activeState;
 };
-}// namespace charge_controller::DEV
+}// namespace CC
 
 #endif

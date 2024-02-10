@@ -1,8 +1,8 @@
-#include <charge_controller/dev/LCDDisplay.hpp>
+#include <charge_controller/dev/LCDView.hpp>
 
-LCDDisplay::LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi, ControllerModel& model) : lcd(DEV::LCD(reg_select, reset, spi, 9, 3)), model(model) {}
+CC::LCDView::LCDView(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi, UIModel& model) : lcd(DEV::LCD(reg_select, reset, spi, 9, 3)), model(model) {}
 
-void LCDDisplay::init() {
+void CC::LCDView::init() {
     lcd.initLCD();
     lcd.clearLCD();
     lcd.setDefaultSections(MAIN_SCREEN_SECTION_TITLES);
@@ -11,19 +11,19 @@ void LCDDisplay::init() {
     lcd.displaySectionHeaders();
 }
 
-void LCDDisplay::setChargeControllerStatus(const char* str) {
+void CC::LCDView::setChargeControllerStatus(const char* str) {
     chargeControllerStatus = str;
 }
 
-void LCDDisplay::display() {
-    ControllerModel::Page newPage = model.getPage();
+void CC::LCDView::display() {
+    UIModel::Page newPage = model.getPage();
     switch (newPage) {
-    case ControllerModel::Page::MAIN: {
+    case UIModel::Page::MAIN: {
         if (page != newPage) {
             lcd.clearLCD();
             lcd.setNewSections(9, 3, MAIN_SCREEN_SECTION_TITLES);
             lcd.displaySectionHeaders();
-            page = ControllerModel::Page::MAIN;
+            page = UIModel::Page::MAIN;
         }
         //B1 Status
         lcd.setTextForSection(0, batteryOneStatus);
@@ -56,12 +56,12 @@ void LCDDisplay::display() {
 
         break;
     }
-    case ControllerModel::Page::SETTINGS: {
+    case UIModel::Page::SETTINGS: {
         if (page != newPage) {
             lcd.clearLCD();
             lcd.setNewSections(9, 3, SETTING_SCREEN_SECTION_TITLES);
             lcd.displaySectionHeaders();
-            page = ControllerModel::Page::SETTINGS;
+            page = UIModel::Page::SETTINGS;
         }
         //CC Status
         lcd.setTextForSection(0, chargeControllerStatus);
@@ -101,28 +101,28 @@ void LCDDisplay::display() {
         }
 
         //When the current or voltage is being modified, it will be represented by a < next to that setting
-        if (model.getState() == ControllerModel::CURRENT_SELECT) {
+        if (model.getState() == UIModel::CURRENT_SELECT) {
             currentSetting[0] = EDITING_PREFIX_CHAR;
-        } else if (model.getState() == ControllerModel::VOLTAGE_SELECT) {
+        } else if (model.getState() == UIModel::VOLTAGE_SELECT) {
             voltageSetting[0] = EDITING_PREFIX_CHAR;
         }
         //Determining which option is selected
         //The current selected setting will have a '>' in the first character of the string instead of a ' '
-        if (model.getState() == ControllerModel::SETTING_SELECT) {
+        if (model.getState() == UIModel::SETTING_SELECT) {
             switch (model.getSelectedSetting()) {
-            case ControllerModel::VOLTAGE:
+            case UIModel::VOLTAGE:
                 voltageSetting[0] = SELECTED_PREFIX_CHAR;
                 break;
-            case ControllerModel::CURRENT:
+            case UIModel::CURRENT:
                 currentSetting[0] = SELECTED_PREFIX_CHAR;
                 break;
-            case ControllerModel::SAVE:
+            case UIModel::SAVE:
                 save[0] = SELECTED_PREFIX_CHAR;
                 break;
-            case ControllerModel::QUIT:
+            case UIModel::QUIT:
                 quit[0] = SELECTED_PREFIX_CHAR;
                 break;
-            case ControllerModel::RESET:
+            case UIModel::RESET:
                 reset[0] = SELECTED_PREFIX_CHAR;
                 break;
             }
@@ -135,7 +135,7 @@ void LCDDisplay::display() {
         //Blanks out the save, quit, and reset options unless you are clicked into the screen
         //Suggested by Luke (Integration) to avoid people being able to mess with the settings as easily
         //Also provides visual feedback that the user has the settings screen selected
-        if (model.getState() != ControllerModel::State::PAGE_SELECT) {
+        if (model.getState() != UIModel::State::PAGE_SELECT) {
             //Save
             lcd.setTextForSection(6, save);
             //Quit
@@ -152,15 +152,15 @@ void LCDDisplay::display() {
     }
 }
 
-void LCDDisplay::setChargerVoltage(uint16_t voltage) {
+void CC::LCDView::setChargerVoltage(uint16_t voltage) {
     chargeControllerVoltage = voltage;
 }
 
-void LCDDisplay::setChargerCurrent(uint16_t current) {
+void CC::LCDView::setChargerCurrent(uint16_t current) {
     chargeControllerCurrent = current;
 }
 
-void LCDDisplay::setBatteryStatus(BMSManager::BMSStatus status, uint8_t index) {
+void CC::LCDView::setBatteryStatus(BMSManager::BMSStatus status, uint8_t index) {
     if (index == 0) {
         switch (status) {
         case BMSManager::BMSStatus::START:
@@ -230,7 +230,7 @@ void LCDDisplay::setBatteryStatus(BMSManager::BMSStatus status, uint8_t index) {
     }
 }
 
-void LCDDisplay::setMinCellVoltage(int16_t cellVoltage, uint8_t index) {
+void CC::LCDView::setMinCellVoltage(int16_t cellVoltage, uint8_t index) {
     if (index == 0) {
         batteryMinVoltages[0] = cellVoltage;
     } else if (index == 1) {
@@ -238,7 +238,7 @@ void LCDDisplay::setMinCellVoltage(int16_t cellVoltage, uint8_t index) {
     }
 }
 
-void LCDDisplay::setMaxCellVoltage(int16_t cellVoltage, uint8_t index) {
+void CC::LCDView::setMaxCellVoltage(int16_t cellVoltage, uint8_t index) {
     if (index == 0) {
         batteryMaxVoltages[0] = cellVoltage;
     } else if (index == 1) {
@@ -246,7 +246,7 @@ void LCDDisplay::setMaxCellVoltage(int16_t cellVoltage, uint8_t index) {
     }
 }
 
-void LCDDisplay::setMinTemp(int16_t temp, uint8_t index) {
+void CC::LCDView::setMinTemp(int16_t temp, uint8_t index) {
     if (index == 0) {
         batteryMinTemps[0] = temp;
     } else if (index == 1) {
@@ -254,7 +254,7 @@ void LCDDisplay::setMinTemp(int16_t temp, uint8_t index) {
     }
 }
 
-void LCDDisplay::setMaxTemp(int16_t temp, uint8_t index) {
+void CC::LCDView::setMaxTemp(int16_t temp, uint8_t index) {
     if (index == 0) {
         batteryMaxTemps[0] = temp;
     } else if (index == 1) {

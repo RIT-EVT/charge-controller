@@ -14,6 +14,7 @@
 // 1: The COB-ID to receive PDOs from.
 // 2: transmission trigger
 // 6 spaces in an array
+
 #define GEN_PACK_RPDO_CONFIG(NUM, ID)                                         \
     {                                                                         \
         .Key = CO_KEY(0x1400 + 2 * NUM, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),      \
@@ -45,7 +46,6 @@
             .Type = nullptr,                                                  \
             .Data = (uintptr_t) 0xFE,                                         \
         },
-
 // RPDO(NUM) mapping, determines the PDO messages to send when TPDO(NUM) is triggered
 // 0: The number of PDO messages associated with the TPDO
 // 1: Link to the first PDO message
@@ -136,6 +136,7 @@
         },                                                                    \
                                                                               \
         // 8 spaces in an array
+
 #define GEN_PACK_DATA(NUM, VAR)                                           \
     {                                                                     \
         .Key = CO_KEY(0x2100 + NUM, 1, CO_UNSIGNED16 | CO_OBJ___PR_),     \
@@ -177,8 +178,9 @@
             .Type = nullptr,                                              \
             .Data = (uintptr_t) &VAR.status,                              \
         },
-
 namespace IO = EVT::core::IO;
+
+namespace CC {
 
 class BMSManager {
     static constexpr uint32_t TOTAL_VOLTAGE_ID = 0x2101;
@@ -474,5 +476,7 @@ private:
         CO_OBJ_DICT_ENDMARK,
     };
 };
+
+} //namespace CC
 
 #endif// EXAMPLE_BMSMANAGER_HPP

@@ -12,7 +12,7 @@
 #include <EVT/dev/button.hpp>
 #include <charge_controller/ChargeController.hpp>
 #include <charge_controller/dev/BMSManager.hpp>
-#include <charge_controller/dev/LCDDisplay.hpp>
+#include <charge_controller/dev/LCDView.hpp>
 
 namespace IO = EVT::core::IO;
 namespace DEV = EVT::core::DEV;
@@ -53,7 +53,7 @@ constexpr uint32_t SPI_SPEED = SPI_SPEED_500KHZ;
 
 struct CANInterruptParams {
     EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage>* queue;
-    ChargeController* chargeController;
+    CC::ChargeController* chargeController;
 };
 
 /**
@@ -134,13 +134,13 @@ int main() {
     IO::CAN& can = IO::getCAN<CAN_TX, CAN_RX>();
 
     // charge controller module instantiation
-    BMSManager bms(can, bmsOK);
+    CC::BMSManager bms(can, bmsOK);
 
     //Model initialization
-    ControllerModel model;
+    CC::UIModel model;
 
     //LCD display initialization
-    LCDDisplay display(LCDRegisterSEL, LCDReset, spi, model);
+    CC::LCDView display(LCDRegisterSEL, LCDReset, spi, model);
 
     //Encoder GPIO pin initialization
     IO::GPIO& encoderGPIOpinA = IO::getGPIO<ENCODER_A_PIN>(IO::GPIO::Direction::INPUT);
@@ -151,8 +151,8 @@ int main() {
     DEV::Button encoderButton(encoderButtonGPIO, IO::GPIO::State::LOW);
 
     //UI Controller initialization
-    ControllerUI controllerUI(encoder, encoderButton, display, model);
-    ChargeController chargeController(bms, display, can, startButton, statusLED, controllerUI, model);
+    CC::UIController controllerUI(encoder, encoderButton, display, model);
+    CC::ChargeController chargeController(bms, display, can, startButton, statusLED, controllerUI, model);
 
     uart.printf("Modules Initialized\n\r");
 
@@ -213,7 +213,7 @@ int main() {
 
     //setup CANopen Node
     CO_NODE_SPEC canSpec = {
-        .NodeId = BMSManager::NODE_ID,
+        .NodeId = CC::BMSManager::NODE_ID,
         .Baudrate = IO::CAN::DEFAULT_BAUD,
         .Dict = bms.getObjectDictionary(),
         .DictLen = bms.getObjectDictionarySize(),

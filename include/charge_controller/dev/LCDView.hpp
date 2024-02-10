@@ -4,7 +4,7 @@
 #include <EVT/dev/LCD.hpp>
 #include <EVT/io/SPI.hpp>
 #include <charge_controller/dev/BMSManager.hpp>
-#include <charge_controller/dev/ControllerModel.hpp>
+#include <charge_controller/dev/UIModel.hpp>
 #include <cstdint>
 #include <cstdio>
 
@@ -15,14 +15,16 @@
 namespace IO = EVT::core::IO;
 namespace DEV = EVT::core::DEV;
 
+namespace CC {
+
 /**
  * Outputs all the values from the ChargeController class to the LCD display
- * Acts as the view in a Model-View-Controller (MVC) Structure where
- * ControllerModel is the model,
- * LCDDisplay is the display, and
- * ControllerUI is the controller
+ * Acts as the view in a Model-View-Controller (MVC) design pattern where
+ * UIModel is the model,
+ * LCDView is the view, and
+ * UIController is the controller.
  */
-class LCDDisplay {
+class LCDView {
 public:
     /**
      * Initializer for the LCD Display class.
@@ -31,7 +33,7 @@ public:
      * @param[in] reset Reset pin
      * @param[in] spi SPI class for communication
      */
-    LCDDisplay(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi, ControllerModel& model);
+    LCDView(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi, UIModel& model);
 
     /**
      * Initializes the LCD driver and displays the splash image.
@@ -67,7 +69,7 @@ public:
     /**
      * Set the status of the battery at the given index.
      * Will display in either the BM1 (BMS 1) column if index is 0
-     * or BM2 (BMS 2)
+     * or BM2 (BMS 2).
      *
      * @param status the status to display for the BMS at index.
      * @param index the index of the bms to display too (0 - 1).
@@ -115,7 +117,7 @@ private:
     /**
      * The model reference
      */
-    ControllerModel& model;
+    UIModel& model;
 
     /** The current status of the charge controller */
     const char* chargeControllerStatus = "NULL";
@@ -128,7 +130,7 @@ private:
     /** The current that is being supplied */
     uint16_t chargeControllerCurrent = 0;
     /** The current page that the display is on */
-    ControllerModel::Page page = ControllerModel::Page::MAIN;
+    UIModel::Page page = UIModel::Page::MAIN;
 
     int16_t batteryMinVoltages[2] = {};
     int16_t batteryMaxVoltages[2] = {};
@@ -138,24 +140,6 @@ private:
 
     /** How charged the batteries currently are. */
     const uint8_t chargePercentage = 0;
-
-    /**
-     * The 9 section headers to be displayed. (DEPRECATED)
-     */
-    static constexpr char* SECTION_TITLES[12]{
-        (char*) "B1 Status",
-        (char*) "CC Status",
-        (char*) "B2 Status",
-        (char*) "B1 Voltage",
-        (char*) "Charge %",
-        (char*) "B2 Voltage",
-        (char*) "B1 Min T",
-        (char*) "C Voltage",
-        (char*) "B2 Min T",
-        (char*) "B1 Max T",
-        (char*) "C Current",
-        (char*) "B2 Max T",
-    };
 
     /**
      * The 8 section headers for the main screen
@@ -181,10 +165,15 @@ private:
         (char*) "C Current",
         (char*) "S Voltage",
         (char*) "S Current",
+        //The next three section headers are left blank because they are selectable.
+        //We leave their headers blank, and write their header (save,quit,reset) in
+        //their 'text' section, so we are able to add a '>' in front if they are selected.
         (char*) "",//Save
         (char*) "",//Quit
         (char*) "" //Reset
     };
 };
+
+} //namespace CC
 
 #endif// LCDDISPLAY_H

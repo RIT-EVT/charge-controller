@@ -52,9 +52,9 @@ add_library(${PROJECT_NAME} STATIC)
 target_sources(${PROJECT_NAME} PRIVATE
         src/charge_controller/ChargeController.cpp
         src/charge_controller/dev/BMSManager.cpp
-        src/charge_controller/dev/LCDDisplay.cpp
-        src/charge_controller/dev/ControllerUI.cpp
-        src/charge_controller/dev/ControllerModel.cpp
+        src/charge_controller/dev/LCDView.cpp
+        src/charge_controller/dev/UIController.cpp
+        src/charge_controller/dev/UIModel.cpp
         )
 
 ###############################################################################

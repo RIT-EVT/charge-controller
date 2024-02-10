@@ -1,5 +1,5 @@
-#ifndef CHARGE_CONTROLLER_CONTROLLERMODEL_HPP
-#define CHARGE_CONTROLLER_CONTROLLERMODEL_HPP
+#ifndef CHARGE_CONTROLLER_UIMODEL_HPP
+#define CHARGE_CONTROLLER_UIMODEL_HPP
 
 #include <cstdint>
 
@@ -9,24 +9,25 @@
 #define DEFAULT_VOLTAGE 96
 #define DEFAULT_CURRENT 60
 
-/**
- * Stores values that both the LCDDisplay and the ControllerUI need to access.
- * Acts as the model in a Model-View-Controller (MVC) Structure where
- * ControllerModel is the model,
- * LCDDisplay is the display, and
- * ControllerUI is the controller
- */
+namespace CC {
 
-class ControllerModel {
+/**
+ * Outputs all the values from the ChargeController class to the LCD display
+ * Acts as the view in a Model-View-Controller (MVC) design pattern where
+ * UIModel is the model,
+ * LCDView is the view, and
+ * UIController is the controller.
+ */
+class UIModel {
 
 public:
     /**
-     * default (and only) initializer for the ControllerModel class.
+     * Default (and only) initializer for the ControllerModel class.
      */
-    ControllerModel();
+    UIModel();
 
     /**
-     * enum for the different pages that the LCDDisplay can display.
+     * Enum for the different pages that the LCDDisplay can display.
      */
     enum Page {
         MAIN = 0,
@@ -34,7 +35,7 @@ public:
     };
 
     /**
-     * enum that represents what set of selectable items the controller is focused on.
+     * Enum that represents what set of selectable items the controller is focused on.
      * The value of each entry is equal to the range of the encoder
      */
     enum State {
@@ -45,8 +46,8 @@ public:
     };
 
     /**
-     * enum that represents which setting is selected
-     * Only updated when state = SETTINGSELECT
+     * Enum that represents which setting is selected.
+     * Only updated when state = SETTINGSELECT.
      */
     enum SelectedSetting {
         VOLTAGE = 0u,
@@ -71,15 +72,15 @@ public:
     State getState();
 
     /**
-     * Sets the state of the model
+     * Sets the current State of the model.
      *
      * @param[in] newState the state to set the model's state to.
      */
     void setState(State newState);
 
     /**
-     * Saves the unsavedVoltage and unsavedCurrent.
-     * (Sets savedVoltage and savedCurrent)
+     * Saves the unsavedVoltage and unsavedCurrent
+     * (Sets savedVoltage and savedCurrent).
      */
     void saveVoltageAndCurrent();
 
@@ -98,14 +99,14 @@ public:
     void setSelectedSetting(SelectedSetting newSetting);
 
     /**
-     * Sets the unsavedVoltage
+     * Sets the unsaved voltage value of the model.
      *
      * @param[in] newVoltage the new value for unsavedVoltage
      */
     void setUnsavedVoltage(uint16_t newVoltage);
 
     /**
-     * Sets the unsavedCurrent
+     * Sets the unsaved current value of the model.
      *
      * @param[in] newCurrent the new value for unsavedCurrent
      */
@@ -119,33 +120,38 @@ public:
     void setPage(Page newPage);
 
     /**
-     * Gets the saved voltage value for the model.
-     * @return the saved voltage in the model.
+     * Gets the saved voltage value of the model.
+     *
+     * @return the saved voltage.
      */
     uint16_t getSavedVoltage();
 
     /**
-     * Gets the saved current value for the model.
-     * @return the saved current in the model.
+     * Gets the saved current value of the model.
+     *
+     * @return the saved current.
      */
     uint16_t getSavedCurrent();
 
     /**
-     * Gets the unsaved voltage value for the model.
+     * Gets the unsaved voltage value of the model.
+     *
      * @return the unsaved voltage in the model.
      */
     uint16_t getUnsavedVoltage();
 
     /**
-     * Gets the unsaved current value for the model.
+     * Gets the unsaved current value of the model.
+     *
      * @return the unsaved current in the model.
      */
     uint16_t getUnsavedCurrent();
 
     /**
-     * Returns the valid encoder range for the given state
-     * @param state the state that the encoder range can take
-     * @return the encoder range for that state
+     * Returns the valid encoder range for the given state.
+     *
+     * @param state the state that the encoder range can take.
+     * @return the encoder range for that state.
      */
     uint32_t getEncoderRange(State state);
 
@@ -157,11 +163,17 @@ private:
     /** The most recent selected setting that is selected (only really relevant if state = SETTINGSELECT */
     SelectedSetting setting = QUIT;
 
-    uint16_t savedVoltage = DEFAULT_VOLTAGE;//TODO see about saving values between boot sequences
+    /** The saved voltage value that the controller sends to the charger */
+    uint16_t savedVoltage = DEFAULT_VOLTAGE;
+    /** The saved current value that the controller sends to the charger */
     uint16_t savedCurrent = DEFAULT_CURRENT;
 
+    /** The unsaved voltage value, prevents user changes from immediately influencing the charger */
     uint16_t unsavedVoltage = DEFAULT_VOLTAGE;
+    /** The unsaved current value, prevents user changes from immediately influencing the charger */
     uint16_t unsavedCurrent = DEFAULT_CURRENT;
 };
 
-#endif//CHARGE_CONTROLLER_CONTROLLERMODEL_HPP
+}// namespace CC
+
+#endif//CHARGE_CONTROLLER_UIMODEL_HPP
