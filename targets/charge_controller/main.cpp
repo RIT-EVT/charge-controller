@@ -211,6 +211,7 @@ int main() {
     // Initialize the CANOpen node we are using.
     IO::initializeCANopenNode(&canNode, &bms, &canStackDriver, sdoBuffer, appTmrMem);
 
+    // Set the node to operational mode
     CONmtSetMode(&canNode.Nmt, CO_OPERATIONAL);
 
     time::wait(500);
