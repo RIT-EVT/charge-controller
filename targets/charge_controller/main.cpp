@@ -7,15 +7,12 @@
 #include <EVT/dev/platform/f3xx/Timerf3xx.hpp> // TODO: clang will put this at the top causing compilation problem
 // clang-format on
 
-#include <Canopen/co_core.h>
-#include <Canopen/co_tmr.h>
 #include <EVT/io/CANopen.hpp>
 
-#include "EVT/dev/button.hpp"
+#include <EVT/dev/button.hpp>
 #include <charge_controller/ChargeController.hpp>
 #include <charge_controller/dev/BMSManager.hpp>
-#include <charge_controller/dev/Debounce.hpp>
-#include <charge_controller/dev/LCDDisplay.hpp>
+#include <charge_controller/dev/LCDView.hpp>
 
 namespace IO = EVT::core::IO;
 namespace DEV = EVT::core::DEV;
@@ -49,9 +46,14 @@ constexpr IO::Pin LED_PIN = IO::Pin::PA_10;
 
 constexpr uint32_t SPI_SPEED = SPI_SPEED_500KHZ;
 
+///////////////////////////////////////////////////////////////////////////////
+// EVT-core CAN callback and CAN setup. This will include logic to set
+// aside CANopen messages into a specific queue
+///////////////////////////////////////////////////////////////////////////////
+
 struct CANInterruptParams {
     EVT::core::types::FixedQueue<CANOPEN_QUEUE_SIZE, IO::CANMessage>* queue;
-    ChargeController* chargeController;
+    CC::ChargeController* chargeController;
 };
 
 /**
@@ -82,49 +84,8 @@ void canInterrupt(IO::CANMessage& message, void* priv) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// EVT-core CAN callback and CAN setup. This will include logic to set
-// aside CANopen messages into a specific queue
-///////////////////////////////////////////////////////////////////////////////
-
-/**
- * Interrupt handler to get CAN messages. A function pointer to this function
- * will be passed to the EVT-core CAN interface which will in turn call this
- * function each time a new CAN message comes in.
- *
- * NOTE: For this sample, every non-extended (so 11 bit CAN IDs) will be
- * assumed to be intended to be passed as a CANopen message.
- *
- * @param message[in] The passed in CAN message that was read.
- */
-
-///////////////////////////////////////////////////////////////////////////////
 // CANopen specific Callbacks. Need to be defined in some location
 ///////////////////////////////////////////////////////////////////////////////
-extern "C" void CONodeFatalError(void) {}
-
-extern "C" void COIfCanReceive(CO_IF_FRM* frm) {}
-
-extern "C" int16_t COLssStore(uint32_t baudrate, uint8_t nodeId) { return 0; }
-
-extern "C" int16_t COLssLoad(uint32_t* baudrate, uint8_t* nodeId) { return 0; }
-
-extern "C" void CONmtModeChange(CO_NMT* nmt, CO_MODE mode) {}
-
-extern "C" void CONmtHbConsEvent(CO_NMT* nmt, uint8_t nodeId) {}
-
-extern "C" void CONmtHbConsChange(CO_NMT* nmt, uint8_t nodeId, CO_MODE mode) {}
-
-extern "C" int16_t COParaDefault(CO_PARA* pg) { return 0; }
-
-extern "C" void COPdoTransmit(CO_IF_FRM* frm) {}
-
-extern "C" int16_t COPdoReceive(CO_IF_FRM* frm) { return 0; }
-
-extern "C" void COPdoSyncUpdate(CO_RPDO* pdo) {}
-
-extern "C" void COTmrLock(void) {}
-
-extern "C" void COTmrUnlock(void) {}
 
 extern "C" void HAL_CAN_RxFifo1FullCallback(CAN_HandleTypeDef* hcan) {
     log::LOGGER.log(log::Logger::LogLevel::DEBUG, "RX Full");
@@ -150,7 +111,7 @@ int main() {
     // Buttons
     IO::GPIO& startButtonGPIO = IO::getGPIO<START_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
 
-    //    DEV::Button standbyButton = DEV::Button(standbyButtonGPIO);
+    //DEV::Button standbyButton = DEV::Button(standbyButtonGPIO);
     DEV::Button startButton(startButtonGPIO);
 
     uart.printf("Buttons Init\n\r");
@@ -173,9 +134,25 @@ int main() {
     IO::CAN& can = IO::getCAN<CAN_TX, CAN_RX>();
 
     // charge controller module instantiation
-    BMSManager bms(can, bmsOK);
-    LCDDisplay display(LCDRegisterSEL, LCDReset, spi);
-    ChargeController chargeController(bms, display, can, startButton, statusLED);
+    CC::BMSManager bms(can, bmsOK);
+
+    //Model initialization
+    CC::UIModel model;
+
+    //LCD display initialization
+    CC::LCDView display(LCDRegisterSEL, LCDReset, spi, model);
+
+    //Encoder GPIO pin initialization
+    IO::GPIO& encoderGPIOpinA = IO::getGPIO<ENCODER_A_PIN>(IO::GPIO::Direction::INPUT);
+    IO::GPIO& encoderGPIOpinB = IO::getGPIO<ENCODER_B_PIN>(IO::GPIO::Direction::INPUT);
+    DEV::Encoder encoder(encoderGPIOpinA, encoderGPIOpinB, 1, 0, true);
+    //Encoder button
+    IO::GPIO& encoderButtonGPIO = IO::getGPIO<ENCODER_BUTTON_PIN>(IO::GPIO::Direction::INPUT);
+    DEV::Button encoderButton(encoderButtonGPIO, IO::GPIO::State::LOW);
+
+    //UI Controller initialization
+    CC::UIController controllerUI(encoder, encoderButton, display, model);
+    CC::ChargeController chargeController(bms, display, can, startButton, statusLED, controllerUI, model);
 
     uart.printf("Modules Initialized\n\r");
 
@@ -202,7 +179,7 @@ int main() {
     can.addIRQHandler(canInterrupt, reinterpret_cast<void*>(&canParams));
 
     // Reserved memory for CANopen stack usage
-    uint8_t sdoBuffer[1][CO_SDO_BUF_BYTE];
+    uint8_t sdoBuffer[CO_SSDO_N * CO_SDO_BUF_BYTE];
     CO_TMR_MEM appTmrMem[4];
 
     // Attempt to join the CAN network
@@ -226,32 +203,15 @@ int main() {
     CO_IF_TIMER_DRV timerDriver;
     CO_IF_NVM_DRV nvmDriver;
 
-    IO::getCANopenCANDriver(&can, &canOpenQueue, &canDriver);
-    IO::getCANopenTimerDriver(&timer, &timerDriver);
-    IO::getCANopenNVMDriver(&nvmDriver);
-
-    canStackDriver.Can = &canDriver;
-    canStackDriver.Timer = &timerDriver;
-    canStackDriver.Nvm = &nvmDriver;
-
-    //setup CANopen Node
-    CO_NODE_SPEC canSpec = {
-        .NodeId = BMSManager::NODE_ID,
-        .Baudrate = IO::CAN::DEFAULT_BAUD,
-        .Dict = bms.getObjectDictionary(),
-        .DictLen = bms.getObjectDictionarySize(),
-        .EmcyCode = NULL,
-        .TmrMem = appTmrMem,
-        .TmrNum = 16,
-        .TmrFreq = 100,
-        .Drv = &canStackDriver,
-        .SdoBuf = reinterpret_cast<uint8_t*>(&sdoBuffer[0]),
-    };
-
     CO_NODE canNode;
 
-    CONodeInit(&canNode, &canSpec);
-    CONodeStart(&canNode);
+    // Initialize all the CANOpen drivers.
+    IO::initializeCANopenDriver(&canOpenQueue, &can, &timer, &canStackDriver, &nvmDriver, &timerDriver, &canDriver);
+
+    // Initialize the CANOpen node we are using.
+    IO::initializeCANopenNode(&canNode, &bms, &canStackDriver, sdoBuffer, appTmrMem);
+
+    // Set the node to operational mode
     CONmtSetMode(&canNode.Nmt, CO_OPERATIONAL);
 
     time::wait(500);

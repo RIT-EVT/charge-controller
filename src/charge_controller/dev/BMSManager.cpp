@@ -2,13 +2,13 @@
 
 namespace log = EVT::core::log;
 
-BMSManager::BMSManager(IO::CAN& can, IO::GPIO* bmsOK[]) : can(&can) {
+CC::BMSManager::BMSManager(IO::CAN& can, IO::GPIO* bmsOK[]) : can(&can) {
     for (int i = 0; i < MAX_BMS_PACKS; i++) {
         this->bmsOK[i] = bmsOK[i];
     }
 };
 
-uint8_t BMSManager::numConnected() {
+uint8_t CC::BMSManager::numConnected() {
     uint8_t count = 0;
     for (int i = 0; i < MAX_BMS_PACKS; i++) {
         if (packs[i].isConnected) {
@@ -18,63 +18,67 @@ uint8_t BMSManager::numConnected() {
     return count;
 }
 
-bool BMSManager::isConnected(uint8_t packNum) {
+bool CC::BMSManager::isConnected(uint8_t packNum) {
     return packs[packNum].isConnected;
 }
 
-bool BMSManager::faultDetected(uint8_t packNum) {
+bool CC::BMSManager::faultDetected(uint8_t packNum) {
     return bmsOK[packNum]->readPin() == BMS_NOT_OK || packs[packNum].data.status == BMSStatus::UNSAFE_CONDITIONS_ERROR || packs[packNum].data.status == BMSStatus::INITIALIZATION_ERROR;
 }
 
-bool BMSManager::isCharging(uint8_t packNum) {
+bool CC::BMSManager::isCharging(uint8_t packNum) {
     return packs[packNum].data.status == BMSStatus::CHARGING;
 }
 
-bool BMSManager::isReady(uint8_t packNum) {
+bool CC::BMSManager::isReady(uint8_t packNum) {
     return packs[packNum].data.status == BMSStatus::SYSTEM_READY || packs[packNum].data.status == BMSStatus::DEEP_SLEEP || packs[packNum].data.status == BMSStatus::CHARGING;
 }
 
-int16_t BMSManager::getBatteryVoltage(uint8_t packNum) {
+int16_t CC::BMSManager::getBatteryVoltage(uint8_t packNum) {
     return packs[packNum].data.batteryVoltage;
 }
 
-int16_t BMSManager::getMinCellVoltage(uint8_t packNum) {
+int16_t CC::BMSManager::getMinCellVoltage(uint8_t packNum) {
     return packs[packNum].data.minCellVoltage;
 }
 
-uint8_t BMSManager::getMinCellVoltageID(uint8_t packNum) {
+uint8_t CC::BMSManager::getMinCellVoltageID(uint8_t packNum) {
     return packs[packNum].data.minCellVoltageID;
 }
 
-int16_t BMSManager::getMaxCellVoltage(uint8_t packNum) {
+int16_t CC::BMSManager::getMaxCellVoltage(uint8_t packNum) {
     return packs[packNum].data.maxCellVoltage;
 }
 
-uint8_t BMSManager::getMaxCellVoltageID(uint8_t packNum) {
+uint8_t CC::BMSManager::getMaxCellVoltageID(uint8_t packNum) {
     return packs[packNum].data.maxCellVoltageID;
 }
 
-int8_t BMSManager::getBatteryMinTemp(uint8_t packNum) {
+int8_t CC::BMSManager::getBatteryMinTemp(uint8_t packNum) {
     return packs[packNum].data.batteryPackMinTemp;
 }
 
-int8_t BMSManager::getBatteryMaxTemp(uint8_t packNum) {
+int8_t CC::BMSManager::getBatteryMaxTemp(uint8_t packNum) {
     return packs[packNum].data.batteryPackMaxTemp;
 }
 
-BMSManager::BMSStatus BMSManager::getStatus(uint8_t packNum) {
+CC::BMSManager::BMSStatus CC::BMSManager::getStatus(uint8_t packNum) {
     return packs[packNum].data.status;
 }
 
-uint8_t BMSManager::getObjectDictionarySize() {
+uint8_t CC::BMSManager::getNumElements() {
     return OBJECT_DICTIONARY_SIZE;
 }
 
-CO_OBJ_T* BMSManager::getObjectDictionary() {
+CO_OBJ_T* CC::BMSManager::getObjectDictionary() {
     return objectDictionaryBMS;
 }
 
-void BMSManager::printDebug() {
+uint8_t CC::BMSManager::getNodeID() {
+    return NODE_ID;
+}
+
+void CC::BMSManager::printDebug() {
     for (int i = 0; i < MAX_BMS_PACKS; i++) {
         if (packs[i].data.batteryVoltage != lastValues[i].batteryVoltage) {
             log::LOGGER.log(log::Logger::LogLevel::DEBUG, "Pack%d->batteryVoltage=%d", i, packs[i].data.batteryVoltage);
@@ -104,7 +108,7 @@ void BMSManager::printDebug() {
     }
 }
 
-void BMSManager::update() {
+void CC::BMSManager::update() {
     for (int i = 0; i < MAX_BMS_PACKS; i++) {
         packs[i].isConnected = bmsOK[i]->readPin() == IO::GPIO::State::HIGH;
     }

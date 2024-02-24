@@ -1,19 +1,22 @@
 #ifndef EXAMPLE_BMSMANAGER_HPP
 #define EXAMPLE_BMSMANAGER_HPP
 
-#include <Canopen/co_obj.h>
 #include <EVT/io/CAN.hpp>
 #include <EVT/io/GPIO.hpp>
+#include <co_obj.h>
 #include <stdint.h>
 
-#include <Canopen/co_pdo.h>
+#include <EVT/io/CANDevice.hpp>
+#include <EVT/io/CANOpenMacros.hpp>
 #include <EVT/utils/log.hpp>
+#include <co_pdo.h>
 
 //RPDO-NUM settings
 // 0: RPDO number in index and total number of sub indexes.
 // 1: The COB-ID to receive PDOs from.
 // 2: transmission trigger
 // 6 spaces in an array
+
 #define GEN_PACK_RPDO_CONFIG(NUM, ID)                                         \
     {                                                                         \
         .Key = CO_KEY(0x1400 + 2 * NUM, 0, CO_UNSIGNED8 | CO_OBJ_D__R_),      \
@@ -45,7 +48,6 @@
             .Type = nullptr,                                                  \
             .Data = (uintptr_t) 0xFE,                                         \
         },
-
 // RPDO(NUM) mapping, determines the PDO messages to send when TPDO(NUM) is triggered
 // 0: The number of PDO messages associated with the TPDO
 // 1: Link to the first PDO message
@@ -136,6 +138,7 @@
         },                                                                    \
                                                                               \
         // 8 spaces in an array
+
 #define GEN_PACK_DATA(NUM, VAR)                                           \
     {                                                                     \
         .Key = CO_KEY(0x2100 + NUM, 1, CO_UNSIGNED16 | CO_OBJ___PR_),     \
@@ -177,10 +180,11 @@
             .Type = nullptr,                                              \
             .Data = (uintptr_t) &VAR.status,                              \
         },
-
 namespace IO = EVT::core::IO;
 
-class BMSManager {
+namespace CC {
+
+class BMSManager : public CANDevice {
     static constexpr uint32_t TOTAL_VOLTAGE_ID = 0x2101;
     static constexpr uint32_t STATE_ID = 0x2102;
     static constexpr uintptr_t BMS_PACK_ONE_ID = 0x20;
@@ -336,14 +340,21 @@ public:
      *
      * @return Pointer to the start of the object dictionary
      */
-    CO_OBJ_T* getObjectDictionary();
+    CO_OBJ_T* getObjectDictionary() override;
 
     /**
-     * Get the size of the object dictionary
+     * Get the number of elements in the object dictionary.
      *
-     * @return Size of the object dictionary
+     * @return The number of elements in the object dictionary
      */
-    uint8_t getObjectDictionarySize();
+    uint8_t getNumElements() override;
+
+    /**
+    * Get the device's node ID
+    *
+    * @return The node ID of the can device.
+     */
+    uint8_t getNodeID() override;
 
     static constexpr uint8_t MAX_BMS_PACKS = 2;
 
@@ -396,6 +407,8 @@ private:
         OBJECT_DICTIONARY_SIZE = 69;
 
     CO_OBJ_T objectDictionaryBMS[OBJECT_DICTIONARY_SIZE + 1] = {
+        ///COMMENTED OUT UNTIL WE FIX CANOPEN
+        /*
         // Sync ID, defaults to 0x80
         {
             .Key = CO_KEY(0x1005, 0, CO_UNSIGNED32 | CO_OBJ_D__R_),
@@ -467,9 +480,12 @@ private:
         // Pack 2 Data
         GEN_PACK_DATA(1, packs[1].data)
 
+         */
         // End of dictionary marker
-        CO_OBJ_DIR_ENDMARK,
+        CO_OBJ_DICT_ENDMARK,
     };
 };
+
+}//namespace CC
 
 #endif// EXAMPLE_BMSMANAGER_HPP

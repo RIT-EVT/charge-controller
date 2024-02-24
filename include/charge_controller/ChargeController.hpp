@@ -1,5 +1,5 @@
-#ifndef CHARGE_CONTROLLER_H
-#define CHARGE_CONTROLLER_H
+#ifndef CHARGE_CONTROLLER_HPP
+#define CHARGE_CONTROLLER_HPP
 
 #include <EVT/io/CAN.hpp>
 #include <EVT/io/CANopen.hpp>
@@ -7,7 +7,9 @@
 #include <EVT/dev/button.hpp>
 #include <EVT/io/GPIO.hpp>
 #include <charge_controller/dev/BMSManager.hpp>
-#include <charge_controller/dev/LCDDisplay.hpp>
+#include <charge_controller/dev/LCDView.hpp>
+#include <charge_controller/dev/UIController.hpp>
+#include <charge_controller/dev/UIModel.hpp>
 
 namespace time = EVT::core::time;
 namespace DEV = EVT::core::DEV;
@@ -33,6 +35,8 @@ namespace DEV = EVT::core::DEV;
 
 #define HEARBEAT_INTERVAL 1000
 
+namespace CC {
+
 /**
  * https://elconchargers.com/?page_id=98
  * https://www.diyelectriccar.com/threads/setting-up-can-bus-for-elcon-charger.202419/
@@ -52,7 +56,6 @@ namespace DEV = EVT::core::DEV;
  * Up to four Elcon PFC chargers can be on the same CAN bus with CAN IDs of E5, E7, E8 and E9.
  * A 120 ohm termination resistor is required between CAN-L and CAN-H.
  */
-
 class ChargeController {
 public:
     enum class ControllerStates {
@@ -63,7 +66,7 @@ public:
         FAULT
     };
 
-    ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can, DEV::Button& startButton, IO::GPIO& statusLED);
+    ChargeController(BMSManager& bms, LCDView& display, IO::CAN& can, DEV::Button& startButton, IO::GPIO& statusLED, UIController& controllerUI, UIModel& controllerModel);
 
     /**
      * Initialize the submodules of the Charge Controller
@@ -139,10 +142,12 @@ private:
     void faultState();
 
     BMSManager& bms;
-    LCDDisplay& display;
     IO::CAN& can;
     DEV::Button& startButton;
     IO::GPIO& statusLED;
+    LCDView& display;
+    UIController& controllerUI;
+    UIModel& controllerModel;
 
     uint32_t lastHeartBeat = time::millis();
     uint8_t oldCount = 0;
@@ -154,4 +159,6 @@ private:
     static constexpr IO::GPIO::State RELAY_OFF = IO::GPIO::State::LOW;
 };
 
-#endif// CHARGE_CONTROLLER_H
+}//namespace CC
+
+#endif// CHARGE_CONTROLLER_HPP

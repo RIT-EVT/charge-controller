@@ -2,9 +2,9 @@
 #include <charge_controller/ChargeController.hpp>
 
 namespace log = EVT::core::log;
-ChargeController::ChargeController(BMSManager& bms, LCDDisplay& display, IO::CAN& can, DEV::Button& startButton, IO::GPIO& statusLED) : bms(bms), display(display), can(can), startButton(startButton), statusLED(statusLED) {}
+CC::ChargeController::ChargeController(BMSManager& bms, LCDView& display, IO::CAN& can, DEV::Button& startButton, IO::GPIO& statusLED, UIController& controllerUI, UIModel& controllerModel) : bms(bms), display(display), can(can), startButton(startButton), statusLED(statusLED), controllerUI(controllerUI), controllerModel(controllerModel) {}
 
-void ChargeController::process() {
+void CC::ChargeController::process() {
     switch (state) {
     case ControllerStates::NO_BATTERY:
         display.setChargeControllerStatus("No Battery");
@@ -46,8 +46,6 @@ void ChargeController::process() {
         display.setBatteryStatus(BMSManager::BMSStatus::NOT_CONNECTED, 1);
     }
 
-    display.display();
-
     bms.update();
 
     if (startButton.debounce(500)) {
@@ -63,6 +61,8 @@ void ChargeController::process() {
         log::LOGGER.log(log::Logger::LogLevel::DEBUG, "%d batteries connected", bms.numConnected());
         oldCount = bms.numConnected();
     }
+
+    controllerUI.process();//calls the LCDDisplay display() method internally
 
     if (time::millis() - lastHeartBeat > HEARBEAT_INTERVAL) {
         switch (statusLED.readPin()) {
@@ -80,7 +80,7 @@ void ChargeController::process() {
     }
 }
 
-uint8_t ChargeController::checkBMS() {
+uint8_t CC::ChargeController::checkBMS() {
     uint8_t status = 0;
 
     /*
@@ -132,7 +132,7 @@ uint8_t ChargeController::checkBMS() {
  * state when the battery is disconnected from the charge controller
  * shut off the relay and wait for a connection.
  */
-void ChargeController::noBatteryState() {
+void CC::ChargeController::noBatteryState() {
     if (changedState) {
         // Display no battery connected message on LCD
         //        relay.writePin(RELAY_OFF);
@@ -148,7 +148,7 @@ void ChargeController::noBatteryState() {
     }
 }
 
-void ChargeController::connectedState() {
+void CC::ChargeController::connectedState() {
     if (changedState) {
         // display connected LCD message
         // further init battery communication?
@@ -164,7 +164,7 @@ void ChargeController::connectedState() {
     }
 }
 
-void ChargeController::chargingState() {
+void CC::ChargeController::chargingState() {
     if (changedState) {
         //        relay.writePin(RELAY_ON);
         changedState = false;
@@ -179,7 +179,7 @@ void ChargeController::chargingState() {
     }
 }
 
-void ChargeController::standbyState() {
+void CC::ChargeController::standbyState() {
     if (changedState) {
         //        relay.writePin(RELAY_OFF);
         changedState = false;
@@ -195,7 +195,7 @@ void ChargeController::standbyState() {
     }
 }
 
-void ChargeController::faultState() {
+void CC::ChargeController::faultState() {
     if (changedState) {
         //        relay.writePin(RELAY_OFF);
         changedState = false;
@@ -210,11 +210,11 @@ void ChargeController::faultState() {
     }
 }
 
-void ChargeController::init() {
+void CC::ChargeController::init() {
     //    relay.writePin(RELAY_OFF);
 }
 
-void ChargeController::startCharging() {
+void CC::ChargeController::startCharging() {
     if (state == ControllerStates::STANDBY) {
         state = ControllerStates::CHARGING;
         changedState = true;
@@ -224,14 +224,14 @@ void ChargeController::startCharging() {
 /**
  * stop charging when the stop button is pressed
  */
-void ChargeController::stopCharging() {
+void CC::ChargeController::stopCharging() {
     if (state == ControllerStates::CHARGING) {
         state = ControllerStates::STANDBY;
         changedState = true;
     }
 }
 
-void ChargeController::sendChargerMessage() {
+void CC::ChargeController::sendChargerMessage() {
     /*
      * The following function may be confusing because it requires the use of
      * raw CAN messages. This is because of how the Elcon CAN specification
@@ -242,9 +242,9 @@ void ChargeController::sendChargerMessage() {
     uint8_t stopCharging = 1;// Stop Charging
 
     if (state == ControllerStates::CHARGING) {
-        // Multiply by ten to get the right sized values
-        voltage = 96 * 10;// This is for charging in series
-        current = 60 * 10;
+        // Multiply values by ten to get the right sized values
+        voltage = controllerModel.getSavedVoltage() * 10;
+        current = controllerModel.getSavedCurrent() * 10;
         stopCharging = 0;// Start Charging
     }
 
@@ -277,7 +277,7 @@ void ChargeController::sendChargerMessage() {
     log::LOGGER.log(log::Logger::LogLevel::INFO, "Current status: %d", status);
 }
 
-void ChargeController::setDisplayChargerValues(uint16_t voltage, uint16_t current) {
+void CC::ChargeController::setDisplayChargerValues(uint16_t voltage, uint16_t current) {
     display.setChargerVoltage(voltage);
     display.setChargerCurrent(current);
 }
