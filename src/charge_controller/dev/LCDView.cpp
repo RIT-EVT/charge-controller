@@ -7,7 +7,7 @@ void CC::LCDView::init() {
     lcd.clearLCD();
     lcd.setDefaultSections(MAIN_SCREEN_SECTION_TITLES);
 
-    // Splash Screen
+    // Section Headers
     lcd.displaySectionHeaders();
 }
 

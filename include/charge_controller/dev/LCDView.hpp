@@ -18,7 +18,7 @@ namespace DEV = EVT::core::DEV;
 namespace CC {
 
 /**
- * Outputs all the values from the ChargeController class to the LCD display
+ * Outputs all the values from the ChargeController & UIModel classes to the LCD display
  * Acts as the view in a Model-View-Controller (MVC) design pattern where
  * UIModel is the model,
  * LCDView is the view, and
@@ -27,7 +27,7 @@ namespace CC {
 class LCDView {
 public:
     /**
-     * Initializer for the LCD Display class.
+     * Initializer for the LCDView class.
      *
      * @param[in] regSelect Register select pin
      * @param[in] reset Reset pin
@@ -36,7 +36,7 @@ public:
     LCDView(IO::GPIO& reg_select, IO::GPIO& reset, IO::SPI& spi, UIModel& model);
 
     /**
-     * Initializes the LCD driver and displays the splash image.
+     * Initializes the LCD driver
      */
     void init();
 

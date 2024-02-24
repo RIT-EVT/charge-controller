@@ -14,8 +14,8 @@ namespace DEV = EVT::core::DEV;
 namespace CC {
 
 /**
- * Outputs all the values from the ChargeController class to the LCD display
- * Acts as the view in a Model-View-Controller (MVC) design pattern where
+ * Outputs all the values from the UIModel and the encoder inputs to the LCD display
+ * Acts as the controller in a Model-View-Controller (MVC) design pattern where
  * UIModel is the model,
  * LCDView is the view, and
  * UIController is the controller.
@@ -23,12 +23,12 @@ namespace CC {
 class UIController {
 public:
     /**
-     * Constructor for the ControllerUI class
+     * Constructor for the UIController class
      *
      * @param[in] encoder The encoder object
      * @param[in] encoderButton the button on the encoder
-     * @param[in] display the LCDDisplay that the ControllerUI controls
-     * @param[in] model the ControllerModel that stores values from the ControllerUI
+     * @param[in] display the LCDView that this UIController controls
+     * @param[in] model the UIModel that stores values from this UIController
      */
     UIController(EVT::core::DEV::Encoder& encoder, EVT::core::DEV::Button& encoderButton, LCDView& display, UIModel& model);
 

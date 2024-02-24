@@ -12,8 +12,8 @@
 namespace CC {
 
 /**
- * Outputs all the values from the ChargeController class to the LCD display
- * Acts as the view in a Model-View-Controller (MVC) design pattern where
+ * Stores the values needed to run the UI, modified by UIController, read by LCDView
+ * Acts as the model in a Model-View-Controller (MVC) design pattern where
  * UIModel is the model,
  * LCDView is the view, and
  * UIController is the controller.
