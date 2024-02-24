@@ -22,7 +22,7 @@ class UIModel {
 
 public:
     /**
-     * Default (and only) initializer for the ControllerModel class.
+     * Default (and only) initializer for the UIModel class.
      */
     UIModel();
 
@@ -150,7 +150,7 @@ public:
     /**
      * Returns the valid encoder range for the given state.
      *
-     * @param state the state that the encoder range can take.
+     * @param[in] state the state that the encoder range can take.
      * @return the encoder range for that state.
      */
     uint32_t getEncoderRange(State state);

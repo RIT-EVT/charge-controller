@@ -51,7 +51,7 @@ private:
      * Internal method that sets the model's state and also updates
      * the encoder range and position to align with the state.
      *
-     * @param newState the new state to set the model's state to.
+     * @param[in] newState the new state to set the model's state to.
      */
     void setModelState(UIModel::State newState);
 
